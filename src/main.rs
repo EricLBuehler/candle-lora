@@ -27,10 +27,10 @@ impl LoraLayersModule for Model {
 fn main() -> Result<()> {
     let device = Device::Cpu;
 
-    let mut tensors = HashMap::new();
-    tensors.insert("1.weight".to_string(), Tensor::zeros((10,10), DType::F32, &device)?);
+    let mut vars = HashMap::new();
+    vars.insert("1.weight".to_string(), Tensor::zeros((10,10), DType::F32, &device)?);
 
-    let varbuilder = VarBuilder::from_tensors(tensors, DType::F32, &device);
+    let varbuilder = VarBuilder::from_tensors(vars, DType::F32, &device);
 
     let model = Model { layer: Trc::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()) };
 
@@ -39,10 +39,10 @@ fn main() -> Result<()> {
     let digit = model.forward(&dummy_image).unwrap();
     println!("Digit {digit:?} digit");
 
-    let loramodel = Lora::get_lora_model(&model);
+    Lora::get_lora_model(&model);
     
-    let digit = loramodel.forward(&dummy_image).unwrap();
-    println!("Loramodel {digit:?} digit");
+    //let digit = loramodel.forward(&dummy_image).unwrap();
+    //println!("Loramodel {digit:?} digit");
 
     Ok(())
 }
