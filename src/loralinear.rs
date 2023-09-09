@@ -11,7 +11,7 @@ pub struct LoraLinear {
     old: Trc<NonTrainableLinear>,
     a: Trc<Linear>,
     b: Trc<Linear>,
-    _scale: usize,
+    scale: usize,
     train: bool,
 }
 
@@ -47,7 +47,7 @@ impl LoraLinear {
             old: Trc::new(NonTrainableLinear::new_from_linear(&old)?),
             a,
             b,
-            _scale: alpha / rank,
+            scale: alpha / rank,
             train: true,
         })
     }
@@ -57,7 +57,7 @@ impl Module for LoraLinear {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         let old_output = self.old.forward(xs)?;
         if self.train {
-            let lora_output = self.b.forward(&self.a.forward(xs)?)? * self._scale as f64;
+            let lora_output = self.b.forward(&self.a.forward(xs)?)? * self.scale as f64;
             old_output + lora_output
         } else {
             Ok(old_output)
