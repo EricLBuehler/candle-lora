@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
+use candle_lora::{
+    loralinear::{LoraLinear, ALPHA_DEFAULT},
+    LayerType, Lora, LoraLayersModule,
+};
 use candle_nn::{linear_no_bias, Linear, Module, VarBuilder};
-use rlora::{LayerType, Lora, LoraLayersModule, layers::{LoraLinear, ALPHA_DEFAULT}};
 use trc::Trc;
 
 #[derive(Debug)]
@@ -17,7 +20,7 @@ impl Module for Model {
 }
 
 impl LoraLayersModule for Model {
-    fn get_layers(&self) -> HashMap<String, rlora::LayerType> {
+    fn get_layers(&self) -> HashMap<String, LayerType> {
         let mut layers = HashMap::new();
         layers.insert("layer".to_string(), LayerType::Linear(self.layer.clone()));
         layers
@@ -44,7 +47,12 @@ fn main() -> Result<()> {
     let digit = model.forward(&dummy_image).unwrap();
     println!("Digit {digit:?} digit");
 
-    LoraLinear::new(model.layer.clone(), model.layer.weight().rank(), ALPHA_DEFAULT, &device)?;
+    LoraLinear::new(
+        model.layer.clone(),
+        model.layer.weight().rank(),
+        ALPHA_DEFAULT,
+        &device,
+    )?;
 
     Lora::get_lora_model(&model);
 

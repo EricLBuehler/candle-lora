@@ -1,7 +1,5 @@
-use candle_core::{Module, Result, Tensor, DType, Device};
-use candle_nn::{
-    Linear, VarMap, init,
-};
+use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_nn::{init, Linear, VarMap};
 use trc::Trc;
 
 use crate::nontrainlinear::NonTrainableLinear;
@@ -18,16 +16,29 @@ pub struct LoraLinear {
 }
 
 impl LoraLinear {
-    pub fn new(
-        old: Trc<Linear>,
-        rank: usize,
-        alpha: usize,
-        device: &Device,
-    ) -> Result<Self> {
+    pub fn new(old: Trc<Linear>, rank: usize, alpha: usize, device: &Device) -> Result<Self> {
         let map = VarMap::new();
-        let a_weight = map.get((rank, rank), "a.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
-        let b_weight = map.get((rank, rank), "b.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
-        let b_bias = map.get((rank, rank), "a.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
+        let a_weight = map.get(
+            (rank, rank),
+            "a.weight",
+            init::DEFAULT_KAIMING_NORMAL,
+            DType::F32,
+            device,
+        )?;
+        let b_weight = map.get(
+            (rank, rank),
+            "b.weight",
+            init::DEFAULT_KAIMING_NORMAL,
+            DType::F32,
+            device,
+        )?;
+        let b_bias = map.get(
+            (rank, rank),
+            "a.weight",
+            init::DEFAULT_KAIMING_NORMAL,
+            DType::F32,
+            device,
+        )?;
 
         let a = Trc::new(Linear::new(a_weight, None));
         let b = Trc::new(Linear::new(b_weight, Some(b_bias)));

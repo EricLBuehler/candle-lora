@@ -3,7 +3,7 @@ use candle_nn::{Conv1d, Conv2d, Embedding, Linear, Module};
 use std::collections::HashMap;
 use trc::Trc;
 
-pub mod layers;
+pub mod loralinear;
 mod nontrainlinear;
 
 pub struct Lora;
