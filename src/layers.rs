@@ -12,16 +12,8 @@ struct LoraLinear {
 }
 
 impl LoraLinear {
-    pub fn new<'a>(mut old: Trc<Linear>, rank: usize, alpha: usize, vb: VarBuilderArgs<'a, Box<dyn SimpleBackend>>) -> Result<Self> {
-        loop {
-            match Trc::get_mut(&mut old) {
-                Some(tensor) => {
-                    tensor.set_training(false);
-                    break;
-                }
-                None => {}
-            }
-        }
+    pub fn new<'a>(old: Trc<Linear>, rank: usize, alpha: usize, vb: VarBuilderArgs<'a, Box<dyn SimpleBackend>>) -> Result<Self> {
+        //old.set_training(false) TODO, Trc<Linear> means this is impossible for now
         
         let a = Trc::new(linear_no_bias(rank, 10, vb.clone())?);
 
