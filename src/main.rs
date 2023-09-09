@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_nn::{linear_no_bias, Linear, Module, VarBuilder};
-use rlora::{LayerType, Lora, LoraLayersModule};
+use rlora::{LayerType, Lora, LoraLayersModule, layers::{LoraLinear, ALPHA_DEFAULT}};
 use trc::Trc;
 
 #[derive(Debug)]
@@ -43,6 +43,8 @@ fn main() -> Result<()> {
 
     let digit = model.forward(&dummy_image).unwrap();
     println!("Digit {digit:?} digit");
+
+    LoraLinear::new(model.layer.clone(), model.layer.weight().rank(), ALPHA_DEFAULT, &device)?;
 
     Lora::get_lora_model(&model);
 

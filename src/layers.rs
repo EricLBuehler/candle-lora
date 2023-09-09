@@ -1,15 +1,15 @@
-use candle_core::{Module, Result, Tensor};
+use candle_core::{Module, Result, Tensor, DType, Device};
 use candle_nn::{
-    linear, linear_no_bias,
-    var_builder::{SimpleBackend, VarBuilderArgs},
-    Linear,
+    Linear, VarMap, init,
 };
 use trc::Trc;
 
 use crate::nontrainlinear::NonTrainableLinear;
 
+pub const ALPHA_DEFAULT: usize = 32;
+
 #[derive(Debug)]
-struct LoraLinear {
+pub struct LoraLinear {
     old: Trc<NonTrainableLinear>,
     a: Trc<Linear>,
     b: Trc<Linear>,
@@ -19,13 +19,18 @@ struct LoraLinear {
 
 impl LoraLinear {
     pub fn new(
-        old: Linear,
+        old: Trc<Linear>,
         rank: usize,
         alpha: usize,
-        vb: VarBuilderArgs<'_, Box<dyn SimpleBackend>>,
+        device: &Device,
     ) -> Result<Self> {
-        let a = Trc::new(linear_no_bias(rank, 10, vb.clone())?);
-        let b = Trc::new(linear(rank, 10, vb.clone())?);
+        let map = VarMap::new();
+        let a_weight = map.get((rank, rank), "a.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
+        let b_weight = map.get((rank, rank), "b.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
+        let b_bias = map.get((rank, rank), "a.weight", init::DEFAULT_KAIMING_NORMAL, DType::F32, device)?;
+
+        let a = Trc::new(Linear::new(a_weight, None));
+        let b = Trc::new(Linear::new(b_weight, Some(b_bias)));
 
         Ok(LoraLinear {
             old: Trc::new(NonTrainableLinear::new_from_linear(&old)?),
