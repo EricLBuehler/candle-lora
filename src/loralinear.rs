@@ -1,7 +1,7 @@
 //According to https://keras.io/examples/nlp/parameter_efficient_finetuning_of_gpt2_with_lora/#create-lora-layer
 
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, VarMap, Linear};
+use candle_nn::{init, Linear, VarMap};
 use trc::Trc;
 
 use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};

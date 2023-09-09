@@ -1,4 +1,4 @@
-use candle_core::{Tensor, Device, Shape};
+use candle_core::{Device, Shape, Tensor};
 use candle_nn::{Linear, Module};
 use loralinear::{LoraLinear, ALPHA_DEFAULT};
 use std::{collections::HashMap, hash::Hash};
@@ -10,10 +10,17 @@ mod nontrainlinear;
 pub struct Lora;
 
 impl Lora {
-    pub fn convert_model<T: Eq + PartialEq + Hash>(layers: HashMap<T, &dyn LinearLayerLike>, device: &Device) -> HashMap<T, LoraLinear> {
+    pub fn convert_model<T: Eq + PartialEq + Hash>(
+        layers: HashMap<T, &dyn LinearLayerLike>,
+        device: &Device,
+    ) -> HashMap<T, LoraLinear> {
         let mut output = HashMap::new();
         for (name, layer) in layers {
-            output.insert(name, LoraLinear::new(layer, layer.weight().rank(), ALPHA_DEFAULT, device, 10, 10).unwrap());
+            output.insert(
+                name,
+                LoraLinear::new(layer, layer.weight().rank(), ALPHA_DEFAULT, device, 10, 10)
+                    .unwrap(),
+            );
         }
         output
     }

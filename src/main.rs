@@ -1,14 +1,12 @@
 use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{
-    LinearLayerLike, Lora, loralinear::LoraLinear,
-};
-use candle_nn::{Module, VarMap, init, Linear};
+use candle_lora::{loralinear::LoraLinear, LinearLayerLike, Lora};
+use candle_nn::{init, Linear, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {
-    Layer
+    Layer,
 }
 
 #[derive(Debug)]
