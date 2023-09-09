@@ -2,7 +2,7 @@ use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Linear, VarMap};
 use trc::Trc;
 
-use crate::nontrainlinear::NonTrainableLinear;
+use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
 
 pub const ALPHA_DEFAULT: usize = 32;
 
@@ -16,7 +16,7 @@ pub struct LoraLinear {
 }
 
 impl LoraLinear {
-    pub fn new(old: Trc<Linear>, rank: usize, alpha: usize, device: &Device) -> Result<Self> {
+    pub fn new(old: &Box<dyn LinearLayerLike>, rank: usize, alpha: usize, device: &Device) -> Result<Self> {
         let map = VarMap::new();
         let a_weight = map.get(
             (rank, rank),
@@ -62,5 +62,15 @@ impl Module for LoraLinear {
         } else {
             Ok(old_output)
         }
+    }
+}
+
+impl LinearLayerLike for LoraLinear {
+    fn bias(&self) -> Option<&Tensor> {
+        unimplemented!("Cannot get bias of LoraLinear layer");
+    }
+
+    fn weight(&self) -> &Tensor {
+        unimplemented!("Cannot get weight of LoraLinear layer");
     }
 }

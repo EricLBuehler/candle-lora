@@ -1,5 +1,5 @@
 use candle_core::Tensor;
-use candle_nn::{Conv1d, Conv2d, Embedding, Linear, Module};
+use candle_nn::{Linear, Module};
 use std::collections::HashMap;
 use trc::Trc;
 
@@ -10,20 +10,16 @@ pub struct Lora;
 
 pub type Vars = HashMap<String, Trc<Tensor>>;
 
-pub enum LayerType {
-    Linear(Trc<Linear>),
-    Conv1d(Trc<Conv1d>),
-    Conv2d(Trc<Conv2d>),
-    Embedding(Trc<Embedding>),
+pub trait LinearLayerLike: Module {
+    fn weight(&self) -> &Tensor;
+    fn bias(&self) -> Option<&Tensor>;
 }
 
-pub trait LoraLayersModule: Module {
-    fn get_layers(&self) -> HashMap<String, LayerType>;
-}
-
-impl Lora {
-    pub fn get_lora_model(model: &impl LoraLayersModule) {
-        println!("{:?}", model);
-        todo!()
+impl LinearLayerLike for Linear {
+    fn weight(&self) -> &Tensor {
+        self.weight()
+    }
+    fn bias(&self) -> Option<&Tensor> {
+        self.bias()
     }
 }

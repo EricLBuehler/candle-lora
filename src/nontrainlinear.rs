@@ -1,6 +1,8 @@
 use candle_core::{Module, Result, Tensor};
-use candle_nn::{init, Init, Linear, VarBuilder};
+use candle_nn::{init, Init, VarBuilder};
 use trc::Trc;
+
+use crate::LinearLayerLike;
 
 #[derive(Debug)]
 pub struct NonTrainableLinear {
@@ -17,7 +19,7 @@ impl NonTrainableLinear {
         }
     }
 
-    pub fn new_from_linear(old: &Linear) -> Result<Self> {
+    pub fn new_from_linear(old: &Box<dyn LinearLayerLike>) -> Result<Self> {
         Ok(Self::new(
             old.weight().detach()?,
             match old.bias() {

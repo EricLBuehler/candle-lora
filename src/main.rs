@@ -2,28 +2,18 @@ use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, ALPHA_DEFAULT},
-    LayerType, Lora, LoraLayersModule,
+    loralinear::{LoraLinear, ALPHA_DEFAULT}, LinearLayerLike,
 };
-use candle_nn::{linear_no_bias, Linear, Module, VarBuilder};
-use trc::Trc;
+use candle_nn::{linear_no_bias, Module, VarBuilder};
 
 #[derive(Debug)]
 struct Model {
-    layer: Trc<Linear>,
+    layer: Box<dyn LinearLayerLike>,
 }
 
 impl Module for Model {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         self.layer.forward(input)
-    }
-}
-
-impl LoraLayersModule for Model {
-    fn get_layers(&self) -> HashMap<String, LayerType> {
-        let mut layers = HashMap::new();
-        layers.insert("layer".to_string(), LayerType::Linear(self.layer.clone()));
-        layers
     }
 }
 
@@ -39,7 +29,7 @@ fn main() -> Result<()> {
     let varbuilder = VarBuilder::from_tensors(vars, DType::F32, &device);
 
     let model = Model {
-        layer: Trc::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()),
+        layer: Box::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()),
     };
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
@@ -48,13 +38,11 @@ fn main() -> Result<()> {
     println!("Digit {digit:?} digit");
 
     LoraLinear::new(
-        model.layer.clone(),
+        &model.layer,
         model.layer.weight().rank(),
         ALPHA_DEFAULT,
         &device,
     )?;
-
-    Lora::get_lora_model(&model);
 
     //let digit = loramodel.forward(&dummy_image).unwrap();
     //println!("Loramodel {digit:?} digit");
