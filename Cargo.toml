@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.2.0" }
 candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.2.0" }
-trc = "1.2.2"
+trc = "1.2.3"
