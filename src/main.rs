@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, ALPHA_DEFAULT}, LinearLayerLike,
+    loralinear::{LoraLinear, ALPHA_DEFAULT},
+    LinearLayerLike,
 };
 use candle_nn::{linear_no_bias, Module, VarBuilder};
 
@@ -38,7 +39,7 @@ fn main() -> Result<()> {
     println!("Digit {digit:?} digit");
 
     LoraLinear::new(
-        &model.layer,
+        &*model.layer,
         model.layer.weight().rank(),
         ALPHA_DEFAULT,
         &device,

@@ -16,7 +16,12 @@ pub struct LoraLinear {
 }
 
 impl LoraLinear {
-    pub fn new(old: &Box<dyn LinearLayerLike>, rank: usize, alpha: usize, device: &Device) -> Result<Self> {
+    pub fn new(
+        old: &dyn LinearLayerLike,
+        rank: usize,
+        alpha: usize,
+        device: &Device,
+    ) -> Result<Self> {
         let map = VarMap::new();
         let a_weight = map.get(
             (rank, rank),
@@ -42,9 +47,9 @@ impl LoraLinear {
 
         let a = Trc::new(Linear::new(a_weight, None));
         let b = Trc::new(Linear::new(b_weight, Some(b_bias)));
-
+        
         Ok(LoraLinear {
-            old: Trc::new(NonTrainableLinear::new_from_linear(&old)?),
+            old: Trc::new(NonTrainableLinear::new_from_linear(old)?),
             a,
             b,
             scale: alpha / rank,

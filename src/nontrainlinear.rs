@@ -19,7 +19,7 @@ impl NonTrainableLinear {
         }
     }
 
-    pub fn new_from_linear(old: &Box<dyn LinearLayerLike>) -> Result<Self> {
+    pub fn new_from_linear(old: &dyn LinearLayerLike) -> Result<Self> {
         Ok(Self::new(
             old.weight().detach()?,
             match old.bias() {
