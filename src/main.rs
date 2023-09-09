@@ -1,10 +1,10 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    LinearLayerLike, Lora,
+    LinearLayerLike, Lora, loralinear::LoraLinear,
 };
-use candle_nn::{linear_no_bias, Module, VarBuilder};
+use candle_nn::{Module, VarMap, init, Linear};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {
@@ -22,39 +22,52 @@ impl Module for Model {
     }
 }
 
+impl Model {
+    fn insert_loralinear(&mut self, layers: HashMap<ModelLayers, LoraLinear>) {
+        for (name, layer) in layers {
+            match name {
+                ModelLayers::Layer => {
+                    self.layer = Box::new(layer);
+                }
+            }
+        }
+    }
+}
+
 fn main() -> Result<()> {
     let device = Device::Cpu;
 
-    let mut vars = HashMap::new();
-    vars.insert(
-        "1.weight".to_string(),
-        Tensor::zeros((10, 10), DType::F32, &device)?,
-    );
-
-    let varbuilder = VarBuilder::from_tensors(vars, DType::F32, &device);
+    //Create the model
+    let map = VarMap::new();
+    let layer_weight = map.get(
+        (10, 10),
+        "layer.weight",
+        init::DEFAULT_KAIMING_NORMAL,
+        DType::F32,
+        &device,
+    )?;
 
     let mut model = Model {
-        layer: Box::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()),
+        layer: Box::new(Linear::new(layer_weight, None)),
     };
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
 
+    //Test the model
     let digit = model.forward(&dummy_image).unwrap();
     println!("Output: {digit:?}");
 
+    //Isolate layers we want to convert
     let mut layers = HashMap::new();
     layers.insert(ModelLayers::Layer, &*model.layer);
 
+    //Create new LoRA layers from our layers
     let new_layers = Lora::convert_model(layers, &device);
 
-    for (name, layer) in new_layers{
-        match name {
-            ModelLayers::Layer => {
-                model.layer = Box::new(layer);
-            }
-        }
-    }
+    //Custom methods to implement
+    model.insert_loralinear(new_layers);
 
+    //Test the model
     let digit = model.forward(&dummy_image).unwrap();
     println!("LoRA Output: {digit:?}");
 

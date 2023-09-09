@@ -1,3 +1,5 @@
+//According to https://keras.io/examples/nlp/parameter_efficient_finetuning_of_gpt2_with_lora/#create-lora-layer
+
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, VarMap, Linear};
 use trc::Trc;
@@ -61,9 +63,7 @@ impl LoraLinear {
 impl Module for LoraLinear {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         let old_output = self.old.forward(input).unwrap();
-        let a = self.a.forward(input).unwrap();
-        let b = self.b.forward(&a).unwrap();
-        let lora_output = b * self.scale as f64;
+        let lora_output = self.b.forward(&self.a.forward(input)?)? * self.scale as f64;
         old_output + lora_output
     }
 }
