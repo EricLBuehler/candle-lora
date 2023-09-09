@@ -2,10 +2,14 @@ use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, ALPHA_DEFAULT},
-    LinearLayerLike,
+    LinearLayerLike, Lora,
 };
 use candle_nn::{linear_no_bias, Module, VarBuilder};
+
+#[derive(PartialEq, Eq, Hash)]
+enum ModelLayers {
+    Layer
+}
 
 #[derive(Debug)]
 struct Model {
@@ -29,24 +33,30 @@ fn main() -> Result<()> {
 
     let varbuilder = VarBuilder::from_tensors(vars, DType::F32, &device);
 
-    let model = Model {
+    let mut model = Model {
         layer: Box::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()),
     };
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
 
     let digit = model.forward(&dummy_image).unwrap();
-    println!("Digit {digit:?} digit");
+    println!("Output: {digit:?}");
 
-    LoraLinear::new(
-        &*model.layer,
-        model.layer.weight().rank(),
-        ALPHA_DEFAULT,
-        &device,
-    )?;
+    let mut layers = HashMap::new();
+    layers.insert(ModelLayers::Layer, &*model.layer);
 
-    //let digit = loramodel.forward(&dummy_image).unwrap();
-    //println!("Loramodel {digit:?} digit");
+    let new_layers = Lora::convert_model(layers, &device);
+
+    for (name, layer) in new_layers{
+        match name {
+            ModelLayers::Layer => {
+                model.layer = Box::new(layer);
+            }
+        }
+    }
+
+    let digit = model.forward(&dummy_image).unwrap();
+    println!("LoRA Output: {digit:?}");
 
     Ok(())
 }

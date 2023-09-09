@@ -1,10 +1,10 @@
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, Linear, VarMap};
+use candle_nn::{init, VarMap, Linear};
 use trc::Trc;
 
 use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
 
-pub const ALPHA_DEFAULT: usize = 32;
+pub const ALPHA_DEFAULT: usize = 1;
 
 #[derive(Debug)]
 pub struct LoraLinear {
@@ -12,7 +12,6 @@ pub struct LoraLinear {
     a: Trc<Linear>,
     b: Trc<Linear>,
     scale: usize,
-    train: bool,
 }
 
 impl LoraLinear {
@@ -21,26 +20,28 @@ impl LoraLinear {
         rank: usize,
         alpha: usize,
         device: &Device,
+        in_features: usize,
+        out_features: usize,
     ) -> Result<Self> {
         let map = VarMap::new();
         let a_weight = map.get(
-            (rank, rank),
+            (rank, in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
             DType::F32,
             device,
         )?;
         let b_weight = map.get(
-            (rank, rank),
+            (out_features, rank),
             "b.weight",
-            init::DEFAULT_KAIMING_NORMAL,
+            init::ZERO,
             DType::F32,
             device,
         )?;
         let b_bias = map.get(
-            (rank, rank),
+            (out_features, out_features),
             "b.bias",
-            init::DEFAULT_KAIMING_NORMAL,
+            init::ZERO,
             DType::F32,
             device,
         )?;
@@ -53,20 +54,17 @@ impl LoraLinear {
             a,
             b,
             scale: alpha / rank,
-            train: true,
         })
     }
 }
 
 impl Module for LoraLinear {
-    fn forward(&self, xs: &Tensor) -> Result<Tensor> {
-        let old_output = self.old.forward(xs)?;
-        if self.train {
-            let lora_output = self.b.forward(&self.a.forward(xs)?)? * self.scale as f64;
-            old_output + lora_output
-        } else {
-            Ok(old_output)
-        }
+    fn forward(&self, input: &Tensor) -> Result<Tensor> {
+        let old_output = self.old.forward(input).unwrap();
+        let a = self.a.forward(input).unwrap();
+        let b = self.b.forward(&a).unwrap();
+        let lora_output = b * self.scale as f64;
+        old_output + lora_output
     }
 }
 
@@ -74,8 +72,10 @@ impl LinearLayerLike for LoraLinear {
     fn bias(&self) -> Option<&Tensor> {
         unimplemented!("Cannot get bias of LoraLinear layer");
     }
-
     fn weight(&self) -> &Tensor {
         unimplemented!("Cannot get weight of LoraLinear layer");
+    }
+    fn shape(&self) -> &candle_core::Shape {
+        unimplemented!("Cannot get shape of LoraLinear layer");
     }
 }
