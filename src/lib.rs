@@ -1,9 +1,10 @@
-use std::collections::HashMap;
 use candle_core::Tensor;
-use candle_nn::{Module, Linear, Conv1d, Conv2d, Embedding};
+use candle_nn::{Conv1d, Conv2d, Embedding, Linear, Module};
+use std::collections::HashMap;
 use trc::Trc;
 
 pub mod layers;
+mod nontrainlinear;
 
 pub struct Lora;
 

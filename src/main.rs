@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
 use candle_core::{DType, Device, Result, Tensor};
-use candle_nn::{Linear, Module, linear_no_bias, VarBuilder};
-use rlora::{LoraLayersModule, LayerType, Lora};
+use candle_nn::{linear_no_bias, Linear, Module, VarBuilder};
+use rlora::{LayerType, Lora, LoraLayersModule};
 use trc::Trc;
 
 #[derive(Debug)]
 struct Model {
-    layer: Trc<Linear>
+    layer: Trc<Linear>,
 }
 
 impl Module for Model {
@@ -28,11 +28,16 @@ fn main() -> Result<()> {
     let device = Device::Cpu;
 
     let mut vars = HashMap::new();
-    vars.insert("1.weight".to_string(), Tensor::zeros((10,10), DType::F32, &device)?);
+    vars.insert(
+        "1.weight".to_string(),
+        Tensor::zeros((10, 10), DType::F32, &device)?,
+    );
 
     let varbuilder = VarBuilder::from_tensors(vars, DType::F32, &device);
 
-    let model = Model { layer: Trc::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()) };
+    let model = Model {
+        layer: Trc::new(linear_no_bias(10, 10, varbuilder.pp("1")).unwrap()),
+    };
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
 
@@ -40,7 +45,7 @@ fn main() -> Result<()> {
     println!("Digit {digit:?} digit");
 
     Lora::get_lora_model(&model);
-    
+
     //let digit = loramodel.forward(&dummy_image).unwrap();
     //println!("Loramodel {digit:?} digit");
 
