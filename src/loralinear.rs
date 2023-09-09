@@ -34,7 +34,7 @@ impl LoraLinear {
         )?;
         let b_bias = map.get(
             (rank, rank),
-            "a.weight",
+            "b.bias",
             init::DEFAULT_KAIMING_NORMAL,
             DType::F32,
             device,
