@@ -47,7 +47,7 @@ impl LoraLinear {
 
         let a = Trc::new(Linear::new(a_weight, None));
         let b = Trc::new(Linear::new(b_weight, Some(b_bias)));
-        
+
         Ok(LoraLinear {
             old: Trc::new(NonTrainableLinear::new_from_linear(old)?),
             a,
