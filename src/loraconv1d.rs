@@ -6,14 +6,14 @@ use candle_nn::{init, Conv1dConfig, VarMap};
 use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike};
 
 #[derive(Debug)]
-pub struct LoraConv1D {
+pub struct LoraConv1d {
     old: FrozenConv1d,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
 }
 
-pub struct LoraConv1DConfig<'a> {
+pub struct LoraConv1dConfig<'a> {
     pub rank: usize,
     pub alpha: f64,
     pub kernel_size: usize,
@@ -23,7 +23,7 @@ pub struct LoraConv1DConfig<'a> {
     pub out_channels: usize,
 }
 
-impl<'a> LoraConv1DConfig<'a> {
+impl<'a> LoraConv1dConfig<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
@@ -31,7 +31,7 @@ impl<'a> LoraConv1DConfig<'a> {
         in_channels: usize,
         out_channels: usize,
     ) -> Self {
-        LoraConv1DConfig {
+        LoraConv1dConfig {
             rank: 1,
             alpha: 1.,
             kernel_size,
@@ -43,8 +43,8 @@ impl<'a> LoraConv1DConfig<'a> {
     }
 }
 
-impl LoraConv1D {
-    pub fn new(old: &dyn Conv1dLayerLike, config: &LoraConv1DConfig) -> Result<Self> {
+impl LoraConv1d {
+    pub fn new(old: &dyn Conv1dLayerLike, config: &LoraConv1dConfig) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
             (
@@ -67,7 +67,7 @@ impl LoraConv1D {
             config.device,
         )?;
 
-        Ok(LoraConv1D {
+        Ok(LoraConv1d {
             old: FrozenConv1d::new_from_conv1d(old)?,
             a,
             b,
@@ -80,7 +80,7 @@ impl LoraConv1D {
     }
 }
 
-impl Module for LoraConv1D {
+impl Module for LoraConv1d {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         if let Some(scale) = self.scale {
             let x = input;
@@ -113,7 +113,7 @@ impl Module for LoraConv1D {
     }
 }
 
-impl Conv1dLayerLike for LoraConv1D {
+impl Conv1dLayerLike for LoraConv1d {
     fn config(&self) -> &Conv1dConfig {
         self.old.config()
     }

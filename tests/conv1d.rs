@@ -4,7 +4,7 @@ fn conv1d() -> candle_core::Result<()> {
 
     use candle_core::{DType, Device, Result, Tensor};
     use candle_lora::{
-        loraconv1d::LoraConv1DConfig, Conv1DWithWB, Conv1dLayerLike, Lora, NewLayers,
+        loraconv1d::LoraConv1dConfig, Conv1dLayerLike, Conv1dWithWB, Lora, NewLayers,
         SelectedLayers,
     };
     use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
@@ -55,7 +55,7 @@ fn conv1d() -> candle_core::Result<()> {
         &device,
     )?;
 
-    let conv = Conv1DWithWB {
+    let conv = Conv1dWithWB {
         this: Conv1d::new(
             conv_weight.clone(),
             Some(conv_bias.clone()),
@@ -84,7 +84,7 @@ fn conv1d() -> candle_core::Result<()> {
         linear: linear_layers,
         linear_config: None,
         conv1d: conv1d_layers,
-        conv1d_config: Some(LoraConv1DConfig::default(&device, dtype, 1, 10, 10)),
+        conv1d_config: Some(LoraConv1dConfig::default(&device, dtype, 1, 10, 10)),
         conv2d: conv2d_layers,
         conv2d_config: None,
     };

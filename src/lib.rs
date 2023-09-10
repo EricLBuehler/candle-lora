@@ -2,8 +2,8 @@
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Linear, Module};
-use loraconv1d::{LoraConv1D, LoraConv1DConfig};
-use loraconv2d::{LoraConv2D, LoraConv2DConfig};
+use loraconv1d::{LoraConv1d, LoraConv1dConfig};
+use loraconv2d::{LoraConv2d, LoraConv2dConfig};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
@@ -35,14 +35,14 @@ impl Lora {
         for (name, layer) in selected.conv1d {
             new.conv1d.insert(
                 name,
-                LoraConv1D::new(layer, selected.conv1d_config.as_ref().unwrap()).unwrap(),
+                LoraConv1d::new(layer, selected.conv1d_config.as_ref().unwrap()).unwrap(),
             );
         }
 
         for (name, layer) in selected.conv2d {
             new.conv2d.insert(
                 name,
-                LoraConv2D::new(layer, selected.conv2d_config.as_ref().unwrap()).unwrap(),
+                LoraConv2d::new(layer, selected.conv2d_config.as_ref().unwrap()).unwrap(),
             );
         }
 
@@ -54,15 +54,15 @@ pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, &'a dyn LinearLayerLike>,
     pub linear_config: Option<LoraLinearConfig<'a>>,
     pub conv1d: HashMap<T, &'a dyn Conv1dLayerLike>,
-    pub conv1d_config: Option<LoraConv1DConfig<'a>>,
+    pub conv1d_config: Option<LoraConv1dConfig<'a>>,
     pub conv2d: HashMap<T, &'a dyn Conv2dLayerLike>,
-    pub conv2d_config: Option<LoraConv2DConfig<'a>>,
+    pub conv2d_config: Option<LoraConv2dConfig<'a>>,
 }
 
 pub struct NewLayers<T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, LoraLinear>,
-    pub conv1d: HashMap<T, LoraConv1D>,
-    pub conv2d: HashMap<T, LoraConv2D>,
+    pub conv1d: HashMap<T, LoraConv1d>,
+    pub conv2d: HashMap<T, LoraConv2d>,
 }
 
 pub trait LinearLayerLike: Module {
@@ -90,19 +90,19 @@ pub trait Conv1dLayerLike: Module {
 }
 
 #[derive(Debug)]
-pub struct Conv1DWithWB {
+pub struct Conv1dWithWB {
     pub this: Conv1d,
     pub weights: Tensor,
     pub bias: Option<Tensor>,
 }
 
-impl Module for Conv1DWithWB {
+impl Module for Conv1dWithWB {
     fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
         self.this.forward(xs)
     }
 }
 
-impl Conv1dLayerLike for Conv1DWithWB {
+impl Conv1dLayerLike for Conv1dWithWB {
     fn config(&self) -> &Conv1dConfig {
         self.this.config()
     }
@@ -121,19 +121,19 @@ pub trait Conv2dLayerLike: Module {
 }
 
 #[derive(Debug)]
-pub struct Conv2DWithWB {
+pub struct Conv2dWithWB {
     pub this: Conv2d,
     pub weights: Tensor,
     pub bias: Option<Tensor>,
 }
 
-impl Module for Conv2DWithWB {
+impl Module for Conv2dWithWB {
     fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
         self.this.forward(xs)
     }
 }
 
-impl Conv2dLayerLike for Conv2DWithWB {
+impl Conv2dLayerLike for Conv2dWithWB {
     fn config(&self) -> &Conv2dConfig {
         self.this.config()
     }
