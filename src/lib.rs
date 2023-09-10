@@ -1,3 +1,5 @@
+#[doc = include_str!("../README.md")]
+
 use candle_core::{DType, Device, Shape, Tensor};
 use candle_nn::{Linear, Module};
 use loralinear::{LoraLinear, ALPHA_DEFAULT};
