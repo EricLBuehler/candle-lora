@@ -1,10 +1,13 @@
+//According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
-use candle_nn::{Linear, Module};
+use candle_nn::{Conv1d, Conv1dConfig, Linear, Module};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
+mod frozenconv;
 mod frozenlinear;
+pub mod loraconv1d;
 pub mod loralinear;
 
 pub struct Lora;
@@ -44,5 +47,36 @@ impl LinearLayerLike for Linear {
     }
     fn shape(&self) -> &Shape {
         self.weight().shape()
+    }
+}
+
+pub trait Conv1dLayerLike: Module {
+    fn weight(&self) -> &Tensor;
+    fn bias(&self) -> Option<&Tensor>;
+    fn config(&self) -> &Conv1dConfig;
+}
+
+#[derive(Debug)]
+pub struct Conv1DWithWB {
+    pub this: Conv1d,
+    pub weights: Tensor,
+    pub bias: Option<Tensor>,
+}
+
+impl Module for Conv1DWithWB {
+    fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
+        self.this.forward(xs)
+    }
+}
+
+impl Conv1dLayerLike for Conv1DWithWB {
+    fn config(&self) -> &Conv1dConfig {
+        self.this.config()
+    }
+    fn weight(&self) -> &Tensor {
+        &self.weights
+    }
+    fn bias(&self) -> Option<&Tensor> {
+        self.bias.as_ref()
     }
 }

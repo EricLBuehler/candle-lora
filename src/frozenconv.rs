@@ -1,0 +1,67 @@
+use candle_core::{Module, Result, Tensor};
+use candle_nn::Conv1dConfig;
+
+use crate::Conv1dLayerLike;
+
+#[derive(Debug)]
+pub struct FrozenConv1d {
+    weight: Tensor,
+    bias: Option<Tensor>,
+    config: Conv1dConfig,
+}
+
+impl FrozenConv1d {
+    pub fn new(weight: &Tensor, bias: Option<&Tensor>, config: Conv1dConfig) -> Result<Self> {
+        Ok(Self {
+            weight: weight.detach()?,
+            bias: match bias {
+                Some(bias) => Some(bias.detach()?),
+                None => None,
+            },
+            config,
+        })
+    }
+
+    pub(crate) fn new_from_conv1d(old: &dyn Conv1dLayerLike) -> Result<Self> {
+        Self::new(old.weight(), old.bias(), *old.config())
+    }
+
+    pub(crate) fn weight(&self) -> &Tensor {
+        &self.weight
+    }
+    pub(crate) fn bias(&self) -> Option<&Tensor> {
+        self.bias.as_ref()
+    }
+}
+
+impl Module for FrozenConv1d {
+    fn forward(&self, x: &Tensor) -> Result<Tensor> {
+        let x = x.conv1d(
+            &self.weight,
+            self.config.padding,
+            self.config.stride,
+            self.config.dilation,
+            self.config.groups,
+        )?;
+        match &self.bias {
+            None => Ok(x),
+            Some(bias) => {
+                let b = bias.dims1()?;
+                let bias = bias.reshape((1, b, 1))?;
+                Ok(x.broadcast_add(&bias)?)
+            }
+        }
+    }
+}
+
+impl Conv1dLayerLike for FrozenConv1d {
+    fn config(&self) -> &Conv1dConfig {
+        &self.config
+    }
+    fn bias(&self) -> Option<&Tensor> {
+        self.bias()
+    }
+    fn weight(&self) -> &Tensor {
+        self.weight()
+    }
+}

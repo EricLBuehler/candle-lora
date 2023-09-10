@@ -1,4 +1,4 @@
-use candle_core::{Module, Result, Tensor};
+use candle_core::{Module, Result, Shape, Tensor};
 
 use crate::LinearLayerLike;
 
@@ -9,18 +9,24 @@ pub(crate) struct FrozenLinear {
 }
 
 impl FrozenLinear {
-    pub(crate) fn new(weight: Tensor, bias: Option<Tensor>) -> Self {
-        Self { weight, bias }
+    pub(crate) fn new(weight: Tensor, bias: Option<Tensor>) -> Result<Self> {
+        Ok(Self {
+            weight: weight.detach()?,
+            bias: match bias {
+                Some(bias) => Some(bias.detach()?),
+                None => None,
+            },
+        })
     }
 
     pub(crate) fn new_from_linear(old: &dyn LinearLayerLike) -> Result<Self> {
-        Ok(Self::new(
+        Self::new(
             old.weight().detach()?,
             match old.bias() {
                 Some(bias) => Some(bias.detach()?),
                 None => None,
             },
-        ))
+        )
     }
 }
 
@@ -36,5 +42,17 @@ impl Module for FrozenLinear {
             None => Ok(x),
             Some(bias) => x.broadcast_add(bias),
         }
+    }
+}
+
+impl LinearLayerLike for FrozenLinear {
+    fn bias(&self) -> Option<&Tensor> {
+        self.bias.as_ref()
+    }
+    fn weight(&self) -> &Tensor {
+        &self.weight
+    }
+    fn shape(&self) -> &Shape {
+        self.weight.shape()
     }
 }

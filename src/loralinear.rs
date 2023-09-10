@@ -1,7 +1,6 @@
 use std::ops::Mul;
 
-//According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
-use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_core::{DType, Device, Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, VarMap};
 
 use crate::{frozenlinear::FrozenLinear, LinearLayerLike};
@@ -38,36 +37,36 @@ impl<'a> LoraLinearConfig<'a> {
 impl LoraLinear {
     pub fn new(
         old: &dyn LinearLayerLike,
-        metadata: &LoraLinearConfig,
+        config: &LoraLinearConfig,
         in_features: usize,
         out_features: usize,
     ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (metadata.rank, in_features),
+            (config.rank, in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
-            metadata.dtype,
-            metadata.device,
+            config.dtype,
+            config.device,
         )?;
         let b = map.get(
-            (out_features, metadata.rank),
+            (out_features, config.rank),
             "b.weight",
             init::ZERO,
-            metadata.dtype,
-            metadata.device,
+            config.dtype,
+            config.device,
         )?;
 
         Ok(LoraLinear {
             old: FrozenLinear::new_from_linear(old)?,
             a,
             b,
-            scale: if metadata.rank > 0 {
-                Some(metadata.alpha / metadata.rank as f64)
+            scale: if config.rank > 0 {
+                Some(config.alpha / config.rank as f64)
             } else {
                 None
             },
-            dropout: metadata.dropout.map(Dropout::new),
+            dropout: config.dropout.map(Dropout::new),
         })
     }
 }
@@ -92,12 +91,12 @@ impl Module for LoraLinear {
 
 impl LinearLayerLike for LoraLinear {
     fn bias(&self) -> Option<&Tensor> {
-        unimplemented!("Cannot get bias of LoraLinear layer");
+        self.old.bias()
     }
     fn weight(&self) -> &Tensor {
-        unimplemented!("Cannot get weight of LoraLinear layer");
+        self.old.weight()
     }
-    fn shape(&self) -> &candle_core::Shape {
-        unimplemented!("Cannot get shape of LoraLinear layer");
+    fn shape(&self) -> &Shape {
+        self.old.shape()
     }
 }
