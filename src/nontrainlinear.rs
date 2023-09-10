@@ -9,7 +9,6 @@ pub struct NonTrainableLinear {
     bias: Option<Tensor>,
 }
 
-#[allow(dead_code)]
 impl NonTrainableLinear {
     pub fn new(weight: Tensor, bias: Option<Tensor>) -> Self {
         Self { weight, bias }
@@ -23,14 +22,6 @@ impl NonTrainableLinear {
                 None => None,
             },
         ))
-    }
-
-    pub fn weight(&self) -> &Tensor {
-        &self.weight
-    }
-
-    pub fn bias(&self) -> Option<&Tensor> {
-        self.bias.as_ref()
     }
 }
 
