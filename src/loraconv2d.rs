@@ -83,17 +83,30 @@ impl LoraConv2D {
 impl Module for LoraConv2D {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         if let Some(scale) = self.scale {
-            input.conv1d(
-                &self
-                    .b
-                    .matmul(&self.a)?
-                    .reshape(self.old.weight().shape())?
-                    .mul(scale)?,
+            let x = input;
+            let bias = self.bias();
+            let weight = &self
+                .b
+                .matmul(&self.a)?
+                .reshape(self.old.weight().shape())?
+                .mul(scale)?;
+
+            let x = x.conv2d(
+                weight,
                 self.config().padding,
                 self.config().stride,
                 self.config().dilation,
                 self.config().groups,
-            )
+            )?;
+
+            match &bias {
+                None => Ok(x),
+                Some(bias) => {
+                    let b = bias.dims1()?;
+                    let bias = bias.reshape((1, b, 1, 1))?;
+                    Ok(x.broadcast_add(&bias)?)
+                }
+            }
         } else {
             self.old.forward(input)
         }

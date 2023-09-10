@@ -107,7 +107,7 @@ impl FrozenConv2d {
 
 impl Module for FrozenConv2d {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
-        let x = x.conv1d(
+        let x = x.conv2d(
             &self.weight,
             self.config.padding,
             self.config.stride,
@@ -118,7 +118,7 @@ impl Module for FrozenConv2d {
             None => Ok(x),
             Some(bias) => {
                 let b = bias.dims1()?;
-                let bias = bias.reshape((1, b, 1))?;
+                let bias = bias.reshape((1, b, 1, 1))?;
                 Ok(x.broadcast_add(&bias)?)
             }
         }
