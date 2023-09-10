@@ -5,7 +5,7 @@ use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
 pub mod loralinear;
-mod nontrainlinear;
+mod frozenlinear;
 
 pub struct Lora;
 

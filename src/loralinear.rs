@@ -4,11 +4,11 @@ use std::ops::Mul;
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Dropout, VarMap};
 
-use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
+use crate::{frozenlinear::FrozenLinear, LinearLayerLike};
 
 #[derive(Debug)]
 pub struct LoraLinear {
-    old: NonTrainableLinear,
+    old: FrozenLinear,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
@@ -59,7 +59,7 @@ impl LoraLinear {
         )?;
 
         Ok(LoraLinear {
-            old: NonTrainableLinear::new_from_linear(old)?,
+            old: FrozenLinear::new_from_linear(old)?,
             a,
             b,
             scale: if metadata.rank > 0 {
