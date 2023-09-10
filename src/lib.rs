@@ -4,8 +4,8 @@ use candle_nn::{Linear, Module};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
-pub mod loralinear;
 mod frozenlinear;
+pub mod loralinear;
 
 pub struct Lora;
 
