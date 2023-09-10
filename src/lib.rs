@@ -1,7 +1,7 @@
 #[doc = include_str!("../README.md")]
 use candle_core::{DType, Device, Shape, Tensor};
 use candle_nn::{Linear, Module};
-use loralinear::{LoraLinear, ALPHA_DEFAULT};
+use loralinear::{LoraLinear, LoraLinearMetadata, ALPHA_DEFAULT};
 use std::{collections::HashMap, hash::Hash};
 use trc::Trc;
 
@@ -24,11 +24,13 @@ impl Lora {
                 name,
                 LoraLinear::new(
                     layer,
-                    layer.weight().rank(),
-                    ALPHA_DEFAULT,
-                    Some(0.),
-                    device,
-                    dtype,
+                    LoraLinearMetadata {
+                        rank: layer.weight().rank(),
+                        alpha: ALPHA_DEFAULT,
+                        dropout: Some(0.),
+                        device,
+                        dtype,
+                    },
                     in_features,
                     out_features,
                 )

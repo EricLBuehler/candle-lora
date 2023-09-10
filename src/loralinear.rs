@@ -3,7 +3,7 @@
 use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, VarMap, Dropout};
+use candle_nn::{init, Dropout, VarMap};
 use trc::Trc;
 
 use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
@@ -19,26 +19,36 @@ pub struct LoraLinear {
     dropout: Option<Dropout>,
 }
 
+pub struct LoraLinearMetadata<'a> {
+    pub rank: usize,
+    pub alpha: f64,
+    pub dropout: Option<f32>,
+    pub device: &'a Device,
+    pub dtype: DType,
+}
+
 impl LoraLinear {
     pub fn new(
         old: &dyn LinearLayerLike,
-        rank: usize,
-        alpha: f64,
-        dropout: Option<f32>,
-        device: &Device,
-        dtype: DType,
+        metadata: LoraLinearMetadata,
         in_features: usize,
         out_features: usize,
     ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (rank, in_features),
+            (metadata.rank, in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
-            dtype,
-            device,
+            metadata.dtype,
+            metadata.device,
         )?;
-        let b = map.get((out_features, rank), "b.weight", init::ZERO, dtype, device)?;
+        let b = map.get(
+            (out_features, metadata.rank),
+            "b.weight",
+            init::ZERO,
+            metadata.dtype,
+            metadata.device,
+        )?;
 
         let a = Trc::new(a);
         let b = Trc::new(b);
@@ -47,8 +57,12 @@ impl LoraLinear {
             old: Trc::new(NonTrainableLinear::new_from_linear(old)?),
             a,
             b,
-            scale: if rank > 0 {Some(alpha / rank as f64)}else{None},
-            dropout: dropout.map(Dropout::new),
+            scale: if metadata.rank > 0 {
+                Some(metadata.alpha / metadata.rank as f64)
+            } else {
+                None
+            },
+            dropout: metadata.dropout.map(Dropout::new),
         })
     }
 }
@@ -60,12 +74,11 @@ impl Module for LoraLinear {
         if let Some(scale) = self.scale {
             if self.dropout.is_some() {
                 result = (result + self.dropout.as_ref().unwrap().forward(input, true)?)?;
-            }
-            else {
+            } else {
                 result = (result + input)?;
             }
-            result = result.matmul(&self.a.transpose(0,1)?)?;
-            result = result.matmul(&self.b.transpose(0,1)?)?;
+            result = result.matmul(&self.a.transpose(0, 1)?)?;
+            result = result.matmul(&self.b.transpose(0, 1)?)?;
             result = result.mul(scale)?;
         }
         Ok(result)
