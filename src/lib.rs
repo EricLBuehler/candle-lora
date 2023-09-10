@@ -26,6 +26,7 @@ impl Lora {
                     layer,
                     layer.weight().rank(),
                     ALPHA_DEFAULT,
+                    Some(0.),
                     device,
                     dtype,
                     in_features,
