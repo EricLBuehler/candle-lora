@@ -1,29 +1,29 @@
 use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, Conv1dConfig, VarMap};
+use candle_nn::{init, Conv2dConfig, VarMap};
 
-use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike};
+use crate::{frozenconv::FrozenConv2d, Conv2dLayerLike};
 
 #[derive(Debug)]
-pub struct LoraConv1D {
-    old: FrozenConv1d,
+pub struct LoraConv2D {
+    old: FrozenConv2d,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
 }
 
-pub struct LoraConv1DConfig<'a> {
+pub struct LoraConv2DConfig<'a> {
     pub rank: usize,
     pub alpha: f64,
     pub kernel_size: usize,
     pub device: &'a Device,
     pub dtype: DType,
-    pub in_channels: usize,
-    pub out_channels: usize,
+    in_channels: usize,
+    out_channels: usize,
 }
 
-impl<'a> LoraConv1DConfig<'a> {
+impl<'a> LoraConv2DConfig<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
@@ -31,7 +31,7 @@ impl<'a> LoraConv1DConfig<'a> {
         in_channels: usize,
         out_channels: usize,
     ) -> Self {
-        LoraConv1DConfig {
+        LoraConv2DConfig {
             rank: 1,
             alpha: 1.,
             kernel_size,
@@ -43,8 +43,8 @@ impl<'a> LoraConv1DConfig<'a> {
     }
 }
 
-impl LoraConv1D {
-    pub fn new(old: &dyn Conv1dLayerLike, config: &LoraConv1DConfig) -> Result<Self> {
+impl LoraConv2D {
+    pub fn new(old: &dyn Conv2dLayerLike, config: &LoraConv2DConfig) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
             (
@@ -67,8 +67,8 @@ impl LoraConv1D {
             config.device,
         )?;
 
-        Ok(LoraConv1D {
-            old: FrozenConv1d::new_from_conv1d(old)?,
+        Ok(LoraConv2D {
+            old: FrozenConv2d::new_from_conv2d(old)?,
             a,
             b,
             scale: if config.rank > 0 {
@@ -80,7 +80,7 @@ impl LoraConv1D {
     }
 }
 
-impl Module for LoraConv1D {
+impl Module for LoraConv2D {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         if let Some(scale) = self.scale {
             input.conv1d(
@@ -100,8 +100,8 @@ impl Module for LoraConv1D {
     }
 }
 
-impl Conv1dLayerLike for LoraConv1D {
-    fn config(&self) -> &Conv1dConfig {
+impl Conv2dLayerLike for LoraConv2D {
+    fn config(&self) -> &Conv2dConfig {
         self.old.config()
     }
     fn bias(&self) -> Option<&Tensor> {

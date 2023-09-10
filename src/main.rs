@@ -2,36 +2,31 @@ use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, LoraLinearConfig},
-    Conv1DWithWB, Conv1dLayerLike, LinearLayerLike, Lora,
+    loraconv1d::LoraConv1DConfig, Conv1DWithWB, Conv1dLayerLike, Lora, NewLayers, SelectedLayers,
 };
-use candle_nn::{init, Conv1d, Conv1dConfig, Linear, Module, VarMap};
+use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {
-    Layer,
+    Conv,
 }
 
 #[derive(Debug)]
 struct Model {
-    layer: Box<dyn LinearLayerLike>,
     conv: Box<dyn Conv1dLayerLike>,
 }
 
 impl Module for Model {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         self.conv.forward(input)
-        //self.layer.forward(input)
     }
 }
 
 impl Model {
-    fn insert_loralinear(&mut self, layers: HashMap<ModelLayers, LoraLinear>) {
-        for (name, layer) in layers {
+    fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
+        for (name, conv) in new.conv1d {
             match name {
-                ModelLayers::Layer => {
-                    self.layer = Box::new(layer);
-                }
+                ModelLayers::Conv => self.conv = Box::new(conv),
             }
         }
     }
@@ -43,14 +38,6 @@ fn main() -> Result<()> {
 
     //Create the model
     let map = VarMap::new();
-    let layer_weight = map.get(
-        (10, 10),
-        "layer.weight",
-        init::DEFAULT_KAIMING_NORMAL,
-        dtype,
-        &device,
-    )?;
-
     let conv_weight = map.get(
         (1, 10, 10),
         "conv.weight",
@@ -77,7 +64,6 @@ fn main() -> Result<()> {
     };
 
     let mut model = Model {
-        layer: Box::new(Linear::new(layer_weight.clone(), None)),
         conv: Box::new(conv),
     };
 
@@ -87,20 +73,25 @@ fn main() -> Result<()> {
     let digit = model.forward(&dummy_image).unwrap();
     println!("Output: {digit:?}");
 
-    //Isolate layers we want to convert
-    let mut linear_layers = HashMap::new();
-    linear_layers.insert(ModelLayers::Layer, &*model.layer);
+    //Select layers we want to convert
+    let linear_layers = HashMap::new();
+    let mut conv1d_layers = HashMap::new();
+    let conv2d_layers = HashMap::new();
+    conv1d_layers.insert(ModelLayers::Conv, &*model.conv);
+    let selected = SelectedLayers {
+        linear: linear_layers,
+        linear_config: None,
+        conv1d: conv1d_layers,
+        conv1d_config: Some(LoraConv1DConfig::default(&device, dtype, 1, 10, 10)),
+        conv2d: conv2d_layers,
+        conv2d_config: None,
+    };
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(
-        linear_layers,
-        LoraLinearConfig::default(&device, dtype),
-        10,
-        10,
-    );
+    let new_layers = Lora::convert_model(selected);
 
     //Custom methods to implement
-    model.insert_loralinear(new_layers);
+    model.insert_new(new_layers);
 
     //Test the model
     let digit = model.forward(&dummy_image).unwrap();

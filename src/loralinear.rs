@@ -20,37 +20,41 @@ pub struct LoraLinearConfig<'a> {
     pub dropout: Option<f32>,
     pub device: &'a Device,
     pub dtype: DType,
+    pub in_features: usize,
+    pub out_features: usize,
 }
 
 impl<'a> LoraLinearConfig<'a> {
-    pub fn default(device: &'a Device, dtype: DType) -> Self {
+    pub fn default(
+        device: &'a Device,
+        dtype: DType,
+        in_features: usize,
+        out_features: usize,
+    ) -> Self {
         LoraLinearConfig {
             rank: 1,
             alpha: 1.,
             dropout: Some(0.),
             device,
             dtype,
+            in_features,
+            out_features,
         }
     }
 }
 
 impl LoraLinear {
-    pub fn new(
-        old: &dyn LinearLayerLike,
-        config: &LoraLinearConfig,
-        in_features: usize,
-        out_features: usize,
-    ) -> Result<Self> {
+    pub fn new(old: &dyn LinearLayerLike, config: &LoraLinearConfig) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (config.rank, in_features),
+            (config.rank, config.in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
             config.dtype,
             config.device,
         )?;
         let b = map.get(
-            (out_features, config.rank),
+            (config.out_features, config.rank),
             "b.weight",
             init::ZERO,
             config.dtype,

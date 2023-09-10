@@ -10,8 +10,8 @@ use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, LoraLinearConfig},
-    LinearLayerLike, Lora,
+    loralinear::LoraLinearConfig,
+    LinearLayerLike, Lora, NewLayers, SelectedLayers,
 };
 use candle_nn::{init, Linear, Module, VarMap};
 
@@ -32,18 +32,16 @@ impl Module for Model {
 }
 
 impl Model {
-    fn insert_loralinear(&mut self, layers: HashMap<ModelLayers, LoraLinear>) {
-        for (name, layer) in layers {
+    fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
+        for (name, conv) in new.linear {
             match name {
-                ModelLayers::Layer => {
-                    self.layer = Box::new(layer);
-                }
+                ModelLayers::Layer => self.layer = Box::new(conv),
             }
         }
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> candle_core::Result<()> {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
@@ -67,20 +65,25 @@ fn main() -> Result<()> {
     let digit = model.forward(&dummy_image).unwrap();
     println!("Output: {digit:?}");
 
-    //Isolate layers we want to convert
-    let mut layers = HashMap::new();
-    layers.insert(ModelLayers::Layer, &*model.layer);
+    //Select layers we want to convert
+    let mut linear_layers = HashMap::new();
+    linear_layers.insert(ModelLayers::Layer, &*model.layer);
+    let conv1d_layers = HashMap::new();
+    let conv2d_layers = HashMap::new();
+    let selected = SelectedLayers {
+        linear: linear_layers,
+        linear_config: Some(LoraLinearConfig::default(&device, dtype, 10, 10)),
+        conv1d: conv1d_layers,
+        conv1d_config: None,
+        conv2d: conv2d_layers,
+        conv2d_config: None,
+    };
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(
-        layers,
-        LoraLinearConfig::default(&device, dtype),
-        10,
-        10,
-    );
+    let new_layers = Lora::convert_model(selected);
 
     //Custom methods to implement
-    model.insert_loralinear(new_layers);
+    model.insert_new(new_layers);
 
     //Test the model
     let digit = model.forward(&dummy_image).unwrap();
