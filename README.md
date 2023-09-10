@@ -4,7 +4,10 @@
 
 LoRA (low rank adaptation) implemented in Rust for use with Candle.
 
-**Current WIP: Conv2D output shape is not as expected. Fix is expected very shortly!**
+Working features:
+- `Linear`
+- `Conv1D`
+- `Conv2D`
 
 Current working example:
 ```rust

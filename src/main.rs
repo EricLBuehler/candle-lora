@@ -36,23 +36,36 @@ fn main() -> Result<()> {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
+    let out_channels = 10;
+    let in_channels = 10;
+    let kernel = 2;
+
+    let cfg = Conv2dConfig::default();
+
     //Create the model
     let map = VarMap::new();
     let conv_weight = map.get(
-        (1, 10, 10, 3),
+        (
+            out_channels,
+            in_channels / cfg.groups, //cfg.groups in this case are 1
+            kernel,
+            kernel,
+        ),
         "conv.weight",
         init::DEFAULT_KAIMING_NORMAL,
         dtype,
         &device,
     )?;
-    let conv_bias = map.get(3, "conv.bias", init::DEFAULT_KAIMING_NORMAL, dtype, &device)?;
+    let conv_bias = map.get(
+        out_channels,
+        "conv.bias",
+        init::DEFAULT_KAIMING_NORMAL,
+        dtype,
+        &device,
+    )?;
 
     let conv = Conv2DWithWB {
-        this: Conv2d::new(
-            conv_weight.clone(),
-            Some(conv_bias.clone()),
-            Conv2dConfig::default(),
-        ),
+        this: Conv2d::new(conv_weight.clone(), Some(conv_bias.clone()), cfg),
         weights: conv_weight,
         bias: Some(conv_bias),
     };
@@ -61,7 +74,8 @@ fn main() -> Result<()> {
         conv: Box::new(conv),
     };
 
-    let dummy_image = Tensor::zeros((1, 10, 10, 3), DType::F32, &device)?;
+    let shape = [2, in_channels, 20, 20]; //(BS, K, X, Y)
+    let dummy_image = Tensor::zeros(&shape, DType::F32, &device)?;
 
     //Test the model
     let output = model.forward(&dummy_image).unwrap();
@@ -78,7 +92,13 @@ fn main() -> Result<()> {
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
-        conv2d_config: Some(LoraConv2DConfig::default(&device, dtype, 1, 10, 10)),
+        conv2d_config: Some(LoraConv2DConfig::default(
+            &device,
+            dtype,
+            kernel,
+            in_channels,
+            out_channels,
+        )),
     };
 
     //Create new LoRA layers from our layers
