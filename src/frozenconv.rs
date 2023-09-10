@@ -4,14 +4,14 @@ use candle_nn::Conv1dConfig;
 use crate::Conv1dLayerLike;
 
 #[derive(Debug)]
-pub struct FrozenConv1d {
+pub(crate) struct FrozenConv1d {
     weight: Tensor,
     bias: Option<Tensor>,
     config: Conv1dConfig,
 }
 
 impl FrozenConv1d {
-    pub fn new(weight: &Tensor, bias: Option<&Tensor>, config: Conv1dConfig) -> Result<Self> {
+    pub(crate) fn new(weight: &Tensor, bias: Option<&Tensor>, config: Conv1dConfig) -> Result<Self> {
         Ok(Self {
             weight: weight.detach()?,
             bias: match bias {
