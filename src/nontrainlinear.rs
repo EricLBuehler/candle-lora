@@ -1,22 +1,18 @@
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Init, VarBuilder};
-use trc::Trc;
 
 use crate::LinearLayerLike;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NonTrainableLinear {
-    weight: Trc<Tensor>,
-    bias: Option<Trc<Tensor>>,
+    weight: Tensor,
+    bias: Option<Tensor>,
 }
 
 #[allow(dead_code)]
 impl NonTrainableLinear {
     pub fn new(weight: Tensor, bias: Option<Tensor>) -> Self {
-        Self {
-            weight: Trc::new(weight),
-            bias: bias.map(Trc::new),
-        }
+        Self { weight, bias }
     }
 
     pub fn new_from_linear(old: &dyn LinearLayerLike) -> Result<Self> {
@@ -33,7 +29,7 @@ impl NonTrainableLinear {
         &self.weight
     }
 
-    pub fn bias(&self) -> Option<&Trc<Tensor>> {
+    pub fn bias(&self) -> Option<&Tensor> {
         self.bias.as_ref()
     }
 }

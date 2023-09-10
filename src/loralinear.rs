@@ -1,18 +1,16 @@
-//According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
-
 use std::ops::Mul;
 
+//According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Dropout, VarMap};
-use trc::Trc;
 
 use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
 
 #[derive(Debug)]
 pub struct LoraLinear {
-    old: Trc<NonTrainableLinear>,
-    a: Trc<Tensor>,
-    b: Trc<Tensor>,
+    old: NonTrainableLinear,
+    a: Tensor,
+    b: Tensor,
     scale: Option<f64>,
     dropout: Option<Dropout>,
 }
@@ -60,11 +58,8 @@ impl LoraLinear {
             metadata.device,
         )?;
 
-        let a = Trc::new(a);
-        let b = Trc::new(b);
-
         Ok(LoraLinear {
-            old: Trc::new(NonTrainableLinear::new_from_linear(old)?),
+            old: NonTrainableLinear::new_from_linear(old)?,
             a,
             b,
             scale: if metadata.rank > 0 {

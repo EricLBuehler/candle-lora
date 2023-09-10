@@ -3,7 +3,6 @@ use candle_core::{Shape, Tensor};
 use candle_nn::{Linear, Module};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
-use trc::Trc;
 
 pub mod loralinear;
 mod nontrainlinear;
@@ -28,7 +27,7 @@ impl Lora {
     }
 }
 
-pub type Vars = HashMap<String, Trc<Tensor>>;
+pub type Vars = HashMap<String, Tensor>;
 
 pub trait LinearLayerLike: Module {
     fn weight(&self) -> &Tensor;
