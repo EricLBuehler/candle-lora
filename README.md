@@ -4,13 +4,14 @@
 
 LoRA (low rank adaptation) implemented in Rust for use with Candle.
 
-candle-lora is able to convert:
-- `Linear`
-- `Conv1D`
-- `Conv2D`
+It is based upon [this implementation](https://github.com/microsoft/LoRA/tree/main), which mirrors what HuggingFace's `peft` library implements. See the original paper [here](https://arxiv.org/pdf/2106.09685.pdf). 
 
-I plan to add:
-- `Embedding`
+candle-lora is able to convert:
+- `Linear` -> `LoraLinear`
+- `Conv1d` -> `LoraConv1d`
+- `Conv2d` -> `LoraConv2d`
+
+**WIP statement: I plan to add conversion for `Embedding` very shortly!**
 
 Current working example:
 ```rust
