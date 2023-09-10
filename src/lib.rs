@@ -1,15 +1,15 @@
 //According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
-use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Linear, Module};
+use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
 use loraconv1d::{LoraConv1d, LoraConv1dConfig};
 use loraconv2d::{LoraConv2d, LoraConv2dConfig};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
 mod frozenconv;
-mod frozenlinear;
 mod frozenembed;
+mod frozenlinear;
 pub mod loraconv1d;
 pub mod loraconv2d;
 pub mod loralinear;
@@ -92,20 +92,20 @@ pub trait Conv1dLayerLike: Module {
 
 #[derive(Debug)]
 pub struct Conv1dWithWB {
-    pub this: Conv1d,
+    pub layer: Conv1d,
     pub weights: Tensor,
     pub bias: Option<Tensor>,
 }
 
 impl Module for Conv1dWithWB {
     fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
-        self.this.forward(xs)
+        self.layer.forward(xs)
     }
 }
 
 impl Conv1dLayerLike for Conv1dWithWB {
     fn config(&self) -> &Conv1dConfig {
-        self.this.config()
+        self.layer.config()
     }
     fn weight(&self) -> &Tensor {
         &self.weights
@@ -123,25 +123,51 @@ pub trait Conv2dLayerLike: Module {
 
 #[derive(Debug)]
 pub struct Conv2dWithWB {
-    pub this: Conv2d,
+    pub layer: Conv2d,
     pub weights: Tensor,
     pub bias: Option<Tensor>,
 }
 
 impl Module for Conv2dWithWB {
     fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
-        self.this.forward(xs)
+        self.layer.forward(xs)
     }
 }
 
 impl Conv2dLayerLike for Conv2dWithWB {
     fn config(&self) -> &Conv2dConfig {
-        self.this.config()
+        self.layer.config()
     }
     fn weight(&self) -> &Tensor {
         &self.weights
     }
     fn bias(&self) -> Option<&Tensor> {
         self.bias.as_ref()
+    }
+}
+
+pub trait EmbeddingLayerLike: Module {
+    fn embeddings(&self) -> &Tensor;
+    fn hidden_size(&self) -> usize;
+}
+
+#[derive(Debug)]
+pub struct EmbeddingWithSize {
+    pub layer: Embedding,
+    pub hidden_size: usize,
+}
+
+impl Module for EmbeddingWithSize {
+    fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
+        self.layer.forward(xs)
+    }
+}
+
+impl EmbeddingLayerLike for EmbeddingWithSize {
+    fn embeddings(&self) -> &Tensor {
+        self.layer.embeddings()
+    }
+    fn hidden_size(&self) -> usize {
+        self.hidden_size
     }
 }

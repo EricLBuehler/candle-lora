@@ -66,7 +66,7 @@ fn main() -> candle_core::Result<()> {
     )?;
 
     let conv = Conv2dWithWB {
-        this: Conv2d::new(conv_weight.clone(), Some(conv_bias.clone()), cfg),
+        layer: Conv2d::new(conv_weight.clone(), Some(conv_bias.clone()), cfg),
         weights: conv_weight,
         bias: Some(conv_bias),
     };

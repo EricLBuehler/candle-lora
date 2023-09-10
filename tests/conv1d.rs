@@ -56,7 +56,7 @@ fn conv1d() -> candle_core::Result<()> {
     )?;
 
     let conv = Conv1dWithWB {
-        this: Conv1d::new(
+        layer: Conv1d::new(
             conv_weight.clone(),
             Some(conv_bias.clone()),
             Conv1dConfig::default(),
