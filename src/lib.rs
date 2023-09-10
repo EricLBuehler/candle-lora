@@ -9,6 +9,7 @@ use std::{collections::HashMap, hash::Hash};
 
 mod frozenconv;
 mod frozenlinear;
+mod frozenembed;
 pub mod loraconv1d;
 pub mod loraconv2d;
 pub mod loralinear;

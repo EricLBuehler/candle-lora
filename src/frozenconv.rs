@@ -18,10 +18,7 @@ impl FrozenConv1d {
     ) -> Result<Self> {
         Ok(Self {
             weight: weight.detach()?,
-            bias: match bias {
-                Some(bias) => Some(bias.detach()?),
-                None => None,
-            },
+            bias: bias.cloned(), //Bias is still trainable
             config,
         })
     }
@@ -85,10 +82,7 @@ impl FrozenConv2d {
     ) -> Result<Self> {
         Ok(Self {
             weight: weight.detach()?,
-            bias: match bias {
-                Some(bias) => Some(bias.detach()?),
-                None => None,
-            },
+            bias: bias.cloned(), //Bias is still trainable
             config,
         })
     }
