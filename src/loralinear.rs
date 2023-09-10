@@ -19,7 +19,7 @@ pub struct LoraLinear {
     dropout: Option<Dropout>,
 }
 
-pub struct LoraLinearMetadata<'a> {
+pub struct LoraLinearConfig<'a> {
     pub rank: usize,
     pub alpha: f64,
     pub dropout: Option<f32>,
@@ -30,7 +30,7 @@ pub struct LoraLinearMetadata<'a> {
 impl LoraLinear {
     pub fn new(
         old: &dyn LinearLayerLike,
-        metadata: LoraLinearMetadata,
+        metadata: &LoraLinearConfig,
         in_features: usize,
         out_features: usize,
     ) -> Result<Self> {

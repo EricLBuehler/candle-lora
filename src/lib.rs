@@ -1,7 +1,7 @@
 #[doc = include_str!("../README.md")]
-use candle_core::{DType, Device, Shape, Tensor};
+use candle_core::{Shape, Tensor};
 use candle_nn::{Linear, Module};
-use loralinear::{LoraLinear, LoraLinearMetadata, ALPHA_DEFAULT};
+use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 use trc::Trc;
 
@@ -13,8 +13,7 @@ pub struct Lora;
 impl Lora {
     pub fn convert_model<T: Eq + PartialEq + Hash>(
         layers: HashMap<T, &dyn LinearLayerLike>,
-        device: &Device,
-        dtype: DType,
+        metadata: LoraLinearConfig,
         in_features: usize,
         out_features: usize,
     ) -> HashMap<T, LoraLinear> {
@@ -22,19 +21,7 @@ impl Lora {
         for (name, layer) in layers {
             output.insert(
                 name,
-                LoraLinear::new(
-                    layer,
-                    LoraLinearMetadata {
-                        rank: layer.weight().rank(),
-                        alpha: ALPHA_DEFAULT,
-                        dropout: Some(0.),
-                        device,
-                        dtype,
-                    },
-                    in_features,
-                    out_features,
-                )
-                .unwrap(),
+                LoraLinear::new(layer, &metadata, in_features, out_features).unwrap(),
             );
         }
         output
