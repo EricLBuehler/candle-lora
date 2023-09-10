@@ -13,6 +13,7 @@ mod frozenlinear;
 pub mod loraconv1d;
 pub mod loraconv2d;
 pub mod loralinear;
+pub mod loraembed;
 
 pub struct Lora;
 
