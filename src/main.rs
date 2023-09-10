@@ -70,8 +70,8 @@ fn main() -> Result<()> {
     let dummy_image = Tensor::zeros((1, 10, 10), DType::F32, &device)?;
 
     //Test the model
-    let digit = model.forward(&dummy_image).unwrap();
-    println!("Output: {digit:?}");
+    let output = model.forward(&dummy_image).unwrap();
+    println!("Output: {output:?}");
 
     //Select layers we want to convert
     let linear_layers = HashMap::new();
@@ -94,8 +94,10 @@ fn main() -> Result<()> {
     model.insert_new(new_layers);
 
     //Test the model
-    let digit = model.forward(&dummy_image).unwrap();
-    println!("LoRA Output: {digit:?}");
+    let lora_output = model.forward(&dummy_image).unwrap();
+    println!("LoRA Output: {lora_output:?}");
+
+    assert_eq!(lora_output.shape(), output.shape());
 
     Ok(())
 }
