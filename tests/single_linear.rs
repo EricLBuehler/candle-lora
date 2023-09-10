@@ -4,7 +4,7 @@ fn single_linear() -> candle_core::Result<()> {
 
     use candle_core::{DType, Device, Result, Tensor};
     use candle_lora::{
-        loralinear::{LoraLinear, LoraLinearConfig, ALPHA_DEFAULT},
+        loralinear::{LoraLinear, LoraLinearConfig},
         LinearLayerLike, Lora,
     };
     use candle_nn::{init, Linear, Module, VarMap};
@@ -65,18 +65,7 @@ fn single_linear() -> candle_core::Result<()> {
     layers.insert(ModelLayers::Layer, &*model.layer);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(
-        layers,
-        LoraLinearConfig {
-            rank: layer_weight.rank(),
-            alpha: ALPHA_DEFAULT,
-            dropout: Some(0.),
-            device: &device,
-            dtype,
-        },
-        10,
-        10,
-    );
+    let new_layers = Lora::convert_model(layers, LoraLinearConfig::default(&device, dtype), 10, 10);
 
     //Custom methods to implement
     model.insert_loralinear(new_layers);

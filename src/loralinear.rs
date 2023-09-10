@@ -8,8 +8,6 @@ use trc::Trc;
 
 use crate::{nontrainlinear::NonTrainableLinear, LinearLayerLike};
 
-pub const ALPHA_DEFAULT: f64 = 1.;
-
 #[derive(Debug)]
 pub struct LoraLinear {
     old: Trc<NonTrainableLinear>,
@@ -25,6 +23,18 @@ pub struct LoraLinearConfig<'a> {
     pub dropout: Option<f32>,
     pub device: &'a Device,
     pub dtype: DType,
+}
+
+impl<'a> LoraLinearConfig<'a> {
+    pub fn default(device: &'a Device, dtype: DType) -> Self {
+        LoraLinearConfig {
+            rank: 1,
+            alpha: 1.,
+            dropout: Some(0.),
+            device,
+            dtype,
+        }
+    }
 }
 
 impl LoraLinear {

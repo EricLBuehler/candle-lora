@@ -7,7 +7,7 @@ use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loralinear::{LoraLinear, LoraLinearConfig, ALPHA_DEFAULT},
+    loralinear::{LoraLinear, LoraLinearConfig},
     LinearLayerLike, Lora,
 };
 use candle_nn::{init, Linear, Module, VarMap};
@@ -71,13 +71,7 @@ fn main() -> Result<()> {
     //Create new LoRA layers from our layers
     let new_layers = Lora::convert_model(
         layers,
-        LoraLinearConfig {
-            rank: layer_weight.rank(),
-            alpha: ALPHA_DEFAULT,
-            dropout: Some(0.),
-            device: &device,
-            dtype,
-        },
+        LoraLinearConfig::default(&device, dtype),
         10,
         10,
     );
