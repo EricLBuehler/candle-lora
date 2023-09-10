@@ -4,7 +4,7 @@
 
 LoRA (low rank adaptation) implemented in Rust for use with Candle.
 
-**Current WIP: Conv1/2D output shapes are not as expected. Fix is expected shortly!**
+**Current WIP: Conv2D output shape is not as expected. Fix is expected very shortly!**
 
 Current working example:
 ```rust
