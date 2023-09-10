@@ -22,6 +22,7 @@ impl LoraLinear {
         rank: usize,
         alpha: usize,
         device: &Device,
+        dtype: DType,
         in_features: usize,
         out_features: usize,
     ) -> Result<Self> {
@@ -30,21 +31,15 @@ impl LoraLinear {
             (rank, in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
-            DType::F32,
+            dtype,
             device,
         )?;
-        let b_weight = map.get(
-            (out_features, rank),
-            "b.weight",
-            init::ZERO,
-            DType::F32,
-            device,
-        )?;
+        let b_weight = map.get((out_features, rank), "b.weight", init::ZERO, dtype, device)?;
         let b_bias = map.get(
             (out_features, out_features),
             "b.bias",
             init::ZERO,
-            DType::F32,
+            dtype,
             device,
         )?;
 

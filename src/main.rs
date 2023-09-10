@@ -34,6 +34,7 @@ impl Model {
 
 fn main() -> Result<()> {
     let device = Device::Cpu;
+    let dtype = DType::F32;
 
     //Create the model
     let map = VarMap::new();
@@ -41,7 +42,7 @@ fn main() -> Result<()> {
         (10, 10),
         "layer.weight",
         init::DEFAULT_KAIMING_NORMAL,
-        DType::F32,
+        dtype,
         &device,
     )?;
 
@@ -60,7 +61,7 @@ fn main() -> Result<()> {
     layers.insert(ModelLayers::Layer, &*model.layer);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(layers, &device);
+    let new_layers = Lora::convert_model(layers, &device, dtype, 10, 10);
 
     //Custom methods to implement
     model.insert_loralinear(new_layers);

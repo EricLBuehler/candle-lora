@@ -61,7 +61,7 @@ fn single_linear() -> candle_core::Result<()> {
     layers.insert(ModelLayers::Layer, &*model.layer);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(layers, &device);
+    let new_layers = Lora::convert_model(layers, &device, DType::F32, 10, 10);
 
     //Custom methods to implement
     model.insert_loralinear(new_layers);
