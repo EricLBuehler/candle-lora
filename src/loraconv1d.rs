@@ -85,14 +85,14 @@ impl Module for LoraConv1D {
         if let Some(scale) = self.scale {
             let x = input;
             let bias = self.bias();
-            let weight =&self
-            .b
-            .matmul(&self.a)?
-            .reshape(self.old.weight().shape())?
-            .mul(scale)?;
+            let weight = &self
+                .b
+                .matmul(&self.a)?
+                .reshape(self.old.weight().shape())?
+                .mul(scale)?;
 
             let x = x.conv1d(
-                &weight,
+                weight,
                 self.config().padding,
                 self.config().stride,
                 self.config().dilation,

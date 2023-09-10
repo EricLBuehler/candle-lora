@@ -4,7 +4,8 @@ fn conv1d() -> candle_core::Result<()> {
 
     use candle_core::{DType, Device, Result, Tensor};
     use candle_lora::{
-        loraconv1d::LoraConv1DConfig, Conv1DWithWB, Conv1dLayerLike, Lora, NewLayers, SelectedLayers,
+        loraconv1d::LoraConv1DConfig, Conv1DWithWB, Conv1dLayerLike, Lora, NewLayers,
+        SelectedLayers,
     };
     use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
 
