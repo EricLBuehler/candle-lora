@@ -2,7 +2,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-informational)](LICENSE)
 [![Continuous integration](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml)
 
-LoRA implemented in Rust for use with Candle.
+LoRA (low rank adaptation) implemented in Rust for use with Candle.
 
 Current working example:
 ```rust
