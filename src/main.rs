@@ -2,31 +2,31 @@ use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
-    loraconv2d::LoraConv2dConfig, Conv2dLayerLike, Conv2dWithWB, Lora, NewLayers, SelectedLayers,
+    loraembed::LoraEmbeddingConfig, EmbeddingLayerLike, Lora, NewLayers, SelectedLayers,
 };
-use candle_nn::{init, Conv2d, Conv2dConfig, Module, VarMap};
+use candle_nn::{init, Embedding, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {
-    Conv,
+    Embed,
 }
 
 #[derive(Debug)]
 struct Model {
-    conv: Box<dyn Conv2dLayerLike>,
+    embed: Box<dyn EmbeddingLayerLike>,
 }
 
 impl Module for Model {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        self.conv.forward(input)
+        self.embed.forward(input)
     }
 }
 
 impl Model {
     fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-        for (name, conv) in new.conv2d {
+        for (name, conv) in new.embed {
             match name {
-                ModelLayers::Conv => self.conv = Box::new(conv),
+                ModelLayers::Embed => self.embed = Box::new(conv),
             }
         }
     }
@@ -36,46 +36,24 @@ fn main() -> Result<()> {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
-    let out_channels = 10;
-    let in_channels = 10;
-    let kernel = 2;
-
-    let cfg = Conv2dConfig::default();
+    let in_size = 10;
+    let hidden_size = 3;
 
     //Create the model
     let map = VarMap::new();
-    let conv_weight = map.get(
-        (
-            out_channels,
-            in_channels / cfg.groups, //cfg.groups in this case are 1
-            kernel,
-            kernel,
-        ),
-        "conv.weight",
-        init::DEFAULT_KAIMING_NORMAL,
+    let embed_weight = map.get(
+        (in_size, hidden_size),
+        "embed.weight",
+        init::ZERO,
         dtype,
         &device,
     )?;
-    let conv_bias = map.get(
-        out_channels,
-        "conv.bias",
-        init::DEFAULT_KAIMING_NORMAL,
-        dtype,
-        &device,
-    )?;
-
-    let conv = Conv2dWithWB {
-        layer: Conv2d::new(conv_weight.clone(), Some(conv_bias.clone()), cfg),
-        weights: conv_weight,
-        bias: Some(conv_bias),
-    };
 
     let mut model = Model {
-        conv: Box::new(conv),
+        embed: Box::new(Embedding::new(embed_weight, hidden_size)),
     };
 
-    let shape = [2, in_channels, 20, 20]; //(BS, K, X, Y)
-    let dummy_image = Tensor::zeros(&shape, DType::F32, &device)?;
+    let dummy_image = Tensor::zeros((2, 4), DType::U32, &device)?;
 
     //Test the model
     let output = model.forward(&dummy_image).unwrap();
@@ -84,20 +62,22 @@ fn main() -> Result<()> {
     //Select layers we want to convert
     let linear_layers = HashMap::new();
     let conv1d_layers = HashMap::new();
-    let mut conv2d_layers = HashMap::new();
-    conv2d_layers.insert(ModelLayers::Conv, &*model.conv);
+    let conv2d_layers = HashMap::new();
+    let mut embed_layers = HashMap::new();
+    embed_layers.insert(ModelLayers::Embed, &*model.embed);
     let selected = SelectedLayers {
         linear: linear_layers,
         linear_config: None,
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
-        conv2d_config: Some(LoraConv2dConfig::default(
+        conv2d_config: None,
+        embed: embed_layers,
+        embed_config: Some(LoraEmbeddingConfig::default(
             &device,
             dtype,
-            kernel,
-            in_channels,
-            out_channels,
+            in_size,
+            hidden_size,
         )),
     };
 

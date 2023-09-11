@@ -87,6 +87,7 @@ fn main() -> candle_core::Result<()> {
     let conv1d_layers = HashMap::new();
     let mut conv2d_layers = HashMap::new();
     conv2d_layers.insert(ModelLayers::Conv, &*model.conv);
+    let embed_layers = HashMap::new();
     let selected = SelectedLayers {
         linear: linear_layers,
         linear_config: None,
@@ -100,6 +101,8 @@ fn main() -> candle_core::Result<()> {
             in_channels,
             out_channels,
         )),
+        embed: embed_layers,
+        embed_config: None,
     };
 
     //Create new LoRA layers from our layers

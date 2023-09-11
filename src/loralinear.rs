@@ -85,9 +85,10 @@ impl Module for LoraLinear {
             } else {
                 result = (result + input)?;
             }
-            result = result.matmul(&self.a.transpose(0, 1)?)?;
-            result = result.matmul(&self.b.transpose(0, 1)?)?;
-            result = result.mul(scale)?;
+            result = result.broadcast_add(
+                &result.matmul(&self.b.broadcast_matmul(&self.a.matmul(&result)?)?)?,
+            )?;
+            result = result.broadcast_add(&result.clone().mul(scale)?)?;
         }
         Ok(result)
     }

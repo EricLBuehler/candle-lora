@@ -1,68 +1,63 @@
-use std::ops::Mul;
+use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_nn::{init, Embedding, VarMap};
 
-use candle_core::{DType, Device, Module, Result, Shape, Tensor};
-use candle_nn::{init, Dropout, VarMap};
-
-use crate::{frozenlinear::FrozenLinear, LinearLayerLike};
+use crate::{frozenembed::FrozenEmbedding, EmbeddingLayerLike};
 
 #[derive(Debug)]
-pub struct LoraLinear {
-    old: FrozenLinear,
+pub struct LoraEmbedding {
+    old: FrozenEmbedding,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
-    dropout: Option<Dropout>,
 }
 
-pub struct LoraLinearConfig<'a> {
+pub struct LoraEmbeddingConfig<'a> {
     pub rank: usize,
     pub alpha: f64,
-    pub dropout: Option<f32>,
     pub device: &'a Device,
     pub dtype: DType,
-    pub in_features: usize,
-    pub out_features: usize,
+    pub num_embeddings: usize,
+    pub embedding_dim: usize,
 }
 
-impl<'a> LoraLinearConfig<'a> {
+impl<'a> LoraEmbeddingConfig<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
-        in_features: usize,
-        out_features: usize,
+        num_embeddings: usize,
+        embedding_dim: usize,
     ) -> Self {
-        LoraLinearConfig {
+        LoraEmbeddingConfig {
             rank: 1,
             alpha: 1.,
-            dropout: Some(0.),
             device,
             dtype,
-            in_features,
-            out_features,
+            num_embeddings,
+            embedding_dim,
         }
     }
 }
 
-impl LoraLinear {
-    pub fn new(old: &dyn LinearLayerLike, config: &LoraLinearConfig) -> Result<Self> {
+impl LoraEmbedding {
+    pub fn new(old: &dyn EmbeddingLayerLike, config: &LoraEmbeddingConfig) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (config.rank, config.in_features),
+            (config.rank, config.num_embeddings),
             "a.weight",
-            init::DEFAULT_KAIMING_NORMAL,
+            init::ZERO,
             config.dtype,
             config.device,
         )?;
         let b = map.get(
-            (config.out_features, config.rank),
+            (config.embedding_dim, config.rank),
             "b.weight",
             init::ZERO,
             config.dtype,
             config.device,
         )?;
 
-        Ok(LoraLinear {
-            old: FrozenLinear::new_from_linear(old)?,
+        Ok(LoraEmbedding {
+            old: FrozenEmbedding::new_from_embed(old)?,
             a,
             b,
             scale: if config.rank > 0 {
@@ -70,37 +65,33 @@ impl LoraLinear {
             } else {
                 None
             },
-            dropout: config.dropout.map(Dropout::new),
         })
     }
 }
 
-impl Module for LoraLinear {
+impl Module for LoraEmbedding {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        //No fan_in_fan_out so no weight.transpose(0,1)
         let mut result = self.old.forward(input)?;
         if let Some(scale) = self.scale {
-            if self.dropout.is_some() {
-                result = (result + self.dropout.as_ref().unwrap().forward(input, true)?)?;
-            } else {
-                result = (result + input)?;
-            }
-            result = (&result+result.matmul(&self.a.transpose(0, 1)?)?)?;
-            result = (&result+result.matmul(&self.b.transpose(0, 1)?)?)?;
-            result = (&result+result.clone().mul(scale)?)?;
+            let weight = self.a.transpose(0, 1)?;
+            let weight = weight.reshape(weight.shape())?; //Get contiguous
+            let hidden = weight.dim(1)?;
+
+            let embed = Embedding::new(weight, hidden);
+            let after_a = embed.forward(input)?;
+
+            result = (result + after_a.broadcast_matmul(&self.b.transpose(0, 1)?)?)?;
+            result = (result * scale)?;
         }
         Ok(result)
     }
 }
 
-impl LinearLayerLike for LoraLinear {
-    fn bias(&self) -> Option<&Tensor> {
-        self.old.bias()
+impl EmbeddingLayerLike for LoraEmbedding {
+    fn embeddings(&self) -> &Tensor {
+        self.old.embeddings()
     }
-    fn weight(&self) -> &Tensor {
-        self.old.weight()
-    }
-    fn shape(&self) -> &Shape {
-        self.old.shape()
+    fn hidden_size(&self) -> usize {
+        self.old.hidden_size()
     }
 }

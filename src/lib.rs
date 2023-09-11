@@ -4,6 +4,7 @@ use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
 use loraconv1d::{LoraConv1d, LoraConv1dConfig};
 use loraconv2d::{LoraConv2d, LoraConv2dConfig};
+use loraembed::{LoraEmbedding, LoraEmbeddingConfig};
 use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
@@ -12,8 +13,8 @@ mod frozenembed;
 mod frozenlinear;
 pub mod loraconv1d;
 pub mod loraconv2d;
-pub mod loralinear;
 pub mod loraembed;
+pub mod loralinear;
 
 pub struct Lora;
 
@@ -25,6 +26,7 @@ impl Lora {
             linear: HashMap::new(),
             conv1d: HashMap::new(),
             conv2d: HashMap::new(),
+            embed: HashMap::new(),
         };
 
         for (name, layer) in selected.linear {
@@ -48,6 +50,13 @@ impl Lora {
             );
         }
 
+        for (name, layer) in selected.embed {
+            new.embed.insert(
+                name,
+                LoraEmbedding::new(layer, selected.embed_config.as_ref().unwrap()).unwrap(),
+            );
+        }
+
         new
     }
 }
@@ -59,12 +68,15 @@ pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
     pub conv1d_config: Option<LoraConv1dConfig<'a>>,
     pub conv2d: HashMap<T, &'a dyn Conv2dLayerLike>,
     pub conv2d_config: Option<LoraConv2dConfig<'a>>,
+    pub embed: HashMap<T, &'a dyn EmbeddingLayerLike>,
+    pub embed_config: Option<LoraEmbeddingConfig<'a>>,
 }
 
 pub struct NewLayers<T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, LoraLinear>,
     pub conv1d: HashMap<T, LoraConv1d>,
     pub conv2d: HashMap<T, LoraConv2d>,
+    pub embed: HashMap<T, LoraEmbedding>,
 }
 
 pub trait LinearLayerLike: Module {
@@ -152,23 +164,11 @@ pub trait EmbeddingLayerLike: Module {
     fn hidden_size(&self) -> usize;
 }
 
-#[derive(Debug)]
-pub struct EmbeddingWithSize {
-    pub layer: Embedding,
-    pub hidden_size: usize,
-}
-
-impl Module for EmbeddingWithSize {
-    fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
-        self.layer.forward(xs)
-    }
-}
-
-impl EmbeddingLayerLike for EmbeddingWithSize {
+impl EmbeddingLayerLike for Embedding {
     fn embeddings(&self) -> &Tensor {
-        self.layer.embeddings()
+        self.embeddings()
     }
     fn hidden_size(&self) -> usize {
-        self.hidden_size
+        self.embeddings().dim(1).unwrap() //Reason: 2nd dim is always the hidden
     }
 }

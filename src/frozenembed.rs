@@ -16,7 +16,7 @@ impl FrozenEmbedding {
         })
     }
 
-    pub(crate) fn new_from_linear(old: &dyn EmbeddingLayerLike) -> Result<Self> {
+    pub(crate) fn new_from_embed(old: &dyn EmbeddingLayerLike) -> Result<Self> {
         Self::new(old.embeddings(), old.hidden_size())
     }
 }
