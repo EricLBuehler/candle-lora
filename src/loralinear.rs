@@ -14,6 +14,7 @@ pub struct LoraLinear {
     dropout: Option<Dropout>,
 }
 
+/// Configuration for LoraLinear
 pub struct LoraLinearConfig<'a> {
     pub rank: usize,
     pub alpha: f64,

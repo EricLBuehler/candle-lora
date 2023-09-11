@@ -12,6 +12,8 @@ candle-lora is able to convert:
 - `Conv2d` -> `LoraConv2d`
 - `Embedding` -> `LoraEmbedding`
 
+All conversions are done as implemented in HuggingFace's official LoRA implementation.
+
 Current working example:
 ```rust
 use std::{collections::HashMap, hash::Hash};

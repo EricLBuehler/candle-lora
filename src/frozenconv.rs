@@ -3,6 +3,7 @@ use candle_nn::{Conv1dConfig, Conv2dConfig};
 
 use crate::{Conv1dLayerLike, Conv2dLayerLike};
 
+/// Conv1d, but with a `new` implementation that ensures the weights are detached (frozen).
 #[derive(Debug)]
 pub(crate) struct FrozenConv1d {
     weight: Tensor,
@@ -67,6 +68,7 @@ impl Conv1dLayerLike for FrozenConv1d {
     }
 }
 
+/// Conv2d, but with a `new` implementation that ensures the weights are detached (frozen).
 #[derive(Debug)]
 pub(crate) struct FrozenConv2d {
     weight: Tensor,

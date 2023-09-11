@@ -2,6 +2,7 @@ use candle_core::{Result, Tensor};
 
 use crate::EmbeddingLayerLike;
 
+/// Embedding, but with a `new` implementation that ensures the embeddings are detached (frozen).
 #[derive(Debug)]
 pub(crate) struct FrozenEmbedding {
     embeddings: Tensor,

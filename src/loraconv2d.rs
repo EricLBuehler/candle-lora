@@ -14,6 +14,7 @@ pub struct LoraConv2d {
     dropout: Option<Dropout>,
 }
 
+/// Configuration for LoraConv2d. Other configurations are inherited from the `Conv2d` struct.
 pub struct LoraConv2dConfig<'a> {
     pub rank: usize,
     pub alpha: f64,

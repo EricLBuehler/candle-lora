@@ -2,6 +2,7 @@ use candle_core::{Module, Result, Shape, Tensor};
 
 use crate::LinearLayerLike;
 
+/// Linear, but with a `new` implementation that ensures the weight and/or biases are detached (frozen).
 #[derive(Debug, Clone)]
 pub(crate) struct FrozenLinear {
     weight: Tensor,

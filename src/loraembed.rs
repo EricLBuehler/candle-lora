@@ -11,6 +11,7 @@ pub struct LoraEmbedding {
     scale: Option<f64>,
 }
 
+/// Configuration for LoraEmbedding, with `num_embeddings` vectors of `embedding_dim` size`.
 pub struct LoraEmbeddingConfig<'a> {
     pub rank: usize,
     pub alpha: f64,
