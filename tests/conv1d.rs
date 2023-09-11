@@ -4,8 +4,7 @@ fn conv1d() -> candle_core::Result<()> {
 
     use candle_core::{DType, Device, Result, Tensor};
     use candle_lora::{
-        loraconv1d::LoraConv1dConfig, Conv1dLayerLike, Conv1dWithWB, Lora, NewLayers,
-        SelectedLayers,
+        loraconv1d::LoraConv1dConfig, Conv1dLayerLike, Lora, NewLayers, SelectedLayers,
     };
     use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
 
@@ -55,18 +54,12 @@ fn conv1d() -> candle_core::Result<()> {
         &device,
     )?;
 
-    let conv = Conv1dWithWB {
-        layer: Conv1d::new(
+    let mut model = Model {
+        conv: Box::new(Conv1d::new(
             conv_weight.clone(),
             Some(conv_bias.clone()),
             Conv1dConfig::default(),
-        ),
-        weights: conv_weight,
-        bias: Some(conv_bias),
-    };
-
-    let mut model = Model {
-        conv: Box::new(conv),
+        )),
     };
 
     let dummy_image = Tensor::zeros((1, 10, 10), DType::F32, &device)?;

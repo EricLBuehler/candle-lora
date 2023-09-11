@@ -106,28 +106,15 @@ pub trait Conv1dLayerLike: Module {
     fn config(&self) -> &Conv1dConfig;
 }
 
-#[derive(Debug)]
-pub struct Conv1dWithWB {
-    pub layer: Conv1d,
-    pub weights: Tensor,
-    pub bias: Option<Tensor>,
-}
-
-impl Module for Conv1dWithWB {
-    fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
-        self.layer.forward(xs)
-    }
-}
-
-impl Conv1dLayerLike for Conv1dWithWB {
+impl Conv1dLayerLike for Conv1d {
     fn config(&self) -> &Conv1dConfig {
-        self.layer.config()
+        self.config()
     }
     fn weight(&self) -> &Tensor {
-        &self.weights
+        self.weight()
     }
     fn bias(&self) -> Option<&Tensor> {
-        self.bias.as_ref()
+        self.bias()
     }
 }
 
@@ -138,28 +125,15 @@ pub trait Conv2dLayerLike: Module {
     fn config(&self) -> &Conv2dConfig;
 }
 
-#[derive(Debug)]
-pub struct Conv2dWithWB {
-    pub layer: Conv2d,
-    pub weights: Tensor,
-    pub bias: Option<Tensor>,
-}
-
-impl Module for Conv2dWithWB {
-    fn forward(&self, xs: &Tensor) -> candle_core::Result<Tensor> {
-        self.layer.forward(xs)
-    }
-}
-
-impl Conv2dLayerLike for Conv2dWithWB {
+impl Conv2dLayerLike for Conv2d {
     fn config(&self) -> &Conv2dConfig {
-        self.layer.config()
+        self.config()
     }
     fn weight(&self) -> &Tensor {
-        &self.weights
+        self.weight()
     }
     fn bias(&self) -> Option<&Tensor> {
-        self.bias.as_ref()
+        self.bias()
     }
 }
 

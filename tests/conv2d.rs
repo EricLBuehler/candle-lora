@@ -4,8 +4,7 @@ fn conv2d() -> candle_core::Result<()> {
 
     use candle_core::{DType, Device, Result, Tensor};
     use candle_lora::{
-        loraconv2d::LoraConv2dConfig, Conv2dLayerLike, Conv2dWithWB, Lora, NewLayers,
-        SelectedLayers,
+        loraconv2d::LoraConv2dConfig, Conv2dLayerLike, Lora, NewLayers, SelectedLayers,
     };
     use candle_nn::{init, Conv2d, Conv2dConfig, Module, VarMap};
 
@@ -66,14 +65,12 @@ fn conv2d() -> candle_core::Result<()> {
         &device,
     )?;
 
-    let conv = Conv2dWithWB {
-        layer: Conv2d::new(conv_weight.clone(), Some(conv_bias.clone()), cfg),
-        weights: conv_weight,
-        bias: Some(conv_bias),
-    };
-
     let mut model = Model {
-        conv: Box::new(conv),
+        conv: Box::new(Conv2d::new(
+            conv_weight.clone(),
+            Some(conv_bias.clone()),
+            cfg,
+        )),
     };
 
     let shape = [2, in_channels, 20, 20]; //(BS, K, X, Y)
