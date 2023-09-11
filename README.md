@@ -14,7 +14,14 @@ candle-lora is able to convert:
 
 All conversions are done as implemented in HuggingFace's official LoRA implementation.
 
-Current working example:
+## How to use
+1) Replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
+generate new layers that can easily be swaped out without forcing you to redefine your model structs.
+2) Select the layers and perform the conversion.
+3) Swap out the layers.
+4) Enjoy your new LoRA model!
+
+## Example
 ```rust
 use std::{collections::HashMap, hash::Hash};
 
