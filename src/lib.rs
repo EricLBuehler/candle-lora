@@ -19,6 +19,7 @@ pub mod loralinear;
 pub struct Lora;
 
 impl Lora {
+    /// Convert the selected layers into their LoRA counterparts.
     pub fn convert_model<T: Eq + PartialEq + Hash>(
         selected: SelectedLayers<'_, T>,
     ) -> NewLayers<T> {
@@ -79,6 +80,7 @@ pub struct NewLayers<T: Eq + PartialEq + Hash> {
     pub embed: HashMap<T, LoraEmbedding>,
 }
 
+/// Any layer that is linear-like.
 pub trait LinearLayerLike: Module {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
@@ -97,6 +99,7 @@ impl LinearLayerLike for Linear {
     }
 }
 
+/// Any layer that is conv1d-like.
 pub trait Conv1dLayerLike: Module {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
@@ -128,6 +131,7 @@ impl Conv1dLayerLike for Conv1dWithWB {
     }
 }
 
+/// Any layer that is conv2d-like.
 pub trait Conv2dLayerLike: Module {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
@@ -159,6 +163,7 @@ impl Conv2dLayerLike for Conv2dWithWB {
     }
 }
 
+/// Any layer that is embedding-like.
 pub trait EmbeddingLayerLike: Module {
     fn embeddings(&self) -> &Tensor;
     fn hidden_size(&self) -> usize;
