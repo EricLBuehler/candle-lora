@@ -61,6 +61,7 @@ impl Lora {
     }
 }
 
+/// Each configurations is applied to all layers of its respective type
 pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, &'a dyn LinearLayerLike>,
     pub linear_config: Option<LoraLinearConfig<'a>>,
@@ -72,6 +73,7 @@ pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
     pub embed_config: Option<LoraEmbeddingConfig<'a>>,
 }
 
+/// New layers, after conversion
 pub struct NewLayers<T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, LoraLinear>,
     pub conv1d: HashMap<T, LoraConv1d>,
