@@ -1,9 +1,11 @@
+use candle_lora::LoraConv2dConfigBuilder;
+
 #[test]
 fn conv2d() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{Conv2dLayerLike, Lora, LoraConv2dConfig, NewLayers, SelectedLayers};
+    use candle_lora::{Conv2dLayerLike, Lora, NewLayers, SelectedLayers};
     use candle_nn::{init, Conv2d, Conv2dConfig, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -90,13 +92,9 @@ fn conv2d() -> candle_core::Result<()> {
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
-        conv2d_config: Some(LoraConv2dConfig::default(
-            &device,
-            dtype,
-            kernel,
-            in_channels,
-            out_channels,
-        )),
+        conv2d_config: Some(
+            LoraConv2dConfigBuilder::default(&device, dtype, in_channels, out_channels).build(),
+        ),
         embed: embed_layers,
         embed_config: None,
     };

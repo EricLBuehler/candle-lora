@@ -1,10 +1,10 @@
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
-pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};
-pub use loraconv2d::{LoraConv2d, LoraConv2dConfig};
-pub use loraembed::{LoraEmbedding, LoraEmbeddingConfig};
-pub use loralinear::{LoraLinear, LoraLinearConfig};
+pub use loraconv1d::{LoraConv1d, LoraConv1dConfig, LoraConv1dConfigBuilder};
+pub use loraconv2d::{LoraConv2d, LoraConv2dConfig, LoraConv2dConfigBuilder};
+pub use loraembed::{LoraEmbedding, LoraEmbeddingConfig, LoraEmbeddingConfigBuilder};
+pub use loralinear::{LoraLinear, LoraLinearConfig, LoraLinearConfigBuilder};
 use std::{collections::HashMap, hash::Hash};
 
 mod frozenconv;

@@ -25,22 +25,46 @@ pub struct LoraLinearConfig<'a> {
     pub out_features: usize,
 }
 
-impl<'a> LoraLinearConfig<'a> {
+/// Builder for LoraLinearConfig. Call `build` to construct the config.
+pub struct LoraLinearConfigBuilder<'a> {
+    pub config: LoraLinearConfig<'a>,
+}
+
+impl<'a> LoraLinearConfigBuilder<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
         in_features: usize,
         out_features: usize,
     ) -> Self {
-        LoraLinearConfig {
-            rank: 1,
-            alpha: 1.,
-            dropout: Some(0.),
-            device,
-            dtype,
-            in_features,
-            out_features,
+        LoraLinearConfigBuilder {
+            config: LoraLinearConfig {
+                rank: 1,
+                alpha: 1.,
+                dropout: Some(0.),
+                device,
+                dtype,
+                in_features,
+                out_features,
+            },
         }
+    }
+
+    /// Set the rank parameter
+    pub fn rank(mut self, rank: usize) -> Self {
+        self.config.rank = rank;
+        self
+    }
+
+    /// Set the alpha parameter
+    pub fn alpha(mut self, alpha: f64) -> Self {
+        self.config.alpha = alpha;
+        self
+    }
+
+    /// Construct the config
+    pub fn build(self) -> LoraLinearConfig<'a> {
+        self.config
     }
 }
 

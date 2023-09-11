@@ -16,34 +16,61 @@ pub struct LoraConv2d {
 
 /// Configuration for LoraConv2d. Other configurations are inherited from the `Conv2d` struct.
 pub struct LoraConv2dConfig<'a> {
-    pub rank: usize,
-    pub alpha: f64,
-    pub kernel_size: usize,
-    pub device: &'a Device,
-    pub dtype: DType,
-    pub in_channels: usize,
-    pub out_channels: usize,
-    pub dropout: Option<f32>,
+    rank: usize,
+    alpha: f64,
+    device: &'a Device,
+    dtype: DType,
+    in_channels: usize,
+    out_channels: usize,
+    dropout: Option<f32>,
 }
 
-impl<'a> LoraConv2dConfig<'a> {
+/// Builder for LoraConv2dConfig. Call `build` to construct the config.
+pub struct LoraConv2dConfigBuilder<'a> {
+    pub config: LoraConv2dConfig<'a>,
+}
+
+impl<'a> LoraConv2dConfigBuilder<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
-        kernel_size: usize,
         in_channels: usize,
         out_channels: usize,
     ) -> Self {
-        LoraConv2dConfig {
-            rank: 1,
-            alpha: 1.,
-            kernel_size,
-            device,
-            dtype,
-            in_channels,
-            out_channels,
-            dropout: Some(0.),
+        LoraConv2dConfigBuilder {
+            config: LoraConv2dConfig {
+                rank: 1,
+                alpha: 1.,
+                device,
+                dtype,
+                in_channels,
+                out_channels,
+                dropout: None,
+            },
         }
+    }
+
+    /// Set the rank parameter
+    pub fn rank(mut self, rank: usize) -> Self {
+        self.config.rank = rank;
+        self
+    }
+
+    /// Set the alpha parameter
+    pub fn alpha(mut self, alpha: f64) -> Self {
+        self.config.alpha = alpha;
+        self
+    }
+
+    /// Set the dropout
+    pub fn dropout(mut self, prob: f32) -> Self {
+        self.config.dropout = Some(prob);
+        self
+    }
+
+    /// Construct the config
+    pub fn build(self) -> LoraConv2dConfig<'a> {
+        self.config
     }
 }
 

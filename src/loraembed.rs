@@ -21,21 +21,45 @@ pub struct LoraEmbeddingConfig<'a> {
     pub embedding_dim: usize,
 }
 
-impl<'a> LoraEmbeddingConfig<'a> {
+/// Builder for LoraEmbeddingConfig. Call `build` to construct the config.
+pub struct LoraEmbeddingConfigBuilder<'a> {
+    pub config: LoraEmbeddingConfig<'a>,
+}
+
+impl<'a> LoraEmbeddingConfigBuilder<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
         num_embeddings: usize,
         embedding_dim: usize,
     ) -> Self {
-        LoraEmbeddingConfig {
-            rank: 1,
-            alpha: 1.,
-            device,
-            dtype,
-            num_embeddings,
-            embedding_dim,
+        LoraEmbeddingConfigBuilder {
+            config: LoraEmbeddingConfig {
+                rank: 1,
+                alpha: 1.,
+                device,
+                dtype,
+                num_embeddings,
+                embedding_dim,
+            },
         }
+    }
+
+    /// Set the rank parameter
+    pub fn rank(mut self, rank: usize) -> Self {
+        self.config.rank = rank;
+        self
+    }
+
+    /// Set the alpha parameter
+    pub fn alpha(mut self, alpha: f64) -> Self {
+        self.config.alpha = alpha;
+        self
+    }
+
+    /// Construct the config
+    pub fn build(self) -> LoraEmbeddingConfig<'a> {
+        self.config
     }
 }
 

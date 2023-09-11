@@ -16,17 +16,22 @@ pub struct LoraConv1d {
 
 /// Configuration for LoraConv1d. Other configurations are inherited from the `Conv1d` struct.
 pub struct LoraConv1dConfig<'a> {
-    pub rank: usize,
-    pub alpha: f64,
-    pub kernel_size: usize,
-    pub device: &'a Device,
-    pub dtype: DType,
-    pub in_channels: usize,
-    pub out_channels: usize,
-    pub dropout: Option<f32>,
+    rank: usize,
+    alpha: f64,
+    kernel_size: usize,
+    device: &'a Device,
+    dtype: DType,
+    in_channels: usize,
+    out_channels: usize,
+    dropout: Option<f32>,
 }
 
-impl<'a> LoraConv1dConfig<'a> {
+/// Builder for LoraConv1dConfig. Call `build` to construct the config.
+pub struct LoraConv1dConfigBuilder<'a> {
+    pub config: LoraConv1dConfig<'a>,
+}
+
+impl<'a> LoraConv1dConfigBuilder<'a> {
     pub fn default(
         device: &'a Device,
         dtype: DType,
@@ -34,16 +39,41 @@ impl<'a> LoraConv1dConfig<'a> {
         in_channels: usize,
         out_channels: usize,
     ) -> Self {
-        LoraConv1dConfig {
-            rank: 1,
-            alpha: 1.,
-            kernel_size,
-            device,
-            dtype,
-            in_channels,
-            out_channels,
-            dropout: Some(0.),
+        LoraConv1dConfigBuilder {
+            config: LoraConv1dConfig {
+                rank: 1,
+                alpha: 1.,
+                kernel_size,
+                device,
+                dtype,
+                in_channels,
+                out_channels,
+                dropout: None,
+            },
         }
+    }
+
+    /// Set the rank parameter
+    pub fn rank(mut self, rank: usize) -> Self {
+        self.config.rank = rank;
+        self
+    }
+
+    /// Set the alpha parameter
+    pub fn alpha(mut self, alpha: f64) -> Self {
+        self.config.alpha = alpha;
+        self
+    }
+
+    /// Set the dropout
+    pub fn dropout(mut self, prob: f32) -> Self {
+        self.config.dropout = Some(prob);
+        self
+    }
+
+    /// Construct the config
+    pub fn build(self) -> LoraConv1dConfig<'a> {
+        self.config
     }
 }
 

@@ -5,7 +5,7 @@ fn single_linear() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfig};
+    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfigBuilder};
     use candle_nn::{init, Linear, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -65,7 +65,7 @@ fn single_linear() -> candle_core::Result<()> {
     let embed_layers = HashMap::new();
     let selected = SelectedLayers {
         linear: linear_layers,
-        linear_config: Some(LoraLinearConfig::default(&device, dtype, 10, 10)),
+        linear_config: Some(LoraLinearConfigBuilder::default(&device, dtype, 10, 10).build()),
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,

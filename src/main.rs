@@ -1,7 +1,9 @@
 use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{EmbeddingLayerLike, Lora, LoraEmbeddingConfig, NewLayers, SelectedLayers};
+use candle_lora::{
+    EmbeddingLayerLike, Lora, LoraEmbeddingConfigBuilder, NewLayers, SelectedLayers,
+};
 use candle_nn::{init, Embedding, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -71,12 +73,9 @@ fn main() -> Result<()> {
         conv2d: conv2d_layers,
         conv2d_config: None,
         embed: embed_layers,
-        embed_config: Some(LoraEmbeddingConfig::default(
-            &device,
-            dtype,
-            in_size,
-            hidden_size,
-        )),
+        embed_config: Some(
+            LoraEmbeddingConfigBuilder::default(&device, dtype, in_size, hidden_size).build(),
+        ),
     };
 
     //Create new LoRA layers from our layers
