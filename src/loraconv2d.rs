@@ -79,10 +79,10 @@ impl LoraConv2d {
         let map = VarMap::new();
         let a = map.get(
             (
-                config.rank, // * config.kernel_size,
+                config.rank,
                 config.in_channels / old.config().groups,
                 old.weight().dim(2).unwrap(),
-                old.weight().dim(3).unwrap(), // * config.kernel_size,
+                old.weight().dim(3).unwrap(),
             ),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
@@ -90,12 +90,7 @@ impl LoraConv2d {
             config.device,
         )?;
         let b = map.get(
-            (
-                config.out_channels, // / old.config().groups * config.kernel_size,
-                config.rank / old.config().groups,
-                1,
-                1, // * config.kernel_size,
-            ),
+            (config.out_channels, config.rank / old.config().groups, 1, 1),
             "b.weight",
             init::ZERO,
             config.dtype,
