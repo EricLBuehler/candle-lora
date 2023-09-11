@@ -1,4 +1,3 @@
-//According to https://github.com/microsoft/LoRA/blob/main/loralib/layers.py
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
