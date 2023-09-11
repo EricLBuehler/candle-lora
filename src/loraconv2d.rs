@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, Conv2dConfig, VarMap};
+use candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarMap};
 
 use crate::{frozenconv::FrozenConv2d, Conv2dLayerLike};
 
@@ -11,6 +11,7 @@ pub struct LoraConv2d {
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
+    dropout: Option<Dropout>,
 }
 
 pub struct LoraConv2dConfig<'a> {
@@ -19,8 +20,9 @@ pub struct LoraConv2dConfig<'a> {
     pub kernel_size: usize,
     pub device: &'a Device,
     pub dtype: DType,
-    in_channels: usize,
-    out_channels: usize,
+    pub in_channels: usize,
+    pub out_channels: usize,
+    pub dropout: Option<f32>,
 }
 
 impl<'a> LoraConv2dConfig<'a> {
@@ -39,6 +41,7 @@ impl<'a> LoraConv2dConfig<'a> {
             dtype,
             in_channels,
             out_channels,
+            dropout: Some(0.),
         }
     }
 }
@@ -48,8 +51,10 @@ impl LoraConv2d {
         let map = VarMap::new();
         let a = map.get(
             (
-                config.rank * config.kernel_size,
-                config.in_channels * config.kernel_size,
+                config.rank, // * config.kernel_size,
+                config.in_channels / old.config().groups,
+                old.weight().dim(2).unwrap(),
+                old.weight().dim(3).unwrap(), // * config.kernel_size,
             ),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
@@ -58,8 +63,10 @@ impl LoraConv2d {
         )?;
         let b = map.get(
             (
-                config.out_channels / old.config().groups * config.kernel_size,
-                config.rank * config.kernel_size,
+                config.out_channels, // / old.config().groups * config.kernel_size,
+                config.rank / old.config().groups,
+                1,
+                1, // * config.kernel_size,
             ),
             "b.weight",
             init::ZERO,
@@ -76,6 +83,7 @@ impl LoraConv2d {
             } else {
                 None
             },
+            dropout: config.dropout.map(Dropout::new),
         })
     }
 }
@@ -83,29 +91,25 @@ impl LoraConv2d {
 impl Module for LoraConv2d {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         if let Some(scale) = self.scale {
-            let x = input;
-            let bias = self.bias();
-
-            let weight = (self.old.weight()
-                + self.b.matmul(&self.a)?.reshape(self.old.weight().shape())?)?
-            .mul(scale)?;
-
-            let x = x.conv2d(
-                &weight,
-                self.config().padding,
-                self.config().stride,
-                self.config().dilation,
-                self.config().groups,
-            )?;
-
-            match &bias {
-                None => Ok(x),
-                Some(bias) => {
-                    let b = bias.dims1()?;
-                    let bias = bias.reshape((1, b, 1, 1))?;
-                    Ok(x.broadcast_add(&bias)?)
-                }
+            let weight = self.old.forward(input)?;
+            let mut a_input = input.clone();
+            if self.dropout.is_some() {
+                a_input = self.dropout.as_ref().unwrap().forward(input, true)?;
             }
+
+            let a_conv = Conv2d::new(self.a.clone(), None, *self.config());
+            let b_conv = Conv2d::new(
+                self.b.clone(),
+                None,
+                Conv2dConfig {
+                    stride: 1,
+                    ..*self.config()
+                },
+            );
+
+            let tmp = b_conv.forward(&a_conv.forward(&a_input)?)?;
+
+            &weight + tmp.mul(scale)?
         } else {
             self.old.forward(input)
         }

@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
-use candle_nn::{init, Conv1dConfig, VarMap};
+use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarMap};
 
 use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike};
 
@@ -11,6 +11,7 @@ pub struct LoraConv1d {
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
+    dropout: Option<Dropout>,
 }
 
 pub struct LoraConv1dConfig<'a> {
@@ -21,6 +22,7 @@ pub struct LoraConv1dConfig<'a> {
     pub dtype: DType,
     pub in_channels: usize,
     pub out_channels: usize,
+    pub dropout: Option<f32>,
 }
 
 impl<'a> LoraConv1dConfig<'a> {
@@ -39,6 +41,7 @@ impl<'a> LoraConv1dConfig<'a> {
             dtype,
             in_channels,
             out_channels,
+            dropout: Some(0.),
         }
     }
 }
@@ -76,6 +79,7 @@ impl LoraConv1d {
             } else {
                 None
             },
+            dropout: config.dropout.map(Dropout::new),
         })
     }
 }
@@ -83,30 +87,21 @@ impl LoraConv1d {
 impl Module for LoraConv1d {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         if let Some(scale) = self.scale {
-            let x = input;
-            let bias = self.bias();
-            let weight = (self.old.weight()
+            let bias = self.bias().cloned();
+
+            let mut weight = self.old.weight().clone();
+            if self.dropout.is_some() {
+                weight = self.dropout.as_ref().unwrap().forward(input, true)?;
+            }
+            let weight = (&weight
                 + &self
                     .b
-                    .matmul(&self.a)?
+                    .broadcast_matmul(&self.a.broadcast_matmul(&weight)?)?
                     .reshape(self.old.weight().shape())?
                     .mul(scale)?)?;
 
-            let x = x.conv1d(
-                &weight,
-                self.config().padding,
-                self.config().stride,
-                self.config().dilation,
-                self.config().groups,
-            )?;
-            match &bias {
-                None => Ok(x),
-                Some(bias) => {
-                    let b = bias.dims1()?;
-                    let bias = bias.reshape((1, b, 1))?;
-                    Ok(x.broadcast_add(&bias)?)
-                }
-            }
+            let conv = Conv1d::new(weight, bias, *self.config());
+            conv.forward(input)
         } else {
             self.old.forward(input)
         }
