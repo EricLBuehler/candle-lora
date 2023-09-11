@@ -3,9 +3,7 @@ fn conv1d() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{
-        loraconv1d::LoraConv1dConfig, Conv1dLayerLike, Lora, NewLayers, SelectedLayers,
-    };
+    use candle_lora::{Conv1dLayerLike, Lora, LoraConv1dConfig, NewLayers, SelectedLayers};
     use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]

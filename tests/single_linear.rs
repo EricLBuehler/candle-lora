@@ -5,7 +5,7 @@ fn single_linear() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{loralinear::LoraLinearConfig, LinearLayerLike, Lora};
+    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfig};
     use candle_nn::{init, Linear, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]

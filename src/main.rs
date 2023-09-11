@@ -1,9 +1,7 @@
 use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{
-    loraembed::LoraEmbeddingConfig, EmbeddingLayerLike, Lora, NewLayers, SelectedLayers,
-};
+use candle_lora::{EmbeddingLayerLike, Lora, LoraEmbeddingConfig, NewLayers, SelectedLayers};
 use candle_nn::{init, Embedding, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]

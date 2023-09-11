@@ -1,19 +1,19 @@
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
-use loraconv1d::{LoraConv1d, LoraConv1dConfig};
-use loraconv2d::{LoraConv2d, LoraConv2dConfig};
-use loraembed::{LoraEmbedding, LoraEmbeddingConfig};
-use loralinear::{LoraLinear, LoraLinearConfig};
+pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};
+pub use loraconv2d::{LoraConv2d, LoraConv2dConfig};
+pub use loraembed::{LoraEmbedding, LoraEmbeddingConfig};
+pub use loralinear::{LoraLinear, LoraLinearConfig};
 use std::{collections::HashMap, hash::Hash};
 
 mod frozenconv;
 mod frozenembed;
 mod frozenlinear;
-pub mod loraconv1d;
-pub mod loraconv2d;
-pub mod loraembed;
-pub mod loralinear;
+mod loraconv1d;
+mod loraconv2d;
+mod loraembed;
+mod loralinear;
 
 pub struct Lora;
 

@@ -19,10 +19,7 @@ Current working example:
 use std::{collections::HashMap, hash::Hash};
 
 use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{
-    loralinear::LoraLinearConfig,
-    LinearLayerLike, Lora, NewLayers, SelectedLayers,
-};
+use candle_lora::{LinearLayerLike, Lora, LoraLinearConfig, NewLayers, SelectedLayers};
 use candle_nn::{init, Linear, Module, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
