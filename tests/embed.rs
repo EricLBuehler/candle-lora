@@ -1,11 +1,11 @@
-use candle_lora::{LoraConfig, LoraEmbeddingConfig};
+use candle_lora::{LoraConfig, LoraEmbeddingConfig, SelectedLayersBuilder};
 
 #[test]
 fn embed() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{EmbeddingLayerLike, Lora, NewLayers, SelectedLayers};
+    use candle_lora::{EmbeddingLayerLike, Lora, NewLayers};
     use candle_nn::{init, Embedding, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -61,21 +61,11 @@ fn embed() -> candle_core::Result<()> {
     println!("Output: {output:?}");
 
     //Select layers we want to convert
-    let linear_layers = HashMap::new();
-    let conv1d_layers = HashMap::new();
-    let conv2d_layers = HashMap::new();
     let mut embed_layers = HashMap::new();
     embed_layers.insert(ModelLayers::Embed, &*model.embed);
-    let selected = SelectedLayers {
-        linear: linear_layers,
-        linear_config: None,
-        conv1d: conv1d_layers,
-        conv1d_config: None,
-        conv2d: conv2d_layers,
-        conv2d_config: None,
-        embed: embed_layers,
-        embed_config: Some(LoraEmbeddingConfig::new(in_size, hidden_size)),
-    };
+    let selected = SelectedLayersBuilder::new()
+        .add_embed_layers(embed_layers, LoraEmbeddingConfig::new(in_size, hidden_size))
+        .build();
 
     let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
 

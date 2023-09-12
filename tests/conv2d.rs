@@ -1,11 +1,11 @@
-use candle_lora::{LoraConfig, LoraConv2dConfig};
+use candle_lora::{LoraConfig, LoraConv2dConfig, SelectedLayersBuilder};
 
 #[test]
 fn conv2d() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{Conv2dLayerLike, Lora, NewLayers, SelectedLayers};
+    use candle_lora::{Conv2dLayerLike, Lora, NewLayers};
     use candle_nn::{init, Conv2d, Conv2dConfig, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -81,21 +81,14 @@ fn conv2d() -> candle_core::Result<()> {
     println!("Output: {output:?}");
 
     //Select layers we want to convert
-    let linear_layers = HashMap::new();
-    let conv1d_layers = HashMap::new();
     let mut conv2d_layers = HashMap::new();
     conv2d_layers.insert(ModelLayers::Conv, &*model.conv);
-    let embed_layers = HashMap::new();
-    let selected = SelectedLayers {
-        linear: linear_layers,
-        linear_config: None,
-        conv1d: conv1d_layers,
-        conv1d_config: None,
-        conv2d: conv2d_layers,
-        conv2d_config: Some(LoraConv2dConfig::new(in_channels, out_channels)),
-        embed: embed_layers,
-        embed_config: None,
-    };
+    let selected = SelectedLayersBuilder::new()
+        .add_conv2d_layers(
+            conv2d_layers,
+            LoraConv2dConfig::new(in_channels, out_channels),
+        )
+        .build();
 
     let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
 

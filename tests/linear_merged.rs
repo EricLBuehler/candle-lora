@@ -1,4 +1,4 @@
-use candle_lora::{LoraConfig, Merge, NewLayers, SelectedLayers};
+use candle_lora::{LoraConfig, Merge, NewLayers, SelectedLayersBuilder};
 
 #[test]
 fn linear() -> candle_core::Result<()> {
@@ -63,19 +63,9 @@ fn linear() -> candle_core::Result<()> {
     //Select layers we want to convert
     let mut linear_layers = HashMap::new();
     linear_layers.insert(ModelLayers::Layer, &*model.layer);
-    let conv1d_layers = HashMap::new();
-    let conv2d_layers = HashMap::new();
-    let embed_layers = HashMap::new();
-    let selected = SelectedLayers {
-        linear: linear_layers,
-        linear_config: Some(LoraLinearConfig::new(10, 10)),
-        conv1d: conv1d_layers,
-        conv1d_config: None,
-        conv2d: conv2d_layers,
-        conv2d_config: None,
-        embed: embed_layers,
-        embed_config: None,
-    };
+    let selected = SelectedLayersBuilder::new()
+        .add_linear_layers(linear_layers, LoraLinearConfig::new(10, 10))
+        .build();
 
     let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
 

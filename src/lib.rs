@@ -97,14 +97,85 @@ impl<'a> LoraConfig<'a> {
 }
 
 pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
-    pub linear: HashMap<T, &'a dyn LinearLayerLike>,
-    pub linear_config: Option<LoraLinearConfig>,
-    pub conv1d: HashMap<T, &'a dyn Conv1dLayerLike>,
-    pub conv1d_config: Option<LoraConv1dConfig>,
-    pub conv2d: HashMap<T, &'a dyn Conv2dLayerLike>,
-    pub conv2d_config: Option<LoraConv2dConfig>,
-    pub embed: HashMap<T, &'a dyn EmbeddingLayerLike>,
-    pub embed_config: Option<LoraEmbeddingConfig>,
+    linear: HashMap<T, &'a dyn LinearLayerLike>,
+    linear_config: Option<LoraLinearConfig>,
+    conv1d: HashMap<T, &'a dyn Conv1dLayerLike>,
+    conv1d_config: Option<LoraConv1dConfig>,
+    conv2d: HashMap<T, &'a dyn Conv2dLayerLike>,
+    conv2d_config: Option<LoraConv2dConfig>,
+    embed: HashMap<T, &'a dyn EmbeddingLayerLike>,
+    embed_config: Option<LoraEmbeddingConfig>,
+}
+
+pub struct SelectedLayersBuilder<'a, T: Eq + PartialEq + Hash> {
+    selected: SelectedLayers<'a, T>,
+}
+
+impl<'a, T: Eq + PartialEq + Hash> Default for SelectedLayersBuilder<'a, T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<'a, T: Eq + PartialEq + Hash> SelectedLayersBuilder<'a, T> {
+    pub fn new() -> Self {
+        Self {
+            selected: SelectedLayers {
+                linear: HashMap::new(),
+                linear_config: None,
+                conv1d: HashMap::new(),
+                conv1d_config: None,
+                conv2d: HashMap::new(),
+                conv2d_config: None,
+                embed: HashMap::new(),
+                embed_config: None,
+            },
+        }
+    }
+
+    pub fn add_linear_layers(
+        mut self,
+        layers: HashMap<T, &'a dyn LinearLayerLike>,
+        linear_config: LoraLinearConfig,
+    ) -> Self {
+        self.selected.linear = layers;
+        self.selected.linear_config = Some(linear_config);
+        self
+    }
+
+    pub fn add_embed_layers(
+        mut self,
+        layers: HashMap<T, &'a dyn EmbeddingLayerLike>,
+        embed_config: LoraEmbeddingConfig,
+    ) -> Self {
+        self.selected.embed = layers;
+        self.selected.embed_config = Some(embed_config);
+        self
+    }
+
+    pub fn add_conv1d_layers(
+        mut self,
+        layers: HashMap<T, &'a dyn Conv1dLayerLike>,
+        conv1d_config: LoraConv1dConfig,
+    ) -> Self {
+        self.selected.conv1d = layers;
+        self.selected.conv1d_config = Some(conv1d_config);
+        self
+    }
+
+    pub fn add_conv2d_layers(
+        mut self,
+        layers: HashMap<T, &'a dyn Conv2dLayerLike>,
+        conv2d_config: LoraConv2dConfig,
+    ) -> Self {
+        self.selected.conv2d = layers;
+        self.selected.conv2d_config = Some(conv2d_config);
+        self
+    }
+
+    pub fn build(self) -> SelectedLayers<'a, T> {
+        self.selected
+    }
 }
 
 /// New layers, after conversion
