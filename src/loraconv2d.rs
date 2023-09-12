@@ -146,6 +146,10 @@ impl LoraConv2d {
 
 impl Module for LoraConv2d {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
+        if self.merged {
+            return self.old.forward(input);
+        }
+
         if let Some(scale) = self.scale {
             let weight = self.old.forward(input)?;
             let mut a_input = input.clone();
