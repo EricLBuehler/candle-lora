@@ -29,7 +29,7 @@ fn embed() -> candle_core::Result<()> {
             for (name, mut embed) in new.embed {
                 match name {
                     ModelLayers::Embed => {
-                        embed.merge().unwrap();
+                        embed.merge_weights().unwrap();
                         self.embed = Box::new(embed)
                     }
                 }

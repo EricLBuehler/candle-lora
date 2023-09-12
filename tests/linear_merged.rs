@@ -29,7 +29,7 @@ fn linear() -> candle_core::Result<()> {
             for (name, mut linear) in new.linear {
                 match name {
                     ModelLayers::Layer => {
-                        linear.merge().unwrap();
+                        linear.merge_weights().unwrap();
                         self.layer = Box::new(linear)
                     }
                 }

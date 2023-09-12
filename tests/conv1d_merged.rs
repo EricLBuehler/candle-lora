@@ -29,7 +29,7 @@ fn conv1d() -> candle_core::Result<()> {
             for (name, mut conv) in new.conv1d {
                 match name {
                     ModelLayers::Conv => {
-                        conv.merge().unwrap();
+                        conv.merge_weights().unwrap();
                         self.conv = Box::new(conv)
                     }
                 }

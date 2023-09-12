@@ -133,7 +133,7 @@ impl Merge for LoraConv1d {
         })
     }
 
-    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn merge_weights(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
@@ -148,7 +148,7 @@ impl Merge for LoraConv1d {
         }
     }
 
-    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn unmerge_weights(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {

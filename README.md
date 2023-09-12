@@ -15,7 +15,7 @@ candle-lora is able to convert:
 - `Conv2d` -> `LoraConv2d`
 - `Embedding` -> `LoraEmbedding`
 
-Mergeding and unmerging weights are also implemented.
+Both merging and unmerging weights are also implemented.
 
 ## How to use
 1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to

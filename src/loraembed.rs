@@ -110,7 +110,7 @@ impl Merge for LoraEmbedding {
         })
     }
 
-    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn merge_weights(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
@@ -125,7 +125,7 @@ impl Merge for LoraEmbedding {
         }
     }
 
-    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn unmerge_weights(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
