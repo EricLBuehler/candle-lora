@@ -8,7 +8,7 @@ It is based on HuggingFace's [`peft`](https://github.com/huggingface/peft/tree/m
 
 All conversions are done as implemented in HuggingFace's official LoRA implementation.
 
-Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, `Embedding` into their respective `LoRA` counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
+Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
 
 ## How to use
 1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
