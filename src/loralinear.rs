@@ -2,8 +2,9 @@ use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, VarMap};
+use either::Either;
 
-use crate::{frozenlinear::FrozenLinear, LinearLayerLike};
+use crate::{frozenlinear::FrozenLinear, LinearLayerLike, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraLinear {
@@ -101,30 +102,40 @@ impl LoraLinear {
         })
     }
 
-    fn get_delta_weight(&self) -> Result<Tensor> {
-        let result = self.b.matmul(&self.a)?;
+    fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
+        let result = self.b.matmul(&self.a).map_err(Either::Right)?;
         Ok(match self.scale {
-            Some(scale) => result.mul(scale)?,
+            Some(scale) => result.mul(scale).map_err(Either::Right)?,
             None => result,
         })
     }
 
-    pub fn merge(&mut self) -> Result<()> {
-        self.old = FrozenLinear::new(
-            (self.old.weight() + self.get_delta_weight())?,
-            self.old.bias().cloned(),
-        )?;
-        self.merged = true;
-        Ok(())
+    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if self.merged {
+            Err(Either::Left(MergeError::AlreadyMerged))
+        } else {
+            self.old = FrozenLinear::new(
+                (self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias().cloned(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = true;
+            Ok(())
+        }
     }
 
-    pub fn unmerge(&mut self) -> Result<()> {
-        self.old = FrozenLinear::new(
-            (self.old.weight() - self.get_delta_weight())?,
-            self.old.bias().cloned(),
-        )?;
-        self.merged = false;
-        Ok(())
+    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if !self.merged {
+            Err(Either::Left(MergeError::NotMerged))
+        } else {
+            self.old = FrozenLinear::new(
+                (self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias().cloned(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = false;
+            Ok(())
+        }
     }
 }
 

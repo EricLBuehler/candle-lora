@@ -2,8 +2,9 @@ use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarMap};
+use either::Either;
 
-use crate::{frozenconv::FrozenConv2d, Conv2dLayerLike};
+use crate::{frozenconv::FrozenConv2d, Conv2dLayerLike, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraConv2d {
@@ -112,45 +113,68 @@ impl LoraConv2d {
         })
     }
 
-    fn get_delta_weight(&self) -> Result<Tensor> {
+    fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
         let result = match self.old.weight().shape().dims()[2..4] {
             [1, 1] => self
                 .b
-                .squeeze(3)?
-                .squeeze(2)?
-                .matmul(&self.a.squeeze(3)?.squeeze(2)?)?
-                .unsqueeze(2)?
-                .unsqueeze(3)?,
+                .squeeze(3)
+                .map_err(Either::Right)?
+                .squeeze(2)
+                .map_err(Either::Right)?
+                .matmul(
+                    &self
+                        .a
+                        .squeeze(3)
+                        .map_err(Either::Right)?
+                        .squeeze(2)
+                        .map_err(Either::Right)?,
+                )
+                .map_err(Either::Right)?
+                .unsqueeze(2)
+                .map_err(Either::Right)?
+                .unsqueeze(3)
+                .map_err(Either::Right)?,
             _ => {
                 let conv = Conv2d::new(self.b.clone(), None, *self.old.config());
-                conv.forward(&self.a.permute((1, 0, 2, 3))?)?
+                conv.forward(&self.a.permute((1, 0, 2, 3)).map_err(Either::Right)?)
+                    .map_err(Either::Right)?
             }
         };
 
         Ok(match self.scale {
-            Some(scale) => result.mul(scale)?,
+            Some(scale) => result.mul(scale).map_err(Either::Right)?,
             None => result,
         })
     }
 
-    pub fn merge(&mut self) -> Result<()> {
-        self.old = FrozenConv2d::new(
-            &(self.old.weight() + self.get_delta_weight())?,
-            self.old.bias(),
-            *self.old.config(),
-        )?;
-        self.merged = true;
-        Ok(())
+    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if self.merged {
+            Err(Either::Left(MergeError::AlreadyMerged))
+        } else {
+            self.old = FrozenConv2d::new(
+                &(self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias(),
+                *self.old.config(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = true;
+            Ok(())
+        }
     }
 
-    pub fn unmerge(&mut self) -> Result<()> {
-        self.old = FrozenConv2d::new(
-            &(self.old.weight() - self.get_delta_weight())?,
-            self.old.bias(),
-            *self.old.config(),
-        )?;
-        self.merged = false;
-        Ok(())
+    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if !self.merged {
+            Err(Either::Left(MergeError::NotMerged))
+        } else {
+            self.old = FrozenConv2d::new(
+                &(self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias(),
+                *self.old.config(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = false;
+            Ok(())
+        }
     }
 }
 

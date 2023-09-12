@@ -2,8 +2,9 @@ use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarMap};
+use either::Either;
 
-use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike};
+use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraConv1d {
@@ -116,33 +117,48 @@ impl LoraConv1d {
         })
     }
 
-    fn get_delta_weight(&self) -> Result<Tensor> {
-        let result = self.b.matmul(&self.a)?.reshape(self.old.weight().shape())?;
+    fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
+        let result = self
+            .b
+            .matmul(&self.a)
+            .map_err(Either::Right)?
+            .reshape(self.old.weight().shape())
+            .map_err(Either::Right)?;
 
         Ok(match self.scale {
-            Some(scale) => result.mul(scale)?,
+            Some(scale) => result.mul(scale).map_err(Either::Right)?,
             None => result,
         })
     }
 
-    pub fn merge(&mut self) -> Result<()> {
-        self.old = FrozenConv1d::new(
-            &(self.old.weight() + self.get_delta_weight())?,
-            self.old.bias(),
-            *self.old.config(),
-        )?;
-        self.merged = true;
-        Ok(())
+    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if self.merged {
+            Err(Either::Left(MergeError::AlreadyMerged))
+        } else {
+            self.old = FrozenConv1d::new(
+                &(self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias(),
+                *self.old.config(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = true;
+            Ok(())
+        }
     }
 
-    pub fn unmerge(&mut self) -> Result<()> {
-        self.old = FrozenConv1d::new(
-            &(self.old.weight() - self.get_delta_weight())?,
-            self.old.bias(),
-            *self.old.config(),
-        )?;
-        self.merged = false;
-        Ok(())
+    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if !self.merged {
+            Err(Either::Left(MergeError::NotMerged))
+        } else {
+            self.old = FrozenConv1d::new(
+                &(self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
+                self.old.bias(),
+                *self.old.config(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = false;
+            Ok(())
+        }
     }
 }
 

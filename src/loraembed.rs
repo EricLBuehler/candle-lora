@@ -2,8 +2,9 @@ use std::ops::Mul;
 
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Embedding, VarMap};
+use either::Either;
 
-use crate::{frozenembed::FrozenEmbedding, EmbeddingLayerLike};
+use crate::{frozenembed::FrozenEmbedding, EmbeddingLayerLike, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraEmbedding {
@@ -97,32 +98,43 @@ impl LoraEmbedding {
         })
     }
 
-    fn get_delta_weight(&self) -> Result<Tensor> {
-        let result = self.b.matmul(&self.a)?;
+    fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
+        let result = self.b.matmul(&self.a).map_err(Either::Right)?;
         Ok(match self.scale {
-            Some(scale) => result.mul(scale)?,
+            Some(scale) => result.mul(scale).map_err(Either::Right)?,
             None => result,
         })
     }
 
-    pub fn merge(&mut self) -> Result<()> {
-        self.old = FrozenEmbedding::new(
-            &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))?,
-            self.hidden_size(),
-        )?;
-        self.merged = true;
-        Ok(())
+    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if self.merged {
+            Err(Either::Left(MergeError::AlreadyMerged))
+        } else {
+            self.old = FrozenEmbedding::new(
+                &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))
+                    .map_err(Either::Right)?,
+                self.hidden_size(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = true;
+            Ok(())
+        }
     }
 
-    pub fn unmerge(&mut self) -> Result<()> {
-        self.old = FrozenEmbedding::new(
-            &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))?,
-            self.hidden_size(),
-        )?;
-        self.merged = false;
-        Ok(())
+    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+        if !self.merged {
+            Err(Either::Left(MergeError::NotMerged))
+        } else {
+            self.old = FrozenEmbedding::new(
+                &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))
+                    .map_err(Either::Right)?,
+                self.hidden_size(),
+            )
+            .map_err(Either::Right)?;
+            self.merged = false;
+            Ok(())
+        }
     }
-
 }
 
 impl Module for LoraEmbedding {

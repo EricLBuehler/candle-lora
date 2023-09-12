@@ -1,11 +1,14 @@
+use candle_core::Error;
 #[doc = include_str!("../README.md")]
 use candle_core::{Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
+use either::Either;
 pub use loraconv1d::{LoraConv1d, LoraConv1dConfig, LoraConv1dConfigBuilder};
 pub use loraconv2d::{LoraConv2d, LoraConv2dConfig, LoraConv2dConfigBuilder};
 pub use loraembed::{LoraEmbedding, LoraEmbeddingConfig, LoraEmbeddingConfigBuilder};
 pub use loralinear::{LoraLinear, LoraLinearConfig, LoraLinearConfigBuilder};
 use std::{collections::HashMap, hash::Hash};
+use thiserror::Error;
 
 mod frozenconv;
 mod frozenembed;
@@ -152,3 +155,13 @@ impl EmbeddingLayerLike for Embedding {
         self.embeddings().dim(1).unwrap() //Reason: 2nd dim is always the hidden
     }
 }
+
+#[derive(Error, Debug, PartialEq, Eq)]
+pub enum MergeError {
+    #[error("AlreadyMerged")]
+    AlreadyMerged,
+    #[error("NotMerged")]
+    NotMerged,
+}
+
+pub type MergeErrorOrError = Either<MergeError, Error>;
