@@ -134,6 +134,16 @@ impl LoraConv1d {
         self.merged = true;
         Ok(())
     }
+
+    pub fn unmerge(&mut self) -> Result<()> {
+        self.old = FrozenConv1d::new(
+            &(self.old.weight() - self.get_delta_weight())?,
+            self.old.bias(),
+            *self.old.config(),
+        )?;
+        self.merged = false;
+        Ok(())
+    }
 }
 
 impl Module for LoraConv1d {

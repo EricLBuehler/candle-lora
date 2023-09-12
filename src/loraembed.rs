@@ -113,6 +113,16 @@ impl LoraEmbedding {
         self.merged = true;
         Ok(())
     }
+
+    pub fn unmerge(&mut self) -> Result<()> {
+        self.old = FrozenEmbedding::new(
+            &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))?,
+            self.hidden_size(),
+        )?;
+        self.merged = false;
+        Ok(())
+    }
+
 }
 
 impl Module for LoraEmbedding {

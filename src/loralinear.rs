@@ -117,6 +117,15 @@ impl LoraLinear {
         self.merged = true;
         Ok(())
     }
+
+    pub fn unmerge(&mut self) -> Result<()> {
+        self.old = FrozenLinear::new(
+            (self.old.weight() - self.get_delta_weight())?,
+            self.old.bias().cloned(),
+        )?;
+        self.merged = false;
+        Ok(())
+    }
 }
 
 impl Module for LoraLinear {
