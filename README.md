@@ -8,7 +8,7 @@ It is based on HuggingFace's [`peft`](https://github.com/huggingface/peft/tree/m
 
 All conversions are done as implemented in HuggingFace's official LoRA implementation.
 
-Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
+Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, and `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
 
 ## How to use
 1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
@@ -16,6 +16,13 @@ generate new layers that can easily be swapped out without forcing you to redefi
 2) Select the layers and perform the conversion.
 3) Swap out the layers.
 4) Enjoy your new LoRA model!
+
+Because the process of swapping out and selecting layers is tedious and can be error-prone for medium to large models, I plan on developing a library that automatically:
+- Swaps out the types in the model structs.
+- Selects the layers.
+- Swaps out the layers.
+
+The latter 2 items may be combined into a single macro.
 
 ## Example
 ```rust
