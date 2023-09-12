@@ -1,4 +1,5 @@
-fn main() -> candle_core::Result<()> {
+#[test]
+fn conv1d() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};

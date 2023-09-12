@@ -12,6 +12,7 @@ pub struct LoraConv1d {
     b: Tensor,
     scale: Option<f64>,
     dropout: Option<Dropout>,
+    merged: bool,
 }
 
 /// Configuration for LoraConv1d. Other configurations are inherited from the `Conv1d` struct.
@@ -111,12 +112,36 @@ impl LoraConv1d {
                 None
             },
             dropout: config.dropout.map(Dropout::new),
+            merged: false,
         })
+    }
+
+    fn get_delta_weight(&self) -> Result<Tensor> {
+        let result = self.b.matmul(&self.a)?.reshape(self.old.weight().shape())?;
+
+        Ok(match self.scale {
+            Some(scale) => result.mul(scale)?,
+            None => result,
+        })
+    }
+
+    pub fn merge(&mut self) -> Result<()> {
+        self.old = FrozenConv1d::new(
+            &(self.old.weight() + self.get_delta_weight())?,
+            self.old.bias(),
+            *self.old.config(),
+        )?;
+        self.merged = true;
+        Ok(())
     }
 }
 
 impl Module for LoraConv1d {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
+        if self.merged {
+            return self.old.forward(input);
+        }
+
         if let Some(scale) = self.scale {
             let bias = self.bias().cloned();
 
