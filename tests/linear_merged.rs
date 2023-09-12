@@ -1,4 +1,4 @@
-use candle_lora::{NewLayers, SelectedLayers};
+use candle_lora::{Merge, NewLayers, SelectedLayers};
 
 #[test]
 fn linear() -> candle_core::Result<()> {

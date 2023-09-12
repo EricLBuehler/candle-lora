@@ -4,7 +4,7 @@ use candle_core::{DType, Device, Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, VarMap};
 use either::Either;
 
-use crate::{frozenlinear::FrozenLinear, LinearLayerLike, MergeError, MergeErrorOrError};
+use crate::{frozenlinear::FrozenLinear, LinearLayerLike, Merge, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraLinear {
@@ -101,7 +101,9 @@ impl LoraLinear {
             merged: false,
         })
     }
+}
 
+impl Merge for LoraLinear {
     fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
         let result = self.b.matmul(&self.a).map_err(Either::Right)?;
         Ok(match self.scale {
@@ -110,7 +112,7 @@ impl LoraLinear {
         })
     }
 
-    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
@@ -124,7 +126,7 @@ impl LoraLinear {
         }
     }
 
-    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {

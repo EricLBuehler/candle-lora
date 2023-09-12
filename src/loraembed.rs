@@ -4,7 +4,9 @@ use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Embedding, VarMap};
 use either::Either;
 
-use crate::{frozenembed::FrozenEmbedding, EmbeddingLayerLike, MergeError, MergeErrorOrError};
+use crate::{
+    frozenembed::FrozenEmbedding, EmbeddingLayerLike, Merge, MergeError, MergeErrorOrError,
+};
 
 #[derive(Debug)]
 pub struct LoraEmbedding {
@@ -97,7 +99,9 @@ impl LoraEmbedding {
             merged: false,
         })
     }
+}
 
+impl Merge for LoraEmbedding {
     fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
         let result = self.b.matmul(&self.a).map_err(Either::Right)?;
         Ok(match self.scale {
@@ -106,7 +110,7 @@ impl LoraEmbedding {
         })
     }
 
-    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
@@ -121,7 +125,7 @@ impl LoraEmbedding {
         }
     }
 
-    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {

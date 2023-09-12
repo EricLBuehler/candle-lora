@@ -4,7 +4,7 @@ use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarMap};
 use either::Either;
 
-use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike, MergeError, MergeErrorOrError};
+use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike, Merge, MergeError, MergeErrorOrError};
 
 #[derive(Debug)]
 pub struct LoraConv1d {
@@ -116,7 +116,9 @@ impl LoraConv1d {
             merged: false,
         })
     }
+}
 
+impl Merge for LoraConv1d {
     fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
         let result = self
             .b
@@ -131,7 +133,7 @@ impl LoraConv1d {
         })
     }
 
-    pub fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
@@ -146,7 +148,7 @@ impl LoraConv1d {
         }
     }
 
-    pub fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
+    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError> {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {

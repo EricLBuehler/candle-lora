@@ -1,4 +1,4 @@
-use candle_lora::LoraConv2dConfigBuilder;
+use candle_lora::{LoraConv2dConfigBuilder, Merge};
 
 #[test]
 fn conv2d() -> candle_core::Result<()> {

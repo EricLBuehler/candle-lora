@@ -165,3 +165,12 @@ pub enum MergeError {
 }
 
 pub type MergeErrorOrError = Either<MergeError, Error>;
+
+pub trait Merge {
+    /// Get the delta weight of the LoRA layer. This is meant to be an internal method.
+    fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError>;
+    /// Merge the LoRA weights.
+    fn merge(&mut self) -> std::result::Result<(), MergeErrorOrError>;
+    /// Unmerge the LoRA weights.
+    fn unmerge(&mut self) -> std::result::Result<(), MergeErrorOrError>;
+}

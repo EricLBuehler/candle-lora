@@ -1,3 +1,5 @@
+use candle_lora::Merge;
+
 fn main() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 

@@ -1,4 +1,4 @@
-use candle_lora::LoraEmbeddingConfigBuilder;
+use candle_lora::{LoraEmbeddingConfigBuilder, Merge};
 
 #[test]
 fn embed() -> candle_core::Result<()> {
