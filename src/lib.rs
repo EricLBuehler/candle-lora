@@ -96,7 +96,6 @@ impl<'a> LoraConfig<'a> {
     }
 }
 
-/// Each configurations is applied to all layers of its respective type
 pub struct SelectedLayers<'a, T: Eq + PartialEq + Hash> {
     pub linear: HashMap<T, &'a dyn LinearLayerLike>,
     pub linear_config: Option<LoraLinearConfig>,

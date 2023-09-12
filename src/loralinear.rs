@@ -20,8 +20,8 @@ pub struct LoraLinear {
 
 /// Configuration for LoraLinear
 pub struct LoraLinearConfig {
-    pub in_features: usize,
-    pub out_features: usize,
+    in_features: usize,
+    out_features: usize,
 }
 
 impl LoraLinearConfig {

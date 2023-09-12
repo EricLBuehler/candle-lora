@@ -20,8 +20,8 @@ pub struct LoraEmbedding {
 
 /// Configuration for LoraEmbedding, with `num_embeddings` vectors of `embedding_dim` size`.
 pub struct LoraEmbeddingConfig {
-    pub num_embeddings: usize,
-    pub embedding_dim: usize,
+    num_embeddings: usize,
+    embedding_dim: usize,
 }
 
 impl LoraEmbeddingConfig {
