@@ -1,11 +1,11 @@
-use candle_lora::{Merge, NewLayers, SelectedLayers};
+use candle_lora::{LoraConfig, Merge, NewLayers, SelectedLayers};
 
 #[test]
 fn linear() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfigBuilder};
+    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfig};
     use candle_nn::{init, Linear, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -68,7 +68,7 @@ fn linear() -> candle_core::Result<()> {
     let embed_layers = HashMap::new();
     let selected = SelectedLayers {
         linear: linear_layers,
-        linear_config: Some(LoraLinearConfigBuilder::default(&device, dtype, 10, 10).build()),
+        linear_config: Some(LoraLinearConfig::new(10, 10)),
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
@@ -77,8 +77,10 @@ fn linear() -> candle_core::Result<()> {
         embed_config: None,
     };
 
+    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected);
+    let new_layers = Lora::convert_model(selected, loraconfig);
 
     //Custom methods to implement
     model.insert_new(new_layers);

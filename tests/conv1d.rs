@@ -1,9 +1,11 @@
+use candle_lora::LoraConfig;
+
 #[test]
 fn conv1d() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{Conv1dLayerLike, Lora, LoraConv1dConfigBuilder, NewLayers, SelectedLayers};
+    use candle_lora::{Conv1dLayerLike, Lora, LoraConv1dConfig, NewLayers, SelectedLayers};
     use candle_nn::{init, Conv1d, Conv1dConfig, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
@@ -76,15 +78,17 @@ fn conv1d() -> candle_core::Result<()> {
         linear: linear_layers,
         linear_config: None,
         conv1d: conv1d_layers,
-        conv1d_config: Some(LoraConv1dConfigBuilder::default(&device, dtype, 1, 10, 10).build()),
+        conv1d_config: Some(LoraConv1dConfig::new(1, 10, 10)),
         conv2d: conv2d_layers,
         conv2d_config: None,
         embed: embed_layers,
         embed_config: None,
     };
 
+    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected);
+    let new_layers = Lora::convert_model(selected, loraconfig);
 
     //Custom methods to implement
     model.insert_new(new_layers);

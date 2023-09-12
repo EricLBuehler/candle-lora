@@ -1,10 +1,12 @@
 use std::ops::Mul;
 
-use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarMap};
 use either::Either;
 
-use crate::{frozenconv::FrozenConv1d, Conv1dLayerLike, Merge, MergeError, MergeErrorOrError};
+use crate::{
+    frozenconv::FrozenConv1d, Conv1dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+};
 
 #[derive(Debug)]
 pub struct LoraConv1d {
@@ -17,75 +19,33 @@ pub struct LoraConv1d {
 }
 
 /// Configuration for LoraConv1d. Other configurations are inherited from the `Conv1d` struct.
-pub struct LoraConv1dConfig<'a> {
-    rank: usize,
-    alpha: f64,
-    kernel_size: usize,
-    device: &'a Device,
-    dtype: DType,
+pub struct LoraConv1dConfig {
     in_channels: usize,
     out_channels: usize,
-    dropout: Option<f32>,
+    kernel_size: usize,
 }
 
-/// Builder for LoraConv1dConfig. Call `build` to construct the config.
-pub struct LoraConv1dConfigBuilder<'a> {
-    pub config: LoraConv1dConfig<'a>,
-}
-
-impl<'a> LoraConv1dConfigBuilder<'a> {
-    pub fn default(
-        device: &'a Device,
-        dtype: DType,
-        kernel_size: usize,
-        in_channels: usize,
-        out_channels: usize,
-    ) -> Self {
-        LoraConv1dConfigBuilder {
-            config: LoraConv1dConfig {
-                rank: 1,
-                alpha: 1.,
-                kernel_size,
-                device,
-                dtype,
-                in_channels,
-                out_channels,
-                dropout: None,
-            },
+impl LoraConv1dConfig {
+    pub fn new(kernel_size: usize, in_channels: usize, out_channels: usize) -> Self {
+        LoraConv1dConfig {
+            in_channels,
+            out_channels,
+            kernel_size,
         }
-    }
-
-    /// Set the rank parameter
-    pub fn rank(mut self, rank: usize) -> Self {
-        self.config.rank = rank;
-        self
-    }
-
-    /// Set the alpha parameter
-    pub fn alpha(mut self, alpha: f64) -> Self {
-        self.config.alpha = alpha;
-        self
-    }
-
-    /// Set the dropout
-    pub fn dropout(mut self, prob: f32) -> Self {
-        self.config.dropout = Some(prob);
-        self
-    }
-
-    /// Construct the config
-    pub fn build(self) -> LoraConv1dConfig<'a> {
-        self.config
     }
 }
 
 impl LoraConv1d {
-    pub fn new(old: &dyn Conv1dLayerLike, config: &LoraConv1dConfig) -> Result<Self> {
+    pub fn new(
+        old: &dyn Conv1dLayerLike,
+        conv_config: &LoraConv1dConfig,
+        config: &LoraConfig,
+    ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
             (
-                config.rank * config.kernel_size,
-                config.in_channels * config.kernel_size,
+                config.rank * conv_config.kernel_size,
+                conv_config.in_channels * conv_config.kernel_size,
             ),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
@@ -94,8 +54,8 @@ impl LoraConv1d {
         )?;
         let b = map.get(
             (
-                config.out_channels / old.config().groups * config.kernel_size,
-                config.rank * config.kernel_size,
+                conv_config.out_channels / old.config().groups * conv_config.kernel_size,
+                config.rank * conv_config.kernel_size,
             ),
             "b.weight",
             init::ZERO,

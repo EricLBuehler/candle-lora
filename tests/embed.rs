@@ -1,4 +1,4 @@
-use candle_lora::LoraEmbeddingConfigBuilder;
+use candle_lora::{LoraConfig, LoraEmbeddingConfig};
 
 #[test]
 fn embed() -> candle_core::Result<()> {
@@ -74,13 +74,13 @@ fn embed() -> candle_core::Result<()> {
         conv2d: conv2d_layers,
         conv2d_config: None,
         embed: embed_layers,
-        embed_config: Some(
-            LoraEmbeddingConfigBuilder::default(&device, dtype, in_size, hidden_size).build(),
-        ),
+        embed_config: Some(LoraEmbeddingConfig::new(in_size, hidden_size)),
     };
 
+    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected);
+    let new_layers = Lora::convert_model(selected, loraconfig);
 
     //Custom methods to implement
     model.insert_new(new_layers);

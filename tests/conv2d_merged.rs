@@ -1,4 +1,4 @@
-use candle_lora::{LoraConv2dConfigBuilder, Merge};
+use candle_lora::{LoraConfig, LoraConv2dConfig, Merge};
 
 #[test]
 fn conv2d() -> candle_core::Result<()> {
@@ -95,15 +95,15 @@ fn conv2d() -> candle_core::Result<()> {
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
-        conv2d_config: Some(
-            LoraConv2dConfigBuilder::default(&device, dtype, in_channels, out_channels).build(),
-        ),
+        conv2d_config: Some(LoraConv2dConfig::new(in_channels, out_channels)),
         embed: embed_layers,
         embed_config: None,
     };
 
+    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected);
+    let new_layers = Lora::convert_model(selected, loraconfig);
 
     //Custom methods to implement
     model.insert_new(new_layers);

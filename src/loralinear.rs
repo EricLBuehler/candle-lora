@@ -1,10 +1,12 @@
 use std::ops::Mul;
 
-use candle_core::{DType, Device, Module, Result, Shape, Tensor};
+use candle_core::{Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, VarMap};
 use either::Either;
 
-use crate::{frozenlinear::FrozenLinear, LinearLayerLike, Merge, MergeError, MergeErrorOrError};
+use crate::{
+    frozenlinear::FrozenLinear, LinearLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+};
 
 #[derive(Debug)]
 pub struct LoraLinear {
@@ -17,71 +19,36 @@ pub struct LoraLinear {
 }
 
 /// Configuration for LoraLinear
-pub struct LoraLinearConfig<'a> {
-    pub rank: usize,
-    pub alpha: f64,
-    pub dropout: Option<f32>,
-    pub device: &'a Device,
-    pub dtype: DType,
+pub struct LoraLinearConfig {
     pub in_features: usize,
     pub out_features: usize,
 }
 
-/// Builder for LoraLinearConfig. Call `build` to construct the config.
-pub struct LoraLinearConfigBuilder<'a> {
-    pub config: LoraLinearConfig<'a>,
-}
-
-impl<'a> LoraLinearConfigBuilder<'a> {
-    pub fn default(
-        device: &'a Device,
-        dtype: DType,
-        in_features: usize,
-        out_features: usize,
-    ) -> Self {
-        LoraLinearConfigBuilder {
-            config: LoraLinearConfig {
-                rank: 1,
-                alpha: 1.,
-                dropout: Some(0.),
-                device,
-                dtype,
-                in_features,
-                out_features,
-            },
+impl LoraLinearConfig {
+    pub fn new(in_features: usize, out_features: usize) -> Self {
+        LoraLinearConfig {
+            in_features,
+            out_features,
         }
-    }
-
-    /// Set the rank parameter
-    pub fn rank(mut self, rank: usize) -> Self {
-        self.config.rank = rank;
-        self
-    }
-
-    /// Set the alpha parameter
-    pub fn alpha(mut self, alpha: f64) -> Self {
-        self.config.alpha = alpha;
-        self
-    }
-
-    /// Construct the config
-    pub fn build(self) -> LoraLinearConfig<'a> {
-        self.config
     }
 }
 
 impl LoraLinear {
-    pub fn new(old: &dyn LinearLayerLike, config: &LoraLinearConfig) -> Result<Self> {
+    pub fn new(
+        old: &dyn LinearLayerLike,
+        linear_config: &LoraLinearConfig,
+        config: &LoraConfig,
+    ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (config.rank, config.in_features),
+            (config.rank, linear_config.in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
             config.dtype,
             config.device,
         )?;
         let b = map.get(
-            (config.out_features, config.rank),
+            (linear_config.out_features, config.rank),
             "b.weight",
             init::ZERO,
             config.dtype,

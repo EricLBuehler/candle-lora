@@ -1,11 +1,12 @@
 use std::ops::Mul;
 
-use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Embedding, VarMap};
 use either::Either;
 
 use crate::{
-    frozenembed::FrozenEmbedding, EmbeddingLayerLike, Merge, MergeError, MergeErrorOrError,
+    frozenembed::FrozenEmbedding, EmbeddingLayerLike, LoraConfig, Merge, MergeError,
+    MergeErrorOrError,
 };
 
 #[derive(Debug)]
@@ -18,69 +19,36 @@ pub struct LoraEmbedding {
 }
 
 /// Configuration for LoraEmbedding, with `num_embeddings` vectors of `embedding_dim` size`.
-pub struct LoraEmbeddingConfig<'a> {
-    pub rank: usize,
-    pub alpha: f64,
-    pub device: &'a Device,
-    pub dtype: DType,
+pub struct LoraEmbeddingConfig {
     pub num_embeddings: usize,
     pub embedding_dim: usize,
 }
 
-/// Builder for LoraEmbeddingConfig. Call `build` to construct the config.
-pub struct LoraEmbeddingConfigBuilder<'a> {
-    pub config: LoraEmbeddingConfig<'a>,
-}
-
-impl<'a> LoraEmbeddingConfigBuilder<'a> {
-    pub fn default(
-        device: &'a Device,
-        dtype: DType,
-        num_embeddings: usize,
-        embedding_dim: usize,
-    ) -> Self {
-        LoraEmbeddingConfigBuilder {
-            config: LoraEmbeddingConfig {
-                rank: 1,
-                alpha: 1.,
-                device,
-                dtype,
-                num_embeddings,
-                embedding_dim,
-            },
+impl LoraEmbeddingConfig {
+    pub fn new(num_embeddings: usize, embedding_dim: usize) -> Self {
+        LoraEmbeddingConfig {
+            num_embeddings,
+            embedding_dim,
         }
-    }
-
-    /// Set the rank parameter
-    pub fn rank(mut self, rank: usize) -> Self {
-        self.config.rank = rank;
-        self
-    }
-
-    /// Set the alpha parameter
-    pub fn alpha(mut self, alpha: f64) -> Self {
-        self.config.alpha = alpha;
-        self
-    }
-
-    /// Construct the config
-    pub fn build(self) -> LoraEmbeddingConfig<'a> {
-        self.config
     }
 }
 
 impl LoraEmbedding {
-    pub fn new(old: &dyn EmbeddingLayerLike, config: &LoraEmbeddingConfig) -> Result<Self> {
+    pub fn new(
+        old: &dyn EmbeddingLayerLike,
+        embed_config: &LoraEmbeddingConfig,
+        config: &LoraConfig,
+    ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
-            (config.rank, config.num_embeddings),
+            (config.rank, embed_config.num_embeddings),
             "a.weight",
             init::ZERO,
             config.dtype,
             config.device,
         )?;
         let b = map.get(
-            (config.embedding_dim, config.rank),
+            (embed_config.embedding_dim, config.rank),
             "b.weight",
             init::ZERO,
             config.dtype,

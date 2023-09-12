@@ -1,10 +1,12 @@
 use std::ops::Mul;
 
-use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarMap};
 use either::Either;
 
-use crate::{frozenconv::FrozenConv2d, Conv2dLayerLike, Merge, MergeError, MergeErrorOrError};
+use crate::{
+    frozenconv::FrozenConv2d, Conv2dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+};
 
 #[derive(Debug)]
 pub struct LoraConv2d {
@@ -17,72 +19,31 @@ pub struct LoraConv2d {
 }
 
 /// Configuration for LoraConv2d. Other configurations are inherited from the `Conv2d` struct.
-pub struct LoraConv2dConfig<'a> {
-    rank: usize,
-    alpha: f64,
-    device: &'a Device,
-    dtype: DType,
+pub struct LoraConv2dConfig {
     in_channels: usize,
     out_channels: usize,
-    dropout: Option<f32>,
 }
 
-/// Builder for LoraConv2dConfig. Call `build` to construct the config.
-pub struct LoraConv2dConfigBuilder<'a> {
-    pub config: LoraConv2dConfig<'a>,
-}
-
-impl<'a> LoraConv2dConfigBuilder<'a> {
-    pub fn default(
-        device: &'a Device,
-        dtype: DType,
-        in_channels: usize,
-        out_channels: usize,
-    ) -> Self {
-        LoraConv2dConfigBuilder {
-            config: LoraConv2dConfig {
-                rank: 1,
-                alpha: 1.,
-                device,
-                dtype,
-                in_channels,
-                out_channels,
-                dropout: None,
-            },
+impl LoraConv2dConfig {
+    pub fn new(in_channels: usize, out_channels: usize) -> Self {
+        LoraConv2dConfig {
+            in_channels,
+            out_channels,
         }
-    }
-
-    /// Set the rank parameter
-    pub fn rank(mut self, rank: usize) -> Self {
-        self.config.rank = rank;
-        self
-    }
-
-    /// Set the alpha parameter
-    pub fn alpha(mut self, alpha: f64) -> Self {
-        self.config.alpha = alpha;
-        self
-    }
-
-    /// Set the dropout
-    pub fn dropout(mut self, prob: f32) -> Self {
-        self.config.dropout = Some(prob);
-        self
-    }
-
-    /// Construct the config
-    pub fn build(self) -> LoraConv2dConfig<'a> {
-        self.config
     }
 }
 
 impl LoraConv2d {
-    pub fn new(old: &dyn Conv2dLayerLike, config: &LoraConv2dConfig) -> Result<Self> {
+    pub fn new(
+        old: &dyn Conv2dLayerLike,
+        conv_config: &LoraConv2dConfig,
+        config: &LoraConfig,
+    ) -> Result<Self> {
         let map = VarMap::new();
         let a = map.get(
             (
                 config.rank,
-                config.in_channels / old.config().groups,
+                conv_config.in_channels / old.config().groups,
                 old.weight().dim(2).unwrap(),
                 old.weight().dim(3).unwrap(),
             ),
@@ -92,7 +53,12 @@ impl LoraConv2d {
             config.device,
         )?;
         let b = map.get(
-            (config.out_channels, config.rank / old.config().groups, 1, 1),
+            (
+                conv_config.out_channels,
+                config.rank / old.config().groups,
+                1,
+                1,
+            ),
             "b.weight",
             init::ZERO,
             config.dtype,
