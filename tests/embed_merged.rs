@@ -26,14 +26,16 @@ fn embed() -> candle_core::Result<()> {
 
     impl Model {
         fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-            for (name, embed) in new.embed {
+            for (name, mut embed) in new.embed {
                 match name {
-                    ModelLayers::Embed => self.embed = Box::new(embed),
+                    ModelLayers::Embed => {
+                        embed.merge().unwrap();
+                        self.embed = Box::new(embed)
+                    }
                 }
             }
         }
     }
-
     let device = Device::Cpu;
     let dtype = DType::F32;
 

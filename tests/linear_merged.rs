@@ -1,34 +1,37 @@
-use candle_lora::LoraEmbeddingConfigBuilder;
+use candle_lora::{NewLayers, SelectedLayers};
 
 #[test]
-fn embed() -> candle_core::Result<()> {
+fn linear() -> candle_core::Result<()> {
     use std::{collections::HashMap, hash::Hash};
 
     use candle_core::{DType, Device, Result, Tensor};
-    use candle_lora::{EmbeddingLayerLike, Lora, NewLayers, SelectedLayers};
-    use candle_nn::{init, Embedding, Module, VarMap};
+    use candle_lora::{LinearLayerLike, Lora, LoraLinearConfigBuilder};
+    use candle_nn::{init, Linear, Module, VarMap};
 
     #[derive(PartialEq, Eq, Hash)]
     enum ModelLayers {
-        Embed,
+        Layer,
     }
 
     #[derive(Debug)]
     struct Model {
-        embed: Box<dyn EmbeddingLayerLike>,
+        layer: Box<dyn LinearLayerLike>,
     }
 
     impl Module for Model {
         fn forward(&self, input: &Tensor) -> Result<Tensor> {
-            self.embed.forward(input)
+            self.layer.forward(input)
         }
     }
 
     impl Model {
         fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-            for (name, embed) in new.embed {
+            for (name, mut linear) in new.linear {
                 match name {
-                    ModelLayers::Embed => self.embed = Box::new(embed),
+                    ModelLayers::Layer => {
+                        linear.merge().unwrap();
+                        self.layer = Box::new(linear)
+                    }
                 }
             }
         }
@@ -37,46 +40,41 @@ fn embed() -> candle_core::Result<()> {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
-    let in_size = 10;
-    let hidden_size = 3;
-
     //Create the model
     let map = VarMap::new();
-    let embed_weight = map.get(
-        (in_size, hidden_size),
-        "embed.weight",
-        init::ZERO,
+    let layer_weight = map.get(
+        (10, 10),
+        "layer.weight",
+        init::DEFAULT_KAIMING_NORMAL,
         dtype,
         &device,
     )?;
 
     let mut model = Model {
-        embed: Box::new(Embedding::new(embed_weight, hidden_size)),
+        layer: Box::new(Linear::new(layer_weight.clone(), None)),
     };
 
-    let dummy_image = Tensor::zeros((2, 4), DType::U32, &device)?;
+    let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
 
     //Test the model
     let output = model.forward(&dummy_image).unwrap();
     println!("Output: {output:?}");
 
     //Select layers we want to convert
-    let linear_layers = HashMap::new();
+    let mut linear_layers = HashMap::new();
+    linear_layers.insert(ModelLayers::Layer, &*model.layer);
     let conv1d_layers = HashMap::new();
     let conv2d_layers = HashMap::new();
-    let mut embed_layers = HashMap::new();
-    embed_layers.insert(ModelLayers::Embed, &*model.embed);
+    let embed_layers = HashMap::new();
     let selected = SelectedLayers {
         linear: linear_layers,
-        linear_config: None,
+        linear_config: Some(LoraLinearConfigBuilder::default(&device, dtype, 10, 10).build()),
         conv1d: conv1d_layers,
         conv1d_config: None,
         conv2d: conv2d_layers,
         conv2d_config: None,
         embed: embed_layers,
-        embed_config: Some(
-            LoraEmbeddingConfigBuilder::default(&device, dtype, in_size, hidden_size).build(),
-        ),
+        embed_config: None,
     };
 
     //Create new LoRA layers from our layers

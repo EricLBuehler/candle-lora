@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_nn::{init, Embedding, VarMap};
 
@@ -9,6 +11,7 @@ pub struct LoraEmbedding {
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
+    merged: bool,
 }
 
 /// Configuration for LoraEmbedding, with `num_embeddings` vectors of `embedding_dim` size`.
@@ -90,7 +93,25 @@ impl LoraEmbedding {
             } else {
                 None
             },
+            merged: false,
         })
+    }
+
+    fn get_delta_weight(&self) -> Result<Tensor> {
+        let result = self.b.matmul(&self.a)?;
+        Ok(match self.scale {
+            Some(scale) => result.mul(scale)?,
+            None => result,
+        })
+    }
+
+    pub fn merge(&mut self) -> Result<()> {
+        self.old = FrozenEmbedding::new(
+            &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))?,
+            self.hidden_size(),
+        )?;
+        self.merged = true;
+        Ok(())
     }
 }
 

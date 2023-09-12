@@ -12,6 +12,7 @@ pub struct LoraLinear {
     b: Tensor,
     scale: Option<f64>,
     dropout: Option<Dropout>,
+    merged: bool,
 }
 
 /// Configuration for LoraLinear
@@ -96,26 +97,48 @@ impl LoraLinear {
                 None
             },
             dropout: config.dropout.map(Dropout::new),
+            merged: false,
         })
+    }
+
+    fn get_delta_weight(&self) -> Result<Tensor> {
+        let result = self.b.matmul(&self.a)?;
+        Ok(match self.scale {
+            Some(scale) => result.mul(scale)?,
+            None => result,
+        })
+    }
+
+    pub fn merge(&mut self) -> Result<()> {
+        self.old = FrozenLinear::new(
+            (self.old.weight() + self.get_delta_weight())?,
+            self.old.bias().cloned(),
+        )?;
+        self.merged = true;
+        Ok(())
     }
 }
 
 impl Module for LoraLinear {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        //No fan_in_fan_out so no weight.transpose(0,1)
-        let mut result = self.old.forward(input)?;
-        if let Some(scale) = self.scale {
-            if self.dropout.is_some() {
-                result = (result + self.dropout.as_ref().unwrap().forward(input, true)?)?;
-            } else {
-                result = (result + input)?;
+        if self.merged {
+            self.old.forward(input)
+        } else {
+            //No fan_in_fan_out so no weight.transpose(0,1)
+            let mut result = self.old.forward(input)?;
+            if let Some(scale) = self.scale {
+                if self.dropout.is_some() {
+                    result = (result + self.dropout.as_ref().unwrap().forward(input, true)?)?;
+                } else {
+                    result = (result + input)?;
+                }
+                result = result.broadcast_add(
+                    &result.matmul(&self.b.broadcast_matmul(&self.a.matmul(&result)?)?)?,
+                )?;
+                result = result.broadcast_add(&result.clone().mul(scale)?)?;
             }
-            result = result.broadcast_add(
-                &result.matmul(&self.b.broadcast_matmul(&self.a.matmul(&result)?)?)?,
-            )?;
-            result = result.broadcast_add(&result.clone().mul(scale)?)?;
+            Ok(result)
         }
-        Ok(result)
     }
 }
 

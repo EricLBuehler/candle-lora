@@ -1,38 +1,41 @@
-use std::{collections::HashMap, hash::Hash};
+use candle_lora::LoraEmbeddingConfigBuilder;
 
-use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{
-    EmbeddingLayerLike, Lora, LoraEmbeddingConfigBuilder, NewLayers, SelectedLayers,
-};
-use candle_nn::{init, Embedding, Module, VarMap};
+fn main() -> candle_core::Result<()> {
+    use std::{collections::HashMap, hash::Hash};
 
-#[derive(PartialEq, Eq, Hash)]
-enum ModelLayers {
-    Embed,
-}
+    use candle_core::{DType, Device, Result, Tensor};
+    use candle_lora::{EmbeddingLayerLike, Lora, NewLayers, SelectedLayers};
+    use candle_nn::{init, Embedding, Module, VarMap};
 
-#[derive(Debug)]
-struct Model {
-    embed: Box<dyn EmbeddingLayerLike>,
-}
-
-impl Module for Model {
-    fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        self.embed.forward(input)
+    #[derive(PartialEq, Eq, Hash)]
+    enum ModelLayers {
+        Embed,
     }
-}
 
-impl Model {
-    fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-        for (name, conv) in new.embed {
-            match name {
-                ModelLayers::Embed => self.embed = Box::new(conv),
+    #[derive(Debug)]
+    struct Model {
+        embed: Box<dyn EmbeddingLayerLike>,
+    }
+
+    impl Module for Model {
+        fn forward(&self, input: &Tensor) -> Result<Tensor> {
+            self.embed.forward(input)
+        }
+    }
+
+    impl Model {
+        fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
+            for (name, mut embed) in new.embed {
+                match name {
+                    ModelLayers::Embed => {
+                        embed.merge().unwrap();
+                        self.embed = Box::new(embed)
+                    }
+                }
             }
         }
     }
-}
 
-fn main() -> Result<()> {
     let device = Device::Cpu;
     let dtype = DType::F32;
 

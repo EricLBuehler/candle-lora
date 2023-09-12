@@ -47,9 +47,9 @@ impl Module for Model {
 
 impl Model {
     fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-        for (name, conv) in new.linear {
+        for (name, linear) in new.linear {
             match name {
-                ModelLayers::Layer => self.layer = Box::new(conv),
+                ModelLayers::Layer => self.layer = Box::new(linear),
             }
         }
     }
