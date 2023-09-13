@@ -10,8 +10,6 @@ All conversions are done as implemented in HuggingFace's official LoRA implement
 
 Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, and `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
 
-## Ergonomics
-Because swapping out and selecting layers is tedious and can be error-prone for medium to large models, I am developing a library that automates the process: [`candle-lora-macro`](https://github.com/EricLBuehler/candle-lora-macro).
 
 ## How to use
 1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
@@ -20,7 +18,8 @@ generate new layers that can easily be swapped out without forcing you to redefi
 3) Swap out the layers.
 4) Enjoy your new LoRA model!
 
-The latter 2 items may be combined into a single macro.
+## candle-lora-macro
+Because swapping out and selecting layers is tedious and can be error-prone for medium to large models, I am developing a [crate](https://github.com/EricLBuehler/candle-lora-macro) that automates the process.
 
 ## Example
 ```rust
