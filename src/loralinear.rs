@@ -3,18 +3,19 @@ use std::ops::Mul;
 use candle_core::{Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, VarMap};
 use either::Either;
+use trc::Trc;
 
 use crate::{
     frozenlinear::FrozenLinear, LinearLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LoraLinear {
-    old: FrozenLinear,
+    old: Trc<FrozenLinear>,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
-    dropout: Option<Dropout>,
+    dropout: Option<Trc<Dropout>>,
     merged: bool,
 }
 
@@ -56,7 +57,7 @@ impl LoraLinear {
         )?;
 
         Ok(LoraLinear {
-            old: FrozenLinear::new_from_linear(old)?,
+            old: Trc::new(FrozenLinear::new_from_linear(old)?),
             a,
             b,
             scale: if config.rank > 0 {
@@ -64,7 +65,7 @@ impl LoraLinear {
             } else {
                 None
             },
-            dropout: config.dropout.map(Dropout::new),
+            dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
             merged: false,
         })
     }
@@ -83,11 +84,13 @@ impl Merge for LoraLinear {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = FrozenLinear::new(
-                (self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
-                self.old.bias().cloned(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenLinear::new(
+                    (self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
+                    self.old.bias().cloned(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = true;
             Ok(())
         }
@@ -97,11 +100,13 @@ impl Merge for LoraLinear {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = FrozenLinear::new(
-                (self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
-                self.old.bias().cloned(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenLinear::new(
+                    (self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
+                    self.old.bias().cloned(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = false;
             Ok(())
         }

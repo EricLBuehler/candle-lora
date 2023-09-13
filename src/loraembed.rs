@@ -3,15 +3,16 @@ use std::ops::Mul;
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Embedding, VarMap};
 use either::Either;
+use trc::Trc;
 
 use crate::{
     frozenembed::FrozenEmbedding, EmbeddingLayerLike, LoraConfig, Merge, MergeError,
     MergeErrorOrError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LoraEmbedding {
-    old: FrozenEmbedding,
+    old: Trc<FrozenEmbedding>,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
@@ -56,7 +57,7 @@ impl LoraEmbedding {
         )?;
 
         Ok(LoraEmbedding {
-            old: FrozenEmbedding::new_from_embed(old)?,
+            old: Trc::new(FrozenEmbedding::new_from_embed(old)?),
             a,
             b,
             scale: if config.rank > 0 {
@@ -82,12 +83,14 @@ impl Merge for LoraEmbedding {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = FrozenEmbedding::new(
-                &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))
-                    .map_err(Either::Right)?,
-                self.hidden_size(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenEmbedding::new(
+                    &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))
+                        .map_err(Either::Right)?,
+                    self.hidden_size(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = true;
             Ok(())
         }
@@ -97,12 +100,14 @@ impl Merge for LoraEmbedding {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = FrozenEmbedding::new(
-                &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))
-                    .map_err(Either::Right)?,
-                self.hidden_size(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenEmbedding::new(
+                    &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))
+                        .map_err(Either::Right)?,
+                    self.hidden_size(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = false;
             Ok(())
         }

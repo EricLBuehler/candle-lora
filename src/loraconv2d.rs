@@ -3,18 +3,19 @@ use std::ops::Mul;
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarMap};
 use either::Either;
+use trc::Trc;
 
 use crate::{
     frozenconv::FrozenConv2d, Conv2dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LoraConv2d {
-    old: FrozenConv2d,
+    old: Trc<FrozenConv2d>,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
-    dropout: Option<Dropout>,
+    dropout: Option<Trc<Dropout>>,
     merged: bool,
 }
 
@@ -66,7 +67,7 @@ impl LoraConv2d {
         )?;
 
         Ok(LoraConv2d {
-            old: FrozenConv2d::new_from_conv2d(old)?,
+            old: Trc::new(FrozenConv2d::new_from_conv2d(old)?),
             a,
             b,
             scale: if config.rank > 0 {
@@ -74,7 +75,7 @@ impl LoraConv2d {
             } else {
                 None
             },
-            dropout: config.dropout.map(Dropout::new),
+            dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
             merged: false,
         })
     }
@@ -119,12 +120,14 @@ impl Merge for LoraConv2d {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = FrozenConv2d::new(
-                &(self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
-                self.old.bias(),
-                *self.old.config(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenConv2d::new(
+                    &(self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
+                    self.old.bias(),
+                    *self.old.config(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = true;
             Ok(())
         }
@@ -134,12 +137,14 @@ impl Merge for LoraConv2d {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = FrozenConv2d::new(
-                &(self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
-                self.old.bias(),
-                *self.old.config(),
-            )
-            .map_err(Either::Right)?;
+            self.old = Trc::new(
+                FrozenConv2d::new(
+                    &(self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
+                    self.old.bias(),
+                    *self.old.config(),
+                )
+                .map_err(Either::Right)?,
+            );
             self.merged = false;
             Ok(())
         }
