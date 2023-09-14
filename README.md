@@ -18,11 +18,9 @@ In addition, `candle-lora-macro` also provides an attribute macro called `replac
 Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes!
 
 ## How to use
-1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
-generate new layers that can easily be swapped out without forcing you to redefine your model structs.
-2) Derive `AutoLora` from candle-lora-macro on your model struct.
-3) Call `get_lora_model`.
-4) Enjoy your new LoRA model!
+1) Derive `AutoLora` from candle-lora-macro on each model struct and add the `replace_layer_fields` attribute macro.
+2) Call `get_lora_model` on each model struct.
+3) Enjoy your new LoRA model!
 
 
 ## Example
