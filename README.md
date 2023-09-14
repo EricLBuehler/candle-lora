@@ -10,16 +10,15 @@ All conversions are done as implemented in HuggingFace's official LoRA implement
 
 Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, and `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
 
+## [candle-lora-macro](https://github.com/EricLBuehler/candle-lora-macro)
+candle-lora-macro provides a derive macro that defines a method `get_lora_model`. It automates the process of selecting and swapping all `Box<dyn ...LayerLike>` layers. This aims to provide ergonomics similar to the `peft` `.get_peft_model` method.
 
 ## How to use
 1) In your model structs, replace any concrete `Linear`, `Conv1d`, `Conv2d`, or `Embedding` types with `Box<dyn ...LayerLike>`. This will allow `candle-lora` to
 generate new layers that can easily be swapped out without forcing you to redefine your model structs.
-2) Select the layers and perform the conversion.
-3) Swap out the layers.
+2) Derive `AutoLora` from candle-lora-macro on your model struct.
+3) Call `get_lora_model`.
 4) Enjoy your new LoRA model!
-
-## [candle-lora-macro](https://github.com/EricLBuehler/candle-lora-macro)
-candle-lora-macro provides a derive macro that defines a method `get_lora_model`. It automates the process of selecting and swapping all `Box<dyn ...LayerLike>` layers. This aims to provide ergonomics similar to the `peft` `.get_peft_model` method.
 
 
 ## Example
