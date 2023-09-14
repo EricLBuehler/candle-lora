@@ -18,8 +18,9 @@ generate new layers that can easily be swapped out without forcing you to redefi
 3) Swap out the layers.
 4) Enjoy your new LoRA model!
 
-## candle-lora-macro
-Because swapping out and selecting layers is tedious and can be error-prone for medium to large models, I am developing a [crate](https://github.com/EricLBuehler/candle-lora-macro) that automates the process.
+## [candle-lora-macro](https://github.com/EricLBuehler/candle-lora-macro)
+candle-lora-macro provides a derive macro that defines a method `get_lora_model`. It automates the process of selecting and swapping all `Box<dyn ...LayerLike>` layers. This aims to provide ergonomics similar to the `peft` `.get_peft_model` method.
+
 
 ## Example
 ```rust
