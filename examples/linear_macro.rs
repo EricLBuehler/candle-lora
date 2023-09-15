@@ -7,7 +7,7 @@ use candle_nn::{init, Linear, VarMap};
 #[derive(AutoLoraConvert, Debug)]
 struct Model {
     a: Linear,
-    b: i32,
+    _b: i32,
 }
 
 impl Module for Model {
@@ -33,7 +33,7 @@ fn main() {
 
     let mut model = Model {
         a: Box::new(Linear::new(layer_weight.clone(), None)),
-        b: 1,
+        _b: 1,
     };
 
     let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
@@ -47,10 +47,6 @@ fn main() {
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device).unwrap();
 
-    //Test the model
     let digit = model.forward(&dummy_image).unwrap();
     println!("Output: {digit:?}");
-
-    println!("{:?}", model.a);
-    println!("{:?}", model.b);
 }
