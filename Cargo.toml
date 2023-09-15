@@ -2,8 +2,14 @@
 name = "candle-lora"
 version = "0.2.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+readme = "README.md"
+authors = ["Eric Buehler"]
+description = "Macros for a more ergonomic candle-lora."
+homepage = "https://github.com/EricLBuehler/trc"
+repository = "https://github.com/EricLBuehler/trc"
+keywords = ["machine-learning"] #TODOs: Add candle keyword
+categories = ["science"]
 
 [dependencies]
 candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
@@ -11,3 +17,6 @@ candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.2.
 either = "1.9.0"
 thiserror = "1.0.48"
 trc = "1.2.3"
+
+[dev-dependencies]
+candle-lora-macro = { git = "https://github.com/EricLBuehler/candle-lora-macro.git", version = "0.2.0" }
