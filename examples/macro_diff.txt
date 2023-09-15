@@ -1,6 +1,6 @@
---- examples/linear_macro.rs	2023-09-15 13:57:38.483749288 -0400
-+++ examples/linear.rs	2023-09-15 13:58:02.783750282 -0400
-@@ -1,18 +1,34 @@
+--- examples/linear_macro.rs	2023-09-15 14:09:18.113744136 -0400
++++ examples/linear.rs	2023-09-15 14:09:42.833744052 -0400
+@@ -1,12 +1,19 @@
 -use candle_core::{DType, Device, Module, Result, Tensor};
 -use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
 -use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
@@ -22,18 +22,15 @@
 +
 +#[derive(Debug)]
  struct Model {
--    a: Linear,
--    _b: i32,
+-    layer: Linear,
 +    layer: Box<dyn LinearLayerLike>,
  }
  
  impl Module for Model {
-     fn forward(&self, input: &Tensor) -> Result<Tensor> {
--        self.a.forward(input)
-+        self.layer.forward(input)
-+    }
-+}
-+
+@@ -15,6 +22,16 @@
+     }
+ }
+ 
 +impl Model {
 +    fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
 +        for (name, linear) in new.linear {
@@ -41,24 +38,14 @@
 +                ModelLayers::Layer => self.layer = Box::new(linear),
 +            }
 +        }
-     }
- }
- 
-@@ -20,6 +36,7 @@
++    }
++}
++
+ fn main() {
      let device = Device::Cpu;
      let dtype = DType::F32;
- 
-+    //Create the model
-     let map = VarMap::new();
-     let layer_weight = map
-         .get(
-@@ -32,21 +49,23 @@
-         .unwrap();
- 
-     let mut model = Model {
--        a: Box::new(Linear::new(layer_weight.clone(), None)),
--        _b: 1,
-+        layer: Box::new(Linear::new(layer_weight.clone(), None)),
+@@ -34,17 +51,20 @@
+         layer: Box::new(Linear::new(layer_weight.clone(), None)),
      };
  
 +    let mut linear_layers = HashMap::new();

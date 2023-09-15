@@ -6,13 +6,12 @@ use candle_nn::{init, Linear, VarMap};
 #[replace_layer_fields]
 #[derive(AutoLoraConvert, Debug)]
 struct Model {
-    a: Linear,
-    _b: i32,
+    layer: Linear,
 }
 
 impl Module for Model {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        self.a.forward(input)
+        self.layer.forward(input)
     }
 }
 
@@ -32,8 +31,7 @@ fn main() {
         .unwrap();
 
     let mut model = Model {
-        a: Box::new(Linear::new(layer_weight.clone(), None)),
-        _b: 1,
+        layer: Box::new(Linear::new(layer_weight.clone(), None)),
     };
 
     let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);

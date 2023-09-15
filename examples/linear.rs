@@ -36,7 +36,6 @@ fn main() {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
-    //Create the model
     let map = VarMap::new();
     let layer_weight = map
         .get(
