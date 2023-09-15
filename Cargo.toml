@@ -1,13 +1,13 @@
 [package]
 name = "candle-lora"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.2.0" }
-candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.2.0" }
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
+candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
 either = "1.9.0"
 thiserror = "1.0.48"
 trc = "1.2.3"

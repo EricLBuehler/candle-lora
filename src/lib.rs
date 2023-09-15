@@ -7,7 +7,7 @@ pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};
 pub use loraconv2d::{LoraConv2d, LoraConv2dConfig};
 pub use loraembed::{LoraEmbedding, LoraEmbeddingConfig};
 pub use loralinear::{LoraLinear, LoraLinearConfig};
-use std::{collections::HashMap, hash::Hash};
+use std::{collections::HashMap, fmt::Debug, hash::Hash};
 use thiserror::Error;
 
 mod frozenconv;
@@ -187,7 +187,7 @@ pub struct NewLayers<T: Eq + PartialEq + Hash> {
 }
 
 /// Any layer that is linear-like.
-pub trait LinearLayerLike: Module {
+pub trait LinearLayerLike: Module + Debug {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn shape(&self) -> &Shape;
@@ -206,7 +206,7 @@ impl LinearLayerLike for Linear {
 }
 
 /// Any layer that is conv1d-like.
-pub trait Conv1dLayerLike: Module {
+pub trait Conv1dLayerLike: Module + Debug {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv1dConfig;
@@ -225,7 +225,7 @@ impl Conv1dLayerLike for Conv1d {
 }
 
 /// Any layer that is conv2d-like.
-pub trait Conv2dLayerLike: Module {
+pub trait Conv2dLayerLike: Module + Debug {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv2dConfig;
@@ -244,7 +244,7 @@ impl Conv2dLayerLike for Conv2d {
 }
 
 /// Any layer that is embedding-like.
-pub trait EmbeddingLayerLike: Module {
+pub trait EmbeddingLayerLike: Module + Debug {
     fn embeddings(&self) -> &Tensor;
     fn hidden_size(&self) -> usize;
 }
