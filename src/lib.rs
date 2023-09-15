@@ -1,6 +1,4 @@
-use candle_core::{DType, Device, Error};
-#[doc = include_str!("../README.md")]
-use candle_core::{Shape, Tensor};
+use candle_core::{DType, Device, Error, Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
 use either::Either;
 pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};

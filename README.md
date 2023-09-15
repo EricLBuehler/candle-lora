@@ -25,81 +25,61 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 ## Example
 ```rust
-use std::{collections::HashMap, hash::Hash};
+use candle_core::{DType, Device, Module, Result, Tensor};
+use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
+use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
+use candle_nn::{init, Linear, VarMap};
 
-use candle_core::{DType, Device, Result, Tensor};
-use candle_lora::{LinearLayerLike, Lora, LoraLinearConfig, NewLayers, SelectedLayersBuilder, LoraConfig};
-use candle_nn::{init, Linear, Module, VarMap};
-
-#[derive(PartialEq, Eq, Hash)]
-enum ModelLayers {
-    Layer,
-}
-
-#[derive(Debug)]
+#[replace_layer_fields]
+#[derive(AutoLoraConvert, Debug)]
 struct Model {
-    layer: Box<dyn LinearLayerLike>,
+    a: Linear,
+    b: i32,
 }
 
 impl Module for Model {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
-        self.layer.forward(input)
+        self.a.forward(input)
     }
 }
 
-impl Model {
-    fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
-        for (name, linear) in new.linear {
-            match name {
-                ModelLayers::Layer => self.layer = Box::new(linear),
-            }
-        }
-    }
-}
-
-fn main() -> candle_core::Result<()> {
+fn main() {
     let device = Device::Cpu;
     let dtype = DType::F32;
 
-    //Create the model
     let map = VarMap::new();
-    let layer_weight = map.get(
-        (10, 10),
-        "layer.weight",
-        init::DEFAULT_KAIMING_NORMAL,
-        dtype,
-        &device,
-    )?;
+    let layer_weight = map
+        .get(
+            (10, 10),
+            "layer.weight",
+            init::DEFAULT_KAIMING_NORMAL,
+            dtype,
+            &device,
+        )
+        .unwrap();
 
     let mut model = Model {
-        layer: Box::new(Linear::new(layer_weight.clone(), None)),
+        a: Box::new(Linear::new(layer_weight.clone(), None)),
+        b: 1,
     };
 
-    let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;
+    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    model.get_lora_model(
+        loraconfig,
+        Some(LoraLinearConfig::new(10, 10)),
+        None,
+        None,
+        None,
+    );
+
+    let dummy_image = Tensor::zeros((10, 10), DType::F32, &device).unwrap();
 
     //Test the model
     let digit = model.forward(&dummy_image).unwrap();
     println!("Output: {digit:?}");
 
-    //Select layers we want to convert
-    let mut linear_layers = HashMap::new();
-    linear_layers.insert(ModelLayers::Layer, &*model.layer);
-    let selected = SelectedLayersBuilder::new()
-        .add_linear_layers(linear_layers, LoraLinearConfig::new(10, 10))
-        .build();
-
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
-
-    //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected, loraconfig);
-
-    //Custom methods to implement
-    model.insert_new(new_layers);
-
-    //Test the model
-    let digit = model.forward(&dummy_image).unwrap();
-    println!("LoRA Output: {digit:?}");
-
-    Ok(())
+    println!("{:?}", model.a);
+    println!("{:?}", model.b);
 }
+
 ```
