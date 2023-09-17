@@ -43,20 +43,20 @@ impl LoraConv1d {
         config: &LoraConfig,
         vb: &VarBuilder
     ) -> Result<Self> {
-        let a = vb.get_with_hints(
+        let a = vb.pp("a").get_with_hints(
             (
                 config.rank * conv_config.kernel_size,
                 conv_config.in_channels * conv_config.kernel_size,
             ),
-            "a.weight",
+            "weight",
             init::DEFAULT_KAIMING_NORMAL,
         )?;
-        let b = vb.get_with_hints(
+        let b = vb.pp("b").get_with_hints(
             (
                 conv_config.out_channels / old.config().groups * conv_config.kernel_size,
                 config.rank * conv_config.kernel_size,
             ),
-            "b.weight",
+            "weight",
             init::ZERO,
         )?;
 

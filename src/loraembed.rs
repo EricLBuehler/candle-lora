@@ -41,14 +41,14 @@ impl LoraEmbedding {
         config: &LoraConfig,
         vb: &VarBuilder,
     ) -> Result<Self> {
-        let a = vb.get_with_hints(
+        let a = vb.pp("a").get_with_hints(
             (config.rank, embed_config.num_embeddings),
-            "a.weight",
+            "weight",
             init::ZERO,
         )?;
-        let b = vb.get_with_hints(
+        let b = vb.pp("b").get_with_hints(
             (embed_config.embedding_dim, config.rank),
-            "b.weight",
+            "weight",
             Init::Randn {
                 mean: 0.0,
                 stdev: 1.0,
