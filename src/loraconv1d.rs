@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{Module, Result, Tensor};
-use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarMap};
+use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarBuilder};
 use either::Either;
 use trc::Trc;
 
@@ -41,27 +41,23 @@ impl LoraConv1d {
         old: &dyn Conv1dLayerLike,
         conv_config: &LoraConv1dConfig,
         config: &LoraConfig,
+        vb: &VarBuilder
     ) -> Result<Self> {
-        let map = VarMap::new();
-        let a = map.get(
+        let a = vb.get_with_hints(
             (
                 config.rank * conv_config.kernel_size,
                 conv_config.in_channels * conv_config.kernel_size,
             ),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
-            config.dtype,
-            config.device,
         )?;
-        let b = map.get(
+        let b = vb.get_with_hints(
             (
                 conv_config.out_channels / old.config().groups * conv_config.kernel_size,
                 config.rank * conv_config.kernel_size,
             ),
             "b.weight",
             init::ZERO,
-            config.dtype,
-            config.device,
         )?;
 
         Ok(LoraConv1d {

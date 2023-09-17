@@ -1,4 +1,5 @@
 use candle_lora::{LoraConfig, LoraEmbeddingConfig, Merge, SelectedLayersBuilder};
+use candle_nn::VarBuilder;
 
 #[test]
 fn embed() -> candle_core::Result<()> {
@@ -69,10 +70,13 @@ fn embed() -> candle_core::Result<()> {
         .add_embed_layers(embed_layers, LoraEmbeddingConfig::new(in_size, hidden_size))
         .build();
 
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    let varmap = VarMap::new();
+    let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
+
+    let loraconfig = LoraConfig::new(1, 1., None);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected, loraconfig);
+    let new_layers = Lora::convert_model(selected, loraconfig, &vb);
 
     //Custom methods to implement
     model.insert_new(new_layers);

@@ -1,4 +1,5 @@
 use candle_lora::{LoraConfig, LoraConv2dConfig, SelectedLayersBuilder};
+use candle_nn::VarBuilder;
 
 #[test]
 fn conv2d() -> candle_core::Result<()> {
@@ -90,10 +91,13 @@ fn conv2d() -> candle_core::Result<()> {
         )
         .build();
 
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    let varmap = VarMap::new();
+    let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
+
+    let loraconfig = LoraConfig::new(1, 1., None);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected, loraconfig);
+    let new_layers = Lora::convert_model(selected, loraconfig, &vb);
 
     //Custom methods to implement
     model.insert_new(new_layers);

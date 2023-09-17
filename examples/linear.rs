@@ -4,7 +4,7 @@ use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
     LinearLayerLike, Lora, LoraConfig, LoraLinearConfig, NewLayers, SelectedLayersBuilder,
 };
-use candle_nn::{init, Linear, Module, VarMap};
+use candle_nn::{init, Linear, Module, VarMap, VarBuilder};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {
@@ -57,9 +57,12 @@ fn main() {
         .add_linear_layers(linear_layers, LoraLinearConfig::new(10, 10))
         .build();
 
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    let varmap = VarMap::new();
+    let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
 
-    let new_layers = Lora::convert_model(selected, loraconfig);
+    let loraconfig = LoraConfig::new(1, 1., None);
+
+    let new_layers = Lora::convert_model(selected, loraconfig, &vb);
 
     model.insert_new(new_layers);
 

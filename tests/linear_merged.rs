@@ -1,4 +1,5 @@
 use candle_lora::{LoraConfig, Merge, NewLayers, SelectedLayersBuilder};
+use candle_nn::VarBuilder;
 
 #[test]
 fn linear() -> candle_core::Result<()> {
@@ -67,10 +68,13 @@ fn linear() -> candle_core::Result<()> {
         .add_linear_layers(linear_layers, LoraLinearConfig::new(10, 10))
         .build();
 
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    let varmap = VarMap::new();
+    let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
+
+    let loraconfig = LoraConfig::new(1, 1., None);
 
     //Create new LoRA layers from our layers
-    let new_layers = Lora::convert_model(selected, loraconfig);
+    let new_layers = Lora::convert_model(selected, loraconfig, &vb);
 
     //Custom methods to implement
     model.insert_new(new_layers);

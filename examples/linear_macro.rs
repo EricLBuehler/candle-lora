@@ -34,7 +34,7 @@ fn main() {
         layer: Box::new(Linear::new(layer_weight.clone(), None)),
     };
 
-    let loraconfig = LoraConfig::new(1, 1., None, &device, dtype);
+    let loraconfig = LoraConfig::new(1, 1., None);
     model.get_lora_model(
         loraconfig,
         Some(LoraLinearConfig::new(10, 10)),

@@ -1,5 +1,5 @@
 use candle_core::{DType, Device, Error, Shape, Tensor};
-use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module};
+use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module, VarBuilder};
 use either::Either;
 pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};
 pub use loraconv2d::{LoraConv2d, LoraConv2dConfig};
@@ -23,6 +23,7 @@ impl Lora {
     pub fn convert_model<T: Eq + PartialEq + Hash>(
         selected: SelectedLayers<'_, T>,
         config: LoraConfig,
+        vb: &VarBuilder,
     ) -> NewLayers<T> {
         let mut new = NewLayers {
             linear: HashMap::new(),
@@ -34,28 +35,28 @@ impl Lora {
         for (name, layer) in selected.linear {
             new.linear.insert(
                 name,
-                LoraLinear::new(layer, selected.linear_config.as_ref().unwrap(), &config).unwrap(),
+                LoraLinear::new(layer, selected.linear_config.as_ref().unwrap(), &config, &vb).unwrap(),
             );
         }
 
         for (name, layer) in selected.conv1d {
             new.conv1d.insert(
                 name,
-                LoraConv1d::new(layer, selected.conv1d_config.as_ref().unwrap(), &config).unwrap(),
+                LoraConv1d::new(layer, selected.conv1d_config.as_ref().unwrap(), &config, &vb).unwrap(),
             );
         }
 
         for (name, layer) in selected.conv2d {
             new.conv2d.insert(
                 name,
-                LoraConv2d::new(layer, selected.conv2d_config.as_ref().unwrap(), &config).unwrap(),
+                LoraConv2d::new(layer, selected.conv2d_config.as_ref().unwrap(), &config, &vb).unwrap(),
             );
         }
 
         for (name, layer) in selected.embed {
             new.embed.insert(
                 name,
-                LoraEmbedding::new(layer, selected.embed_config.as_ref().unwrap(), &config)
+                LoraEmbedding::new(layer, selected.embed_config.as_ref().unwrap(), &config, &vb)
                     .unwrap(),
             );
         }
@@ -64,15 +65,13 @@ impl Lora {
     }
 }
 
-pub struct LoraConfig<'a> {
+pub struct LoraConfig {
     rank: usize,
     alpha: f64,
     dropout: Option<f32>,
-    device: &'a Device,
-    dtype: DType,
 }
 
-impl<'a> LoraConfig<'a> {
+impl LoraConfig {
     /// Create a new LoRA config.
     /// - `rank`: The dimensions of low-rank matrices.
     /// - `alpha`: Scaling factor for the LoRA signal.
@@ -81,15 +80,11 @@ impl<'a> LoraConfig<'a> {
         rank: usize,
         alpha: f64,
         dropout: Option<f32>,
-        device: &'a Device,
-        dtype: DType,
     ) -> Self {
         Self {
             rank,
             alpha,
             dropout,
-            device,
-            dtype,
         }
     }
 }

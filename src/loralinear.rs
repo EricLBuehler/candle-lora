@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{Module, Result, Shape, Tensor};
-use candle_nn::{init, Dropout, Linear, VarMap};
+use candle_nn::{init, Dropout, Linear, VarBuilder};
 use either::Either;
 use trc::Trc;
 
@@ -39,21 +39,17 @@ impl LoraLinear {
         old: &dyn LinearLayerLike,
         linear_config: &LoraLinearConfig,
         config: &LoraConfig,
+        vb: &VarBuilder,
     ) -> Result<Self> {
-        let map = VarMap::new();
-        let a = map.get(
+        let a = vb.get_with_hints(
             (config.rank, linear_config.in_features),
             "a.weight",
             init::DEFAULT_KAIMING_NORMAL,
-            config.dtype,
-            config.device,
         )?;
-        let b = map.get(
+        let b = vb.get_with_hints(
             (linear_config.out_features, config.rank),
             "b.weight",
             init::ZERO,
-            config.dtype,
-            config.device,
         )?;
 
         Ok(LoraLinear {

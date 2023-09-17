@@ -316,7 +316,7 @@ impl Llama {
 
         let wte_embeddings = wte.embeddings().clone();
         let loraconfig =
-            LoraConfig::new(1, 1., None, wte_embeddings.device(), wte_embeddings.dtype());
+            LoraConfig::new(1, 1., None);
         let linearconfig = LoraLinearConfig::new(cfg.dim, cfg.vocab_size);
         let embedconfig = LoraEmbeddingConfig::new(cfg.vocab_size, cfg.dim);
 
