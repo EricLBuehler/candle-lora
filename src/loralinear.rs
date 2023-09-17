@@ -131,6 +131,7 @@ impl Module for LoraLinear {
                 )?;
                 result = result.broadcast_add(&result.clone().mul(scale)?)?;
             }
+            println!("Linear: {result:?}");
             Ok(result)
         }
     }
