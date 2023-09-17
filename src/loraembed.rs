@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{Module, Result, Tensor};
-use candle_nn::{init, Embedding, VarMap};
+use candle_nn::{init, Embedding, Init, VarMap};
 use either::Either;
 use trc::Trc;
 
@@ -51,7 +51,10 @@ impl LoraEmbedding {
         let b = map.get(
             (embed_config.embedding_dim, config.rank),
             "b.weight",
-            init::ZERO,
+            Init::Randn {
+                mean: 0.0,
+                stdev: 1.0,
+            },
             config.dtype,
             config.device,
         )?;
