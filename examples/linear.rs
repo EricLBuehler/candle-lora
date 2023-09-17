@@ -4,7 +4,7 @@ use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
     LinearLayerLike, Lora, LoraConfig, LoraLinearConfig, NewLayers, SelectedLayersBuilder,
 };
-use candle_nn::{init, Linear, Module, VarMap, VarBuilder};
+use candle_nn::{init, Linear, Module, VarBuilder, VarMap};
 
 #[derive(PartialEq, Eq, Hash)]
 enum ModelLayers {

@@ -1,7 +1,7 @@
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
-use candle_nn::{init, Linear, VarMap};
+use candle_nn::{init, Linear, VarBuilder, VarMap};
 
 #[replace_layer_fields]
 #[derive(AutoLoraConvert, Debug)]
@@ -34,9 +34,13 @@ fn main() {
         layer: Box::new(Linear::new(layer_weight.clone(), None)),
     };
 
+    let varmap = VarMap::new();
+    let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
+
     let loraconfig = LoraConfig::new(1, 1., None);
     model.get_lora_model(
         loraconfig,
+        &vb,
         Some(LoraLinearConfig::new(10, 10)),
         None,
         None,

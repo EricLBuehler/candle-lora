@@ -67,7 +67,7 @@ fn single_linear() -> candle_core::Result<()> {
 
     let varmap = VarMap::new();
     let vb = VarBuilder::from_varmap(&varmap, dtype, &device);
-    
+
     let loraconfig = LoraConfig::new(1, 1., None);
 
     //Create new LoRA layers from our layers

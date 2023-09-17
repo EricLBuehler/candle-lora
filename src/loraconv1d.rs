@@ -41,7 +41,7 @@ impl LoraConv1d {
         old: &dyn Conv1dLayerLike,
         conv_config: &LoraConv1dConfig,
         config: &LoraConfig,
-        vb: &VarBuilder
+        vb: &VarBuilder,
     ) -> Result<Self> {
         let a = vb.pp("a").get_with_hints(
             (

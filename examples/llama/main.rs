@@ -173,7 +173,7 @@ fn run_eval(args: &EvaluationCmd, common_args: &Args) -> Result<()> {
     let weights = TransformerWeights::from_reader(&mut file, &config, &device)?;
     let vb = weights.var_builder(&config, &device)?;
     let cache = model::Cache::new(false, &config, vb.pp("rot"))?;
-    let model = Llama::load(vb, &cache, config)?;
+    let model = Llama::load(vb, &cache, config, false)?;
 
     let tokens = match &args.pretokenized_dir {
         None => {
@@ -258,7 +258,7 @@ fn run_inference(args: &InferenceCmd, common_args: &Args) -> Result<()> {
         (vb, config)
     };
     let cache = model::Cache::new(true, &config, vb.pp("rot"))?;
-    let model = Llama::load(vb, &cache, config)?;
+    let model = Llama::load(vb, &cache, config, false)?;
 
     println!("starting the inference loop");
     let mut logits_processor = LogitsProcessor::new(299792458, args.temperature, args.top_p);

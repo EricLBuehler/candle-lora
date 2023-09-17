@@ -38,7 +38,8 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     let batch_iter = candle_datasets::Batcher::new_r2(iter).batch_size(args.batch_size);
 
     let cache = Cache::new(false, &config, vb.pp("rot"))?;
-    let model = Llama::load(vb, &cache, config)?;
+    let model = Llama::load(vb, &cache, config, true)?;
+
     let params = candle_nn::ParamsAdamW {
         lr: args.learning_rate,
         ..Default::default()

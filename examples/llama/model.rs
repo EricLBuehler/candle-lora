@@ -183,7 +183,7 @@ impl CausalSelfAttention {
         }
     }
 
-    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config) -> Result<Self> {
+    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config, train: bool) -> Result<Self> {
         let size_in = cfg.dim;
         let size_q = (cfg.dim / cfg.n_heads) * cfg.n_heads;
         let size_kv = (cfg.dim / cfg.n_heads) * cfg.n_kv_heads;
@@ -191,7 +191,8 @@ impl CausalSelfAttention {
         let k_proj = Box::new(linear(size_in, size_kv, vb.pp("k_proj"))?);
         let v_proj = Box::new(linear(size_in, size_kv, vb.pp("v_proj"))?);
         let o_proj = Box::new(linear(size_q, size_in, vb.pp("o_proj"))?);
-        Ok(Self {
+
+        let mut csa = Self {
             q_proj,
             k_proj,
             v_proj,
@@ -200,7 +201,20 @@ impl CausalSelfAttention {
             n_key_value_head: cfg.n_kv_heads,
             head_dim: cfg.dim / cfg.n_heads,
             cache: cache.clone(),
-        })
+        };
+        let loraconfig = LoraConfig::new(1, 1., None);
+        let linearconfig = LoraLinearConfig::new(cfg.dim, cfg.vocab_size);
+        if train {
+            csa.get_merged_lora_model(
+                loraconfig,
+                &vb.pp("csa_lora"),
+                Some(linearconfig),
+                None,
+                None,
+                None,
+            );
+        }
+        Ok(csa)
     }
 }
 
@@ -211,8 +225,6 @@ fn masked_fill(on_false: &Tensor, mask: &Tensor, on_true: f32) -> Result<Tensor>
     Ok(m)
 }
 
-#[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 struct Mlp {
     c_fc1: Linear,
     c_fc2: Linear,
@@ -222,9 +234,9 @@ struct Mlp {
 impl Mlp {
     fn new(c_fc1: Linear, c_fc2: Linear, c_proj: Linear) -> Self {
         Self {
-            c_fc1: Box::new(c_fc1),
-            c_fc2: Box::new(c_fc2),
-            c_proj: Box::new(c_proj),
+            c_fc1,
+            c_fc2,
+            c_proj,
         }
     }
 
@@ -269,8 +281,8 @@ impl Block {
         Ok(x)
     }
 
-    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config) -> Result<Self> {
-        let attn = CausalSelfAttention::load(vb.pp("self_attn"), cache, cfg)?;
+    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config, train: bool) -> Result<Self> {
+        let attn = CausalSelfAttention::load(vb.pp("self_attn"), cache, cfg, train)?;
         let mlp = Mlp::load(vb.pp("mlp"), cfg)?;
         let input_layernorm = rms_norm(cfg.dim, cfg.norm_eps, vb.pp("input_layernorm"))?;
         let post_attention_layernorm =
@@ -306,17 +318,15 @@ impl Llama {
         logits.to_dtype(DType::F32)
     }
 
-    pub fn load(vb: VarBuilder, cache: &Cache, cfg: Config) -> Result<Self> {
+    pub fn load(vb: VarBuilder, cache: &Cache, cfg: Config, train: bool) -> Result<Self> {
         let wte = embedding(cfg.vocab_size, cfg.dim, vb.pp("model.embed_tokens"))?;
         let lm_head = linear(cfg.dim, cfg.vocab_size, vb.pp("lm_head"))?;
         let ln_f = rms_norm(cfg.dim, cfg.norm_eps, vb.pp("model.norm"))?;
         let blocks: Vec<_> = (0..cfg.n_layers)
-            .map(|i| Block::load(vb.pp(&format!("model.layers.{i}")), cache, &cfg).unwrap())
+            .map(|i| Block::load(vb.pp(&format!("model.layers.{i}")), cache, &cfg, train).unwrap())
             .collect();
 
-        let wte_embeddings = wte.embeddings().clone();
-        let loraconfig =
-            LoraConfig::new(1, 1., None);
+        let loraconfig = LoraConfig::new(1, 1., None);
         let linearconfig = LoraLinearConfig::new(cfg.dim, cfg.vocab_size);
         let embedconfig = LoraEmbeddingConfig::new(cfg.vocab_size, cfg.dim);
 
@@ -327,13 +337,18 @@ impl Llama {
             lm_head: Box::new(lm_head),
             config: cfg,
         };
-        llama.get_merged_lora_model(
-            loraconfig,
-            Some(linearconfig),
-            None,
-            None,
-            Some(embedconfig),
-        );
+
+        if train {
+            llama.get_merged_lora_model(
+                loraconfig,
+                &vb.pp("llama_lora"),
+                Some(linearconfig),
+                None,
+                None,
+                Some(embedconfig),
+            );
+        }
+
         Ok(llama)
     }
 }
