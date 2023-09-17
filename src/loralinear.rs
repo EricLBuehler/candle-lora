@@ -121,12 +121,11 @@ impl Module for LoraLinear {
             //No fan_in_fan_out so no weight.transpose(0,1)
             let mut result = self.old.forward(input)?;
             if let Some(scale) = self.scale {
-                let input_new;
-                if self.dropout.is_some() {
-                    input_new = self.dropout.as_ref().unwrap().forward(input, true)?;
+                let input_new = if self.dropout.is_some() {
+                    self.dropout.as_ref().unwrap().forward(input, true)?
                 } else {
-                    input_new = input.clone();
-                }
+                    input.clone()
+                };
 
                 let l1 = Linear::new(self.a.clone(), None);
                 let l2 = Linear::new(self.b.clone(), None);

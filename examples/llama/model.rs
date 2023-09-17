@@ -332,7 +332,7 @@ impl Llama {
             lm_head: Box::new(lm_head),
             config: cfg,
         };
-        llama.get_lora_model(
+        llama.get_merged_lora_model(
             loraconfig,
             Some(linearconfig),
             None,
