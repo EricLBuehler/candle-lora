@@ -117,13 +117,13 @@ impl Module for LoraEmbedding {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         let mut result = self.old.forward(input)?;
         if let Some(scale) = self.scale {
-            let a = self.a.t().unwrap();
-            let a = a.reshape(a.shape()).unwrap();
-            let b = self.b.t().unwrap();
-            let b = b.reshape(b.shape()).unwrap();
+            let a = self.a.t()?;
+            let a = a.reshape(a.shape())?;
+            let b = self.b.t()?;
+            let b = b.reshape(b.shape())?;
 
-            let embed = Embedding::new(a.clone(), a.dim(1).unwrap());
-            let after_a = embed.forward(input).unwrap();
+            let embed = Embedding::new(a.clone(), a.dim(1)?);
+            let after_a = embed.forward(input)?;
             result = (result + (after_a.broadcast_matmul(&b)?).mul(scale))?
         }
         Ok(result)

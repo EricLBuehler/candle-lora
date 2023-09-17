@@ -1,4 +1,4 @@
-use candle_core::{DType, Device, Error, Shape, Tensor};
+use candle_core::{Error, Shape, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig, Embedding, Linear, Module, VarBuilder};
 use either::Either;
 pub use loraconv1d::{LoraConv1d, LoraConv1dConfig};

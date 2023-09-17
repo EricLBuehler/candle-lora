@@ -125,7 +125,7 @@ impl Module for LoraLinear {
 
                 let l1 = Linear::new(self.a.clone(), None);
                 let l2 = Linear::new(self.b.clone(), None);
-                result = (result + l2.forward(&l1.forward(&input_new).unwrap()))?.mul(scale)?;
+                result = (result + l2.forward(&l1.forward(&input_new)?))?.mul(scale)?;
             }
             Ok(result)
         }
