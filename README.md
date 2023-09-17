@@ -21,7 +21,7 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 
 ## Examples
-See an example with Llama [here](examples/llama). Running on my Intel Xeon E3 CPU, inference is 3.04 toks/sec without merging, and 2.92 toks/sec after weight merging. 
+See an example with Llama [here](examples/llama). Running on my Intel Xeon E3 CPU, inference is 3.04 toks/sec without merging, and 2.92 toks/sec after weight merging (a 4.1% improvement). 
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
