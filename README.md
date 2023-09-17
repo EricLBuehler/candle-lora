@@ -20,7 +20,9 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 3) Enjoy your new LoRA model!
 
 
-## Example
+## Examples
+See an example with Llama [here](examples/llama).
+
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
