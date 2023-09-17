@@ -1,7 +1,7 @@
 use std::ops::Mul;
 
 use candle_core::{Module, Result, Shape, Tensor};
-use candle_nn::{init, Dropout, VarMap};
+use candle_nn::{init, Dropout, Linear, VarMap};
 use either::Either;
 use trc::Trc;
 
@@ -121,17 +121,17 @@ impl Module for LoraLinear {
             //No fan_in_fan_out so no weight.transpose(0,1)
             let mut result = self.old.forward(input)?;
             if let Some(scale) = self.scale {
+                let input_new;
                 if self.dropout.is_some() {
-                    result = (result + self.dropout.as_ref().unwrap().forward(input, true)?)?;
+                    input_new = self.dropout.as_ref().unwrap().forward(input, true)?;
                 } else {
-                    result = (result + input)?;
+                    input_new = input.clone();
                 }
-                result = result.broadcast_add(
-                    &result.matmul(&self.b.broadcast_matmul(&self.a.matmul(&result)?)?)?,
-                )?;
-                result = result.broadcast_add(&result.clone().mul(scale)?)?;
+
+                let l1 = Linear::new(self.a.clone(), None);
+                let l2 = Linear::new(self.b.clone(), None);
+                result = (result + l2.forward(&l1.forward(&input_new).unwrap()))?.mul(scale)?;
             }
-            println!("Linear: {result:?}");
             Ok(result)
         }
     }

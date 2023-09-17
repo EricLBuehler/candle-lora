@@ -19,4 +19,16 @@ thiserror = "1.0.48"
 trc = "1.2.3"
 
 [dev-dependencies]
+anyhow = "1.0.75"
 candle-lora-macro = { git = "https://github.com/EricLBuehler/candle-lora-macro.git", version = "0.2.0" }
+clap = "4.4.3"
+tokenizers = { version = "0.14.0", features = ["onig"] }
+candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
+byteorder = "1.4.3"
+hf-hub = { version = "0.3.1", features = ["tokio"] }
+candle-examples = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
+candle-datasets = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
+
+[[example]]
+name = "llama"
+path = "examples/llama/main.rs"
