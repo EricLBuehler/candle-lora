@@ -40,13 +40,14 @@ impl LoraEmbedding {
         embed_config: &LoraEmbeddingConfig,
         config: &LoraConfig,
         vb: &VarBuilder,
+        id: usize,
     ) -> Result<Self> {
-        let a = vb.pp("a").get_with_hints(
+        let a = vb.pp(format!("a{id}")).get_with_hints(
             (config.rank, embed_config.num_embeddings),
             "weight",
             init::ZERO,
         )?;
-        let b = vb.pp("b").get_with_hints(
+        let b: Tensor = vb.pp(format!("b{id}")).get_with_hints(
             (embed_config.embedding_dim, config.rank),
             "weight",
             Init::Randn {

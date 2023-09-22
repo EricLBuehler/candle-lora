@@ -34,36 +34,66 @@ impl Lora {
             embed: HashMap::new(),
         };
 
+        let mut id = 0;
+
         for (name, layer) in selected.linear {
             new.linear.insert(
                 name,
-                LoraLinear::new(layer, selected.linear_config.as_ref().unwrap(), &config, vb)
-                    .unwrap(),
+                LoraLinear::new(
+                    layer,
+                    selected.linear_config.as_ref().unwrap(),
+                    &config,
+                    vb,
+                    id,
+                )
+                .unwrap(),
             );
+            id += 1;
         }
 
         for (name, layer) in selected.conv1d {
             new.conv1d.insert(
                 name,
-                LoraConv1d::new(layer, selected.conv1d_config.as_ref().unwrap(), &config, vb)
-                    .unwrap(),
+                LoraConv1d::new(
+                    layer,
+                    selected.conv1d_config.as_ref().unwrap(),
+                    &config,
+                    vb,
+                    id,
+                )
+                .unwrap(),
             );
+            id += 1;
         }
 
         for (name, layer) in selected.conv2d {
             new.conv2d.insert(
                 name,
-                LoraConv2d::new(layer, selected.conv2d_config.as_ref().unwrap(), &config, vb)
-                    .unwrap(),
+                LoraConv2d::new(
+                    layer,
+                    selected.conv2d_config.as_ref().unwrap(),
+                    &config,
+                    vb,
+                    id,
+                )
+                .unwrap(),
             );
+            id += 1;
         }
 
         for (name, layer) in selected.embed {
             new.embed.insert(
                 name,
-                LoraEmbedding::new(layer, selected.embed_config.as_ref().unwrap(), &config, vb)
-                    .unwrap(),
+                LoraEmbedding::new(
+                    layer,
+                    selected.embed_config.as_ref().unwrap(),
+                    &config,
+                    vb,
+                    id,
+                )
+                .unwrap(),
             );
+            id += 1;
         }
 
         new

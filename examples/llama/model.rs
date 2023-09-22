@@ -323,7 +323,7 @@ impl Llama {
         let lm_head = linear(cfg.dim, cfg.vocab_size, vb.pp("lm_head"))?;
         let ln_f = rms_norm(cfg.dim, cfg.norm_eps, vb.pp("model.norm"))?;
         let blocks: Vec<_> = (0..cfg.n_layers)
-            .map(|i| Block::load(vb.pp(&format!("model.layers.{i}")), cache, &cfg, train).unwrap())
+            .map(|i| Block::load(vb.pp(&format!("model.layers.{i}")), cache, &cfg, false).unwrap())
             .collect();
 
         let loraconfig = LoraConfig::new(1, 1., None);

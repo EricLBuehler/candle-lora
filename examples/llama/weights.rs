@@ -1,13 +1,10 @@
 use anyhow::Result;
 use byteorder::{LittleEndian, ReadBytesExt};
-use candle_core::{DType, Device, IndexOp, Shape, Tensor};
-use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
-use candle_nn::VarBuilder;
+use candle_core::{Device, IndexOp, Shape, Tensor, Var};
+use candle_nn::VarMap;
 
 use crate::model::Config;
 
-#[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct TransformerWeights {
     // token embedding table
     token_embedding_table: Tensor, // (vocab_size, dim)
@@ -107,7 +104,7 @@ impl TransformerWeights {
         })
     }
 
-    pub fn var_builder(&self, cfg: &Config, device: &Device) -> Result<VarBuilder<'static>> {
+    pub fn var_builder(&self, cfg: &Config, device: &Device) -> Result<VarMap> {
         // TODO: As of 2023-08-04, gemm is slower than expected when multiplying a matrix of
         // size (1, k) with the transpose of a matrix of size (k, n) as it ends up transposing the
         // second matrix back. We detect this case here and as a temporary hack make the weight
@@ -115,9 +112,12 @@ impl TransformerWeights {
         // 120 token/s to 220 token/s on a Ryzen 2600X.
         let tr = device.is_cpu() && !candle_core::utils::has_mkl();
         let tr = |x: Tensor| if tr { x.t()?.contiguous()?.t() } else { Ok(x) };
-        let mut ws = std::collections::HashMap::new();
+
+        let map = VarMap::new();
+
+        let mut ws = map.data().lock().unwrap();
         let mut insert = |name: &str, t: Tensor| {
-            ws.insert(name.to_string(), t);
+            ws.insert(name.to_string(), Var::from_tensor(&t).unwrap());
         };
         insert("rot.freq_cis_real", self.freq_cis_real.clone());
         insert("rot.freq_cis_imag", self.freq_cis_imag.clone());
@@ -130,42 +130,42 @@ impl TransformerWeights {
         for layer in 0..cfg.n_layers {
             ws.insert(
                 format!("model.layers.{layer}.self_attn.q_proj.weight"),
-                tr(self.wq.i(layer)?)?,
+                Var::from_tensor(&tr(self.wq.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.self_attn.k_proj.weight"),
-                tr(self.wk.i(layer)?)?,
+                Var::from_tensor(&tr(self.wk.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.self_attn.v_proj.weight"),
-                tr(self.wv.i(layer)?)?,
+                Var::from_tensor(&tr(self.wv.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.self_attn.o_proj.weight"),
-                tr(self.wo.i(layer)?)?,
+                Var::from_tensor(&tr(self.wo.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.mlp.gate_proj.weight"),
-                tr(self.w1.i(layer)?)?,
+                Var::from_tensor(&tr(self.w1.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.mlp.down_proj.weight"),
-                tr(self.w2.i(layer)?)?,
+                Var::from_tensor(&tr(self.w2.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.mlp.up_proj.weight"),
-                tr(self.w3.i(layer)?)?,
+                Var::from_tensor(&tr(self.w3.i(layer)?)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.input_layernorm.weight"),
-                self.rms_att_weight.i(layer)?,
+                Var::from_tensor(&self.rms_att_weight.i(layer)?)?,
             );
             ws.insert(
                 format!("model.layers.{layer}.post_attention_layernorm.weight"),
-                self.rms_ffn_weight.i(layer)?,
+                Var::from_tensor(&self.rms_ffn_weight.i(layer)?)?,
             );
         }
-        let vb = VarBuilder::from_tensors(ws, DType::F32, device);
-        Ok(vb)
+        drop(ws);
+        Ok(map)
     }
 }

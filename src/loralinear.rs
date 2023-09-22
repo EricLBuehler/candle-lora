@@ -40,13 +40,14 @@ impl LoraLinear {
         linear_config: &LoraLinearConfig,
         config: &LoraConfig,
         vb: &VarBuilder,
+        id: usize,
     ) -> Result<Self> {
-        let a = vb.pp("a").get_with_hints(
+        let a = vb.pp(format!("a{id}")).get_with_hints(
             (config.rank, linear_config.in_features),
             "weight",
             init::DEFAULT_KAIMING_NORMAL,
         )?;
-        let b = vb.pp("b").get_with_hints(
+        let b = vb.pp(format!("b{id}")).get_with_hints(
             (linear_config.out_features, config.rank),
             "weight",
             init::ZERO,
