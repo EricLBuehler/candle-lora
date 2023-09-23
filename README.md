@@ -21,7 +21,7 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 
 ## Examples
-See an example with Llama [here](examples/llama). I will add a training example soon!
+See a training example with Llama + LoRA [here](examples/llama).
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
