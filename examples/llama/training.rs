@@ -1,9 +1,16 @@
 use crate::{
+    llmdataset::{LLMDataset, LLMDatasetIter},
     model::{Cache, Config, Llama},
     weights::TransformerWeights,
 };
 use candle_core::{Result, Var};
 use candle_nn::{Optimizer, VarMap};
+
+fn to_bytes(input: &str) -> Vec<u8> {
+    input
+            .bytes()
+            .collect::<Vec<_>>()
+}
 
 pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     let config_path = match &args.config {
@@ -48,15 +55,36 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     let vb = candle_nn::VarBuilder::from_varmap(&map, candle_core::DType::F32, &device);
 
     let cache = Cache::new(false, &config, vb.pp("rot"))?;
-    let _model = Llama::load(vb, &cache, config, true)?;
+    let model = Llama::load(vb, &cache, config, true)?;
 
     let params = candle_nn::ParamsAdamW {
         lr: args.learning_rate,
         ..Default::default()
     };
-    let opt = candle_nn::AdamW::new(map.all_vars(), params)?;
+    let mut opt = candle_nn::AdamW::new(map.all_vars(), params)?;
 
-    println!("{:?}", opt);
+    let mut dataset: LLMDataset<u8> = LLMDataset::new(vec![], device);
+    dataset.add_line(to_bytes("This is test text."));
+    dataset.add_line(to_bytes("Hello, world!"));
+    dataset.add_line(to_bytes("How is Llama?"));
+
+    
+    for _ in 0..10 {
+        let batch_iter = LLMDatasetIter::new_shuffled(&dataset, 1);
+        for (batch_index, batch) in batch_iter.enumerate() {
+            let (inp, tgt) = batch?;
+            let logits = model.forward(&inp, 0)?;
+            let loss = candle_nn::loss::cross_entropy(&logits.flatten_to(1)?, &tgt.flatten_to(1)?)?;
+            opt.backward_step(&loss)?;
+            println!("{:?}", loss);
+
+            if batch_index > 0 && batch_index % 1000 == 0 {
+                map.save("checkpoint.safetensors")?
+            }
+        }
+    }
+
+    println!("Done training!");
 
     Ok(())
 }

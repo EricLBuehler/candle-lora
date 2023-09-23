@@ -6,6 +6,7 @@ extern crate accelerate_src;
 #[cfg(feature = "mkl")]
 extern crate intel_mkl_src;
 
+mod llmdataset;
 mod model;
 mod training;
 mod weights;
@@ -93,6 +94,14 @@ pub struct TrainingCmd {
     /// https://huggingface.co/karpathy/tinyllamas/tree/main
     #[arg(long, default_value = "stories15M.bin")]
     which_model: String,
+
+    /// The temperature used to generate samples.
+    #[arg(long)]
+    temperature: Option<f64>,
+
+    /// Nucleus sampling probability cutoff.
+    #[arg(long)]
+    top_p: Option<f64>,
 }
 
 #[derive(Subcommand, Debug, Clone)]

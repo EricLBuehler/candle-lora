@@ -28,6 +28,7 @@ byteorder = "1.4.3"
 hf-hub = { version = "0.3.1", features = ["tokio"] }
 candle-examples = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
 candle-datasets = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
+rand = "0.8.5"
 
 [[example]]
 name = "llama"
