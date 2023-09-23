@@ -5,14 +5,19 @@ use crate::{
 };
 use candle_core::{Result, Var};
 use candle_nn::{Optimizer, VarMap};
+use candle_transformers::generation::LogitsProcessor;
+use plotly::common::Title;
+use plotly::layout::{Axis, Layout};
+use plotly::{Plot, Scatter};
+use tokenizers::Tokenizer;
 
-fn to_bytes(input: &str) -> Vec<u8> {
-    input
-            .bytes()
-            .collect::<Vec<_>>()
+fn encode(input: &str, tokenizer: &Tokenizer) -> Vec<u32> {
+    tokenizer.encode(input, true).unwrap().get_ids().to_vec()
 }
 
 pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
+    let tokenizer = common_args.tokenizer().unwrap();
+
     let config_path = match &args.config {
         Some(config) => std::path::PathBuf::from(config),
         None => {
@@ -63,24 +68,61 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     };
     let mut opt = candle_nn::AdamW::new(map.all_vars(), params)?;
 
-    let mut dataset: LLMDataset<u8> = LLMDataset::new(vec![], device);
-    dataset.add_line(to_bytes("This is test text."));
-    dataset.add_line(to_bytes("Hello, world!"));
-    dataset.add_line(to_bytes("How is Llama?"));
+    let mut dataset: LLMDataset<u32> = LLMDataset::new(vec![], device);
+    dataset.add_line(encode(
+        "What is oxygen good for? Oxygen is good for breathing",
+        &tokenizer,
+    ));
+    dataset.add_line(encode(
+        "Why are leaves beautiful? Leaves might be beautiful",
+        &tokenizer,
+    ));
+    dataset.add_line(encode("What is Kelvin? A unit of temperature", &tokenizer));
 
-    
-    for _ in 0..10 {
+    let mut logits_processor = LogitsProcessor::new(299792458, args.temperature, args.top_p);
+
+    let mut losses = Vec::new();
+    for epoch in 0..100 {
         let batch_iter = LLMDatasetIter::new_shuffled(&dataset, 1);
         for (batch_index, batch) in batch_iter.enumerate() {
             let (inp, tgt) = batch?;
             let logits = model.forward(&inp, 0)?;
             let loss = candle_nn::loss::cross_entropy(&logits.flatten_to(1)?, &tgt.flatten_to(1)?)?;
             opt.backward_step(&loss)?;
-            println!("{:?}", loss);
+
+            let ids = inp.squeeze(0).unwrap().to_vec1().unwrap();
+            let logits = logits.detach().unwrap().squeeze(0).unwrap();
+            let mut logit_ids = Vec::new();
+            for i in 0..logits.dim(0).unwrap() {
+                logit_ids.push(logits_processor.sample(&logits.get(i).unwrap()).unwrap());
+            }
+            let scalar_loss = loss.to_scalar::<f32>().unwrap();
+            println!("input = {:?}", tokenizer.decode(&ids, false).unwrap());
+            println!(
+                "output = {:?}",
+                tokenizer.decode(&logit_ids, false).unwrap()
+            );
+            println!();
+
+            losses.push(scalar_loss);
 
             if batch_index > 0 && batch_index % 1000 == 0 {
                 map.save("checkpoint.safetensors")?
             }
+        }
+
+        if epoch > 0 && epoch % 10 == 0 {
+            let trace = Scatter::new((0..losses.len()).collect::<Vec<_>>(), losses.clone());
+
+            let layout = Layout::new()
+                .x_axis(Axis::new().title(Title::from("Epoch")))
+                .y_axis(Axis::new().title(Title::from("Loss")))
+                .title(Title::from("Loss graph"));
+
+            let mut plot = Plot::new();
+            plot.add_trace(trace);
+            plot.set_layout(layout);
+            plot.write_html(&format!("examples/llama/loss.html"));
         }
     }
 
