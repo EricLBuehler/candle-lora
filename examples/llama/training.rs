@@ -18,6 +18,8 @@ fn encode(input: &str, tokenizer: &Tokenizer) -> Vec<u32> {
 }
 
 const EOS_TOKEN: &str = "</s>";
+const EPOCHS: usize = 250;
+const SEED: u64 = 42;
 
 pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     let tokenizer = common_args.tokenizer().unwrap();
@@ -83,10 +85,10 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     ));
     dataset.add_line(encode("What is Kelvin? A unit of temperature.", &tokenizer));
 
-    let mut logits_processor = LogitsProcessor::new(299792458, args.temperature, args.top_p);
+    let mut logits_processor = LogitsProcessor::new(SEED, args.temperature, args.top_p);
 
     let mut losses = Vec::new();
-    for epoch in 0..100 {
+    for epoch in 0..EPOCHS {
         let batch_iter = LLMDatasetIter::new_shuffled(&dataset, 1);
         for (batch_index, batch) in batch_iter.enumerate() {
             let (inp, tgt) = batch?;
