@@ -18,7 +18,7 @@ fn encode(input: &str, tokenizer: &Tokenizer) -> Vec<u32> {
 }
 
 const EOS_TOKEN: &str = "</s>";
-const EPOCHS: usize = 250;
+const EPOCHS: usize = 100;
 const SEED: u64 = 42;
 
 pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
@@ -128,7 +128,9 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
             let mut plot = Plot::new();
             plot.add_trace(trace);
             plot.set_layout(layout);
-            plot.write_html(&format!("examples/llama/loss.html"));
+            plot.write_html("examples/llama/loss.html");
+
+            map.save(format!("examples/llama/epoch_{epoch}.safetensors"))?;
         }
     }
 
