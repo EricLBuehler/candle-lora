@@ -6,7 +6,6 @@ extern crate accelerate_src;
 #[cfg(feature = "mkl")]
 extern crate intel_mkl_src;
 
-mod llmdataset;
 mod model;
 mod training;
 mod weights;

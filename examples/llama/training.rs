@@ -1,21 +1,14 @@
 use crate::{
-    llmdataset::{LLMDataset, LLMDatasetIter},
     model::{Cache, Config, Llama},
     weights::TransformerWeights,
 };
 use candle_core::{Result, Var};
+use candle_llm_dataset::{LLMDataset, LLMDatasetIter};
 use candle_nn::{Optimizer, VarMap};
 use candle_transformers::generation::LogitsProcessor;
 use plotly::common::Title;
 use plotly::layout::{Axis, Layout};
 use plotly::{Plot, Scatter};
-use tokenizers::Tokenizer;
-
-fn encode(input: &str, tokenizer: &Tokenizer) -> Vec<u32> {
-    let mut toks = tokenizer.encode(input, true).unwrap().get_ids().to_vec();
-    toks.push(tokenizer.token_to_id(EOS_TOKEN).unwrap());
-    toks
-}
 
 const EOS_TOKEN: &str = "</s>";
 const EPOCHS: usize = 100;
@@ -74,16 +67,28 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     };
     let mut opt = candle_nn::AdamW::new(map.all_vars(), params)?;
 
-    let mut dataset: LLMDataset<u32> = LLMDataset::new(vec![], device);
-    dataset.add_line(encode(
-        "What is oxygen good for? Oxygen is good for breathing.",
-        &tokenizer,
-    ));
-    dataset.add_line(encode(
-        "Why are leaves beautiful? Leaves might be beautiful.",
-        &tokenizer,
-    ));
-    dataset.add_line(encode("What is Kelvin? A unit of temperature.", &tokenizer));
+    let mut dataset: LLMDataset = LLMDataset::new(vec![], device, tokenizer.clone());
+    dataset
+        .add_line(
+            "What is oxygen good for? Oxygen is good for breathing.".into(),
+            true,
+            EOS_TOKEN.to_string(),
+        )
+        .unwrap();
+    dataset
+        .add_line(
+            "Why are leaves beautiful? Leaves might be beautiful.".into(),
+            true,
+            EOS_TOKEN.to_string(),
+        )
+        .unwrap();
+    dataset
+        .add_line(
+            "What is Kelvin? A unit of temperature.".into(),
+            true,
+            EOS_TOKEN.to_string(),
+        )
+        .unwrap();
 
     let mut logits_processor = LogitsProcessor::new(SEED, args.temperature, args.top_p);
 
@@ -91,7 +96,7 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
     for epoch in 0..EPOCHS {
         let batch_iter = LLMDatasetIter::new_shuffled(&dataset, 1);
         for (batch_index, batch) in batch_iter.enumerate() {
-            let (inp, tgt) = batch?;
+            let (inp, tgt) = (batch.input.ids, batch.target.ids);
             let logits = model.forward(&inp, 0)?;
             let loss = candle_nn::loss::cross_entropy(&logits.flatten_to(1)?, &tgt.flatten_to(1)?)?;
             opt.backward_step(&loss)?;

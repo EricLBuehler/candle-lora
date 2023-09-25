@@ -5,7 +5,7 @@ edition = "2021"
 license = "MIT"
 readme = "README.md"
 authors = ["Eric Buehler"]
-description = "Macros for a more ergonomic candle-lora."
+description = "LoRA implemented for Candle."
 homepage = "https://github.com/EricLBuehler/trc"
 repository = "https://github.com/EricLBuehler/trc"
 keywords = ["machine-learning"] #TODOs: Add candle keyword
@@ -30,6 +30,7 @@ candle-examples = { git = "https://github.com/huggingface/candle.git", version =
 candle-datasets = { git = "https://github.com/huggingface/candle.git", version = "0.2.2" }
 rand = "0.8.5"
 plotly = "0.8.4"
+candle_llm_dataset = {git = "https://github.com/EricLBuehler/candle_llm_dataset", version = "0.1.0"}
 
 [[example]]
 name = "llama"
