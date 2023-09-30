@@ -2,13 +2,20 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-informational)](LICENSE)
 [![Continuous integration](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml)
 
-LoRA (low rank adaptation) implemented in Rust for use with [`Candle`](https://github.com/huggingface/candle/tree/main).
+LoRA (low rank adaptation) implemented in Rust for use with [`Candle`](https://github.com/huggingface/candle/tree/main). This technique
+interchanges the fully-trainable layers of the model with new, LoRA layers. These LoRA layers act as a wrapper over the original layers, but freeze
+the original layers. Because they contain fewer trainable parameters, LoRA allows for more efficient fine-tuning. 
 
-It is based on HuggingFace's [`peft`](https://github.com/huggingface/peft/tree/main) library. See the original paper [here](https://arxiv.org/pdf/2106.09685.pdf). 
+However, using a fine-tuned LoRA model for inference will have a negative impact on performance. This is because the original layer must still be used to calculate the outputs. However, for a LoRA model, an algorithm known as weight merging nullifies the added cost of using the
+fine-tuned LoRA model by merging the LoRA and original weights. Weights may also be unmerged.
 
-All conversions are done as implemented in HuggingFace's official LoRA implementation.
-
-Specifically, `candle-lora` is able to convert `Linear`, `Conv1d`, `Conv2d`, and `Embedding` into their respective LoRA counterparts. To improve inference performance, both merging and unmerging LoRA weights are also implemented.
+## Features
+- Convert `Linear`, `Conv1d`, `Conv2d`, `Embedding` layers into LoRA layers
+    - All conversions are implemented in accordance with HuggingFace's official LoRA implementation
+- Weight merging is implemented to improve inference performance
+- Weight unmerging
+- Easy-to-use APIs
+- Extensible trait-based layer swapping mechanism
 
 ## [candle-lora-macro](https://github.com/EricLBuehler/candle-lora-macro)
 This library makes using `candle-lora` as simple as adding 2 macros to your model structs and calling a method! It is inspired by the simplicity of the Python `peft` library's `get_peft_model` method. 
@@ -79,3 +86,6 @@ fn main() {
     println!("Output: {digit:?}");
 }
 ```
+
+## Resources
+`candle-lora`'s LoRA conversion implementations are based on HuggingFace's [`peft`](https://github.com/huggingface/peft/tree/main) library. See the original paper [here](https://arxiv.org/pdf/2106.09685.pdf), as well as Microsoft's [implementation](https://github.com/microsoft/LoRA).
