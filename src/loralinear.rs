@@ -12,8 +12,8 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct LoraLinear {
     old: Trc<FrozenLinear>,
-    a: Tensor,
-    b: Tensor,
+    ff_a: Linear,
+    ff_b: Linear,
     scale: Option<f64>,
     dropout: Option<Trc<Dropout>>,
     merged: bool,
@@ -55,8 +55,8 @@ impl LoraLinear {
 
         Ok(LoraLinear {
             old: Trc::new(FrozenLinear::new_from_linear(old)?),
-            a,
-            b,
+            ff_a: Linear::new(a, None),
+            ff_b: Linear::new(b, None),
             scale: if config.rank > 0 {
                 Some(config.alpha / config.rank as f64)
             } else {
@@ -70,7 +70,11 @@ impl LoraLinear {
 
 impl Merge for LoraLinear {
     fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
-        let result = self.b.matmul(&self.a).map_err(Either::Right)?;
+        let result = self
+            .ff_b
+            .weight()
+            .matmul(self.ff_a.weight())
+            .map_err(Either::Right)?;
         Ok(match self.scale {
             Some(scale) => result.mul(scale).map_err(Either::Right)?,
             None => result,
@@ -124,9 +128,8 @@ impl Module for LoraLinear {
                     input.clone()
                 };
 
-                let l1 = Linear::new(self.a.clone(), None);
-                let l2 = Linear::new(self.b.clone(), None);
-                result = (result + l2.forward(&l1.forward(&input_new)?))?.mul(scale)?;
+                result =
+                    (result + self.ff_b.forward(&self.ff_a.forward(&input_new)?))?.mul(scale)?;
             }
             Ok(result)
         }

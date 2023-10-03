@@ -12,8 +12,8 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct LoraConv2d {
     old: Trc<FrozenConv2d>,
-    a: Tensor,
-    b: Tensor,
+    a_conv: Conv2d,
+    b_conv: Conv2d,
     scale: Option<f64>,
     dropout: Option<Trc<Dropout>>,
     merged: bool,
@@ -63,10 +63,20 @@ impl LoraConv2d {
             init::ZERO,
         )?;
 
+        let a_conv = Conv2d::new(a, None, *old.config());
+        let b_conv = Conv2d::new(
+            b,
+            None,
+            Conv2dConfig {
+                stride: 1,
+                ..*old.config()
+            },
+        );
+
         Ok(LoraConv2d {
             old: Trc::new(FrozenConv2d::new_from_conv2d(old)?),
-            a,
-            b,
+            a_conv,
+            b_conv,
             scale: if config.rank > 0 {
                 Some(config.alpha / config.rank as f64)
             } else {
@@ -82,14 +92,16 @@ impl Merge for LoraConv2d {
     fn get_delta_weight(&self) -> std::result::Result<Tensor, MergeErrorOrError> {
         let result = match self.old.weight().shape().dims()[2..4] {
             [1, 1] => self
-                .b
+                .b_conv
+                .weight()
                 .squeeze(3)
                 .map_err(Either::Right)?
                 .squeeze(2)
                 .map_err(Either::Right)?
                 .matmul(
                     &self
-                        .a
+                        .a_conv
+                        .weight()
                         .squeeze(3)
                         .map_err(Either::Right)?
                         .squeeze(2)
@@ -101,9 +113,15 @@ impl Merge for LoraConv2d {
                 .unsqueeze(3)
                 .map_err(Either::Right)?,
             _ => {
-                let conv = Conv2d::new(self.b.clone(), None, *self.old.config());
-                conv.forward(&self.a.permute((1, 0, 2, 3)).map_err(Either::Right)?)
-                    .map_err(Either::Right)?
+                let conv = Conv2d::new(self.b_conv.weight().clone(), None, *self.old.config());
+                conv.forward(
+                    &self
+                        .a_conv
+                        .weight()
+                        .permute((1, 0, 2, 3))
+                        .map_err(Either::Right)?,
+                )
+                .map_err(Either::Right)?
             }
         };
 
@@ -161,17 +179,7 @@ impl Module for LoraConv2d {
                 a_input = self.dropout.as_ref().unwrap().forward(input, true)?;
             }
 
-            let a_conv = Conv2d::new(self.a.clone(), None, *self.config());
-            let b_conv = Conv2d::new(
-                self.b.clone(),
-                None,
-                Conv2dConfig {
-                    stride: 1,
-                    ..*self.config()
-                },
-            );
-
-            let tmp = b_conv.forward(&a_conv.forward(&a_input)?)?;
+            let tmp = self.b_conv.forward(&self.a_conv.forward(&a_input)?)?;
 
             &weight + tmp.mul(scale)?
         } else {

@@ -13,6 +13,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct LoraEmbedding {
     old: Trc<FrozenEmbedding>,
+    embed_a: Embedding,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
@@ -56,8 +57,13 @@ impl LoraEmbedding {
             },
         )?;
 
+        let mut a_t = a.t()?;
+        a_t = a_t.reshape(a_t.shape())?;
+        let embed_a = Embedding::new(a_t.clone(), a_t.dim(1)?);
+
         Ok(LoraEmbedding {
             old: Trc::new(FrozenEmbedding::new_from_embed(old)?),
+            embed_a,
             a,
             b,
             scale: if config.rank > 0 {
@@ -118,13 +124,10 @@ impl Module for LoraEmbedding {
     fn forward(&self, input: &Tensor) -> Result<Tensor> {
         let mut result = self.old.forward(input)?;
         if let Some(scale) = self.scale {
-            let a = self.a.t()?;
-            let a = a.reshape(a.shape())?;
             let b = self.b.t()?;
             let b = b.reshape(b.shape())?;
 
-            let embed = Embedding::new(a.clone(), a.dim(1)?);
-            let after_a = embed.forward(input)?;
+            let after_a = self.embed_a.forward(input)?;
             result = (result + (after_a.broadcast_matmul(&b)?).mul(scale))?
         }
         Ok(result)
