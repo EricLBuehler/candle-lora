@@ -19,7 +19,7 @@ fine-tuned LoRA model by merging the LoRA and original weights. Weights may also
 
 ## [candle-lora-macro](https://github.com/EricLBuehler/candle-lora-macro)
 This library makes using `candle-lora` as simple as adding 2 macros to your model structs and calling a method! It is inspired by the simplicity of the Python `peft` library's `get_peft_model` method. 
-Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes! To see an example of the benefits, compare the example below (or [here](examples/linear_macro.rs)) to [this](examples/linear.rs), equivalent example. See a precise diff [here](examples/macro_diff.txt).
+Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes! To see an example of the benefits, compare the example below (or [here](candle-lora-examples/examples/linear_macro.rs)) to [this](candle-lora-examples/examples/linear.rs), equivalent example. See a precise diff [here](candle-lora-examples/examples/macro_diff.txt).
 
 ## How to use
 1) Derive `AutoLoraConvert` from candle-lora-macro on each model struct and add the `replace_layer_fields` attribute macro.
@@ -28,7 +28,6 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 
 ## Examples
-See a training example with Llama + LoRA [here](examples/llama).
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
