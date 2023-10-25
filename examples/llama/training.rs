@@ -72,21 +72,24 @@ pub fn run(args: &crate::TrainingCmd, common_args: &crate::Args) -> Result<()> {
         .add_line(
             "What is oxygen good for? Oxygen is good for breathing.".into(),
             true,
-            EOS_TOKEN.to_string(),
+            None,
+            Some(EOS_TOKEN.to_string()),
         )
         .unwrap();
     dataset
         .add_line(
             "Why are leaves beautiful? Leaves might be beautiful.".into(),
             true,
-            EOS_TOKEN.to_string(),
+            None,
+            Some(EOS_TOKEN.to_string()),
         )
         .unwrap();
     dataset
         .add_line(
             "What is Kelvin? A unit of temperature.".into(),
             true,
-            EOS_TOKEN.to_string(),
+            None,
+            Some(EOS_TOKEN.to_string()),
         )
         .unwrap();
 
