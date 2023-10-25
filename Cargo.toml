@@ -1,37 +1,30 @@
-[package]
-name = "candle-lora"
+[workspace]
+members = [
+    "candle-lora",
+    "candle-lora-transformers",
+    "candle-lora-examples"
+]
+resolver = "2"
+
+[workspace.package]
 version = "0.2.0"
 edition = "2021"
-license = "MIT"
-readme = "README.md"
-authors = ["Eric Buehler"]
 description = "LoRA implemented for Candle."
-homepage = "https://github.com/EricLBuehler/trc"
-repository = "https://github.com/EricLBuehler/trc"
+homepage = "https://github.com/EricLBuehler/candle-lora"
+repository = "https://github.com/EricLBuehler/candle-lora"
 keywords = ["machine-learning"] #TODOs: Add candle keyword
 categories = ["science"]
+license = "MIT OR Apache-2.0"
 
-[dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+[workspace.dependencies]
+candle-lora-macro = { git = "https://github.com/EricLBuehler/candle-lora-macro.git", version = "0.2.0" }
 either = "1.9.0"
+serde_json = "1.0.107"
 thiserror = "1.0.48"
+tracing-chrome = "0.7.1"
+tracing-subscriber = "0.3.17"
 trc = "1.2.3"
 
-[dev-dependencies]
-anyhow = "1.0.75"
-candle-lora-macro = { git = "https://github.com/EricLBuehler/candle-lora-macro.git", version = "0.2.0" }
-clap = "4.4.3"
-tokenizers = { version = "0.14.0", features = ["onig"] }
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-byteorder = "1.4.3"
-hf-hub = { version = "0.3.1", features = ["tokio"] }
-candle-examples = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-candle-datasets = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-rand = "0.8.5"
-plotly = "0.8.4"
-candle_llm_dataset = {git = "https://github.com/EricLBuehler/candle_llm_dataset", version = "0.1.0"}
-
-[[example]]
-name = "llama"
-path = "examples/llama/main.rs"
+[profile.release-with-debug]
+inherits = "release"
+debug = true

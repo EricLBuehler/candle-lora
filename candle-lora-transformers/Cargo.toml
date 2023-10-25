@@ -1,0 +1,20 @@
+[package]
+name = "candle-lora-transformers"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+authors = ["Eric Buehler"]
+description = "LoRA Candle transformers."
+homepage = "https://github.com/EricLBuehler/candle-lora"
+repository = "https://github.com/EricLBuehler/candle-lora"
+keywords = ["machine-learning"] #TODOs: Add candle keyword
+categories = ["science"]
+
+[dependencies]
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-lora = { version = "0.2.0", path = "../candle-lora" }
+candle-lora-macro.workspace = true
+candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+serde = "1.0.189"
+tracing = "0.1.40"
