@@ -390,7 +390,7 @@ impl DecoderLayer {
 #[derive(Debug)]
 #[replace_layer_fields]
 #[derive(AutoLoraConvert)]
-pub struct Model {
+pub struct Mistral {
     embed_tokens: candle_nn::Embedding,
     layers: Vec<DecoderLayer>,
     norm: RmsNorm,
@@ -400,7 +400,10 @@ pub struct Model {
     dtype: DType,
 }
 
-impl Model {
+impl Mistral {
+    /// Load a Llama model which will be converted to a LoRA model.
+    ///
+    /// The `merge` parameter merges the weights.
     pub fn new(cfg: &Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -> Result<Self> {
         let vb_m = vb.pp("model");
         let embed_tokens =

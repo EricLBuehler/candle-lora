@@ -8,7 +8,7 @@ use anyhow::{Error as E, Result};
 use candle_lora::LoraConfig;
 use clap::Parser;
 
-use candle_lora_transformers::mistral::{Config, Model as Mistral};
+use candle_lora_transformers::mistral::{Config, Mistral};
 
 use candle_core::{DType, Device, Tensor, Var};
 use candle_examples::token_output_stream::TokenOutputStream;
