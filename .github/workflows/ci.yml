@@ -104,3 +104,5 @@ jobs:
           override: true
       - name: Typos check with custom config file
         uses: crate-ci/typos@master
+        with:
+          config: .typos.toml
