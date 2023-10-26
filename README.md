@@ -29,7 +29,10 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 ## Examples
 
-See some examples of transformers from Candle which have added LoRA support [here](candle-lora-transformers/examples/).
+See some examples of transformers from Candle which have added LoRA support [here](candle-lora-transformers/examples/). Currently, the following transformers have been
+converted:
+- `llama`
+- `mistral`
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
