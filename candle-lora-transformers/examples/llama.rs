@@ -52,7 +52,7 @@ struct Args {
     seed: u64,
 
     /// The length of the sample to generate (in tokens).
-    #[arg(long, default_value_t = 100)]
+    #[arg(long, default_value_t = 256)]
     sample_len: usize,
 
     /// Disable the key-value cache.
