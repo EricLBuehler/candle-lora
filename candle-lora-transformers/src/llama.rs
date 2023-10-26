@@ -527,6 +527,9 @@ impl Llama {
         logits.to_dtype(DType::F32)
     }
 
+    /// Load a Llama model which will be converted to a LoRA model.
+    ///
+    /// The `merge` parameter merges the weights.
     pub fn load(
         vb: VarBuilder,
         cache: &Cache,
