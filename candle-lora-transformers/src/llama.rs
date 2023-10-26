@@ -1,5 +1,7 @@
 use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
-use candle_lora::{EmbeddingLayerLike, LinearLayerLike};
+use candle_lora::{
+    EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
+};
 use candle_lora_macro::{self, replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, Module, VarBuilder};
 use serde::Deserialize;
@@ -329,7 +331,14 @@ impl CausalSelfAttention {
         }
     }
 
-    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config) -> Result<Self> {
+    fn load(
+        vb: VarBuilder,
+        cache: &Cache,
+        cfg: &Config,
+        merge: bool,
+        lora_config: LoraConfig,
+        linear_config: LoraLinearConfig,
+    ) -> Result<Self> {
         let span = tracing::span!(tracing::Level::TRACE, "attn");
         let span_rot = tracing::span!(tracing::Level::TRACE, "attn-rot");
         let size_in = cfg.hidden_size;
@@ -339,7 +348,8 @@ impl CausalSelfAttention {
         let k_proj = linear(size_in, size_kv, vb.pp("k_proj"))?;
         let v_proj = linear(size_in, size_kv, vb.pp("v_proj"))?;
         let o_proj = linear(size_q, size_in, vb.pp("o_proj"))?;
-        Ok(Self {
+
+        let mut this = Self {
             q_proj,
             k_proj,
             v_proj,
@@ -351,7 +361,29 @@ impl CausalSelfAttention {
             use_flash_attn: cfg.use_flash_attn,
             span,
             span_rot,
-        })
+        };
+
+        if merge {
+            this.get_merged_lora_model(
+                lora_config,
+                &vb.pp("lora_llama_csa"),
+                Some(linear_config),
+                None,
+                None,
+                None,
+            )
+        } else {
+            this.get_lora_model(
+                lora_config,
+                &vb.pp("lora_llama_csa"),
+                Some(linear_config),
+                None,
+                None,
+                None,
+            )
+        }
+
+        Ok(this)
     }
 }
 
@@ -415,9 +447,24 @@ impl Block {
         Ok(x)
     }
 
-    fn load(vb: VarBuilder, cache: &Cache, cfg: &Config) -> Result<Self> {
+    fn load(
+        vb: VarBuilder,
+        cache: &Cache,
+        cfg: &Config,
+        merge: bool,
+        lora_config: LoraConfig,
+        linear_config: LoraLinearConfig,
+        embed_onfig: LoraEmbeddingConfig,
+    ) -> Result<Self> {
         let span = tracing::span!(tracing::Level::TRACE, "block");
-        let attn = CausalSelfAttention::load(vb.pp("self_attn"), cache, cfg)?;
+        let attn = CausalSelfAttention::load(
+            vb.pp("self_attn"),
+            cache,
+            cfg,
+            merge,
+            lora_config.clone(),
+            linear_config.clone(),
+        )?;
         let mlp = Mlp::load(vb.pp("mlp"), cfg)?;
         let rms_1 = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp("input_layernorm"))?;
         let rms_2 = RmsNorm::load(
@@ -425,13 +472,36 @@ impl Block {
             cfg.rms_norm_eps,
             vb.pp("post_attention_layernorm"),
         )?;
-        Ok(Self {
+
+        let mut this = Self {
             rms_1,
             attn,
             rms_2,
             mlp,
             span,
-        })
+        };
+
+        if merge {
+            this.get_merged_lora_model(
+                lora_config,
+                &vb.pp("lora_llama_block"),
+                Some(linear_config),
+                None,
+                None,
+                Some(embed_onfig),
+            )
+        } else {
+            this.get_lora_model(
+                lora_config,
+                &vb.pp("lora_llama_block"),
+                Some(linear_config),
+                None,
+                None,
+                Some(embed_onfig),
+            )
+        }
+
+        Ok(this)
     }
 }
 
@@ -457,19 +527,60 @@ impl Llama {
         logits.to_dtype(DType::F32)
     }
 
-    pub fn load(vb: VarBuilder, cache: &Cache, cfg: &Config) -> Result<Self> {
+    pub fn load(
+        vb: VarBuilder,
+        cache: &Cache,
+        cfg: &Config,
+        merge: bool,
+        lora_config: LoraConfig,
+        linear_config: LoraLinearConfig,
+        embed_config: LoraEmbeddingConfig,
+    ) -> Result<Self> {
         let wte = embedding(cfg, vb.pp("model.embed_tokens"))?;
         let lm_head = linear(cfg.hidden_size, cfg.vocab_size, vb.pp("lm_head"))?;
         let ln_f = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp("model.norm"))?;
         let blocks: Vec<_> = (0..cfg.num_hidden_layers)
-            .map(|i| Block::load(vb.pp(&format!("model.layers.{i}")), cache, cfg).unwrap())
+            .map(|i| {
+                Block::load(
+                    vb.pp(&format!("model.layers.{i}")),
+                    cache,
+                    cfg,
+                    merge,
+                    lora_config.clone(),
+                    linear_config.clone(),
+                    embed_config.clone(),
+                )
+                .unwrap()
+            })
             .collect();
 
-        Ok(Self {
+        let mut this = Self {
             wte: Box::new(wte),
             blocks,
             ln_f,
             lm_head: Box::new(lm_head),
-        })
+        };
+
+        if merge {
+            this.get_merged_lora_model(
+                lora_config,
+                &vb.pp("lora_llama"),
+                Some(linear_config),
+                None,
+                None,
+                Some(embed_config),
+            )
+        } else {
+            this.get_lora_model(
+                lora_config,
+                &vb.pp("lora_llama"),
+                Some(linear_config),
+                None,
+                None,
+                Some(embed_config),
+            )
+        }
+
+        Ok(this)
     }
 }

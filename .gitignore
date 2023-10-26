@@ -2,4 +2,4 @@
 Cargo.lock
 *.safetensors
 loss.html
-hf_token.txt
+.hf_token

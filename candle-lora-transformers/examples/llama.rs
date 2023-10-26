@@ -13,13 +13,14 @@ extern crate accelerate_src;
 extern crate intel_mkl_src;
 
 use anyhow::{bail, Error as E, Result};
+use candle_lora::{LoraConfig, LoraEmbeddingConfig, LoraLinearConfig};
 use clap::Parser;
 
-use candle_core::{DType, Tensor};
-use candle_nn::VarBuilder;
+use candle_core::{DType, Tensor, Var};
+use candle_nn::{VarBuilder, VarMap};
 use candle_transformers::generation::LogitsProcessor;
-use hf_hub::{api::sync::Api, Repo, RepoType};
-use std::io::Write;
+use hf_hub::{api::sync::ApiBuilder, Repo, RepoType};
+use std::{fs, io::Write};
 
 use candle_lora_transformers::llama as model;
 use model::{Config, Llama, LlamaConfig};
@@ -118,6 +119,7 @@ fn main() -> Result<()> {
         Some(dtype) => bail!("Unsupported dtype {dtype}"),
         None => DType::F16,
     };
+
     let (llama, tokenizer_filename, cache) = match args.npy {
         Some(filename) => {
             let config = if args.v1 {
@@ -126,12 +128,48 @@ fn main() -> Result<()> {
                 Config::config_7b_v2(args.use_flash_attn)
             };
             let cache = model::Cache::new(!args.no_kv_cache, dtype, &config, &device)?;
-            let vb = VarBuilder::from_npz(filename, dtype, &device)?;
             let tokenizer = std::path::PathBuf::from("llama-tokenizer.json");
-            (Llama::load(vb, &cache, &config)?, tokenizer, cache)
+
+            let map = VarMap::new();
+            {
+                let mut ws = map.data().lock().unwrap();
+
+                let tensors = candle_core::npy::NpzTensors::new(filename)?;
+                for name in tensors.names() {
+                    let tensor = tensors
+                        .get(&name)?
+                        .expect("Expect Some(_) tensor.")
+                        .to_device(&device)?;
+                    ws.insert(name.to_string(), Var::from_tensor(&tensor)?);
+                }
+            }
+
+            //F16 is the datatype as described in the config.json
+            let vb = VarBuilder::from_varmap(&map, candle_core::DType::F16, &device);
+
+            let loraconfig = LoraConfig::new(1, 1., None);
+            let linearconfig = LoraLinearConfig::new(config.hidden_size, config.vocab_size);
+            let embedconfig = LoraEmbeddingConfig::new(config.vocab_size, config.hidden_size);
+
+            (
+                Llama::load(
+                    vb,
+                    &cache,
+                    &config,
+                    true,
+                    loraconfig,
+                    linearconfig,
+                    embedconfig,
+                )?,
+                tokenizer,
+                cache,
+            )
         }
         None => {
-            let api = Api::new()?;
+            let api = ApiBuilder::new()
+                .with_progress(true)
+                .with_token(Some(fs::read_to_string(".hf_token")?))
+                .build()?;
             let model_id = args.model_id.unwrap_or_else(|| {
                 if args.v1 {
                     "Narsil/amall-7b".to_string()
@@ -174,8 +212,38 @@ fn main() -> Result<()> {
             println!("building the model");
             let cache = model::Cache::new(!args.no_kv_cache, dtype, &config, &device)?;
 
-            let vb = unsafe { VarBuilder::from_mmaped_safetensors(&filenames, dtype, &device)? };
-            (Llama::load(vb, &cache, &config)?, tokenizer_filename, cache)
+            let map = VarMap::new();
+            {
+                let mut ws = map.data().lock().unwrap();
+
+                let tensors =
+                    unsafe { candle_core::safetensors::MmapedSafetensors::multi(&filenames)? };
+                for (name, _) in tensors.tensors() {
+                    let tensor = tensors.load(&name, &device)?.to_device(&device)?;
+                    ws.insert(name, Var::from_tensor(&tensor)?);
+                }
+            }
+
+            //F16 is the datatype as described in the config.json
+            let vb = VarBuilder::from_varmap(&map, candle_core::DType::F16, &device);
+
+            let loraconfig = LoraConfig::new(1, 1., None);
+            let linearconfig = LoraLinearConfig::new(config.hidden_size, config.vocab_size);
+            let embedconfig = LoraEmbeddingConfig::new(config.vocab_size, config.hidden_size);
+
+            (
+                Llama::load(
+                    vb,
+                    &cache,
+                    &config,
+                    true,
+                    loraconfig,
+                    linearconfig,
+                    embedconfig,
+                )?,
+                tokenizer_filename,
+                cache,
+            )
         }
     };
     let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(E::msg)?;
