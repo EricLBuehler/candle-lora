@@ -159,9 +159,6 @@ struct Args {
     #[arg(long)]
     weight_files: Option<String>,
 
-    #[arg(long)]
-    quantized: bool,
-
     /// Penalty to be applied for repeating tokens, 1. means no penalty.
     #[arg(long, default_value_t = 1.1)]
     repeat_penalty: f32,
@@ -214,14 +211,10 @@ fn main() -> Result<()> {
             .map(std::path::PathBuf::from)
             .collect::<Vec<_>>(),
         None => {
-            if args.quantized {
-                vec![repo.get("model-q4k.gguf")?]
-            } else {
-                vec![
-                    repo.get("pytorch_model-00001-of-00002.safetensors")?,
-                    repo.get("pytorch_model-00002-of-00002.safetensors")?,
-                ]
-            }
+            vec![
+                repo.get("pytorch_model-00001-of-00002.safetensors")?,
+                repo.get("pytorch_model-00002-of-00002.safetensors")?,
+            ]
         }
     };
     println!("retrieved the files in {:?}", start.elapsed());
