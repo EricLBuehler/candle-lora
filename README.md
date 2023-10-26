@@ -29,6 +29,8 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 
 ## Examples
 
+See some examples of transformers from Candle which have added LoRA support [here](candle-lora-transformers/examples/).
+
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
