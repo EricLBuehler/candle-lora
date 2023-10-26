@@ -137,7 +137,7 @@ fn main() -> Result<()> {
                 let tensors = candle_core::npy::NpzTensors::new(filename)?;
                 for name in tensors.names() {
                     let tensor = tensors
-                        .get(&name)?
+                        .get(name)?
                         .expect("Expect Some(_) tensor.")
                         .to_device(&device)?;
                     ws.insert(name.to_string(), Var::from_tensor(&tensor)?);
