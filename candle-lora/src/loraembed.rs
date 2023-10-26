@@ -20,6 +20,7 @@ pub struct LoraEmbedding {
     merged: bool,
 }
 
+#[derive(Clone, Debug)]
 /// Configuration for LoraEmbedding, with `num_embeddings` vectors of `embedding_dim` size`.
 pub struct LoraEmbeddingConfig {
     num_embeddings: usize,

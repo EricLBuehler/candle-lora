@@ -19,6 +19,7 @@ pub struct LoraConv1d {
     merged: bool,
 }
 
+#[derive(Clone, Debug)]
 /// Configuration for LoraConv1d. Other configurations are inherited from the `Conv1d` struct.
 pub struct LoraConv1dConfig {
     in_channels: usize,

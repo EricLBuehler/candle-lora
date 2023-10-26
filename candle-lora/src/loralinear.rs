@@ -19,6 +19,7 @@ pub struct LoraLinear {
     merged: bool,
 }
 
+#[derive(Clone, Debug)]
 /// Configuration for LoraLinear
 pub struct LoraLinearConfig {
     in_features: usize,

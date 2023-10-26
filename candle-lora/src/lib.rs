@@ -100,6 +100,7 @@ impl Lora {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct LoraConfig {
     rank: usize,
     alpha: f64,
