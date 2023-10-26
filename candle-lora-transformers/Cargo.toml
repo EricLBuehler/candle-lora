@@ -12,9 +12,18 @@ keywords = ["machine-learning"] #TODOs: Add candle keyword
 categories = ["science"]
 
 [dependencies]
+anyhow = "1.0.75"
 candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-examples = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
 candle-lora = { version = "0.2.0", path = "../candle-lora" }
 candle-lora-macro.workspace = true
 candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+clap = "4.4.7"
+hf-hub = "0.3.2"
 serde = "1.0.189"
+serde_json.workspace = true
+tokenizers = "0.14.1"
 tracing = "0.1.40"
+tracing-chrome = "0.7.1"
+tracing-subscriber = "0.3.17"
