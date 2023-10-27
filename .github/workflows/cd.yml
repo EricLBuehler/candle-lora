@@ -23,6 +23,7 @@ jobs:
         git worktree add gh-pages
         git config user.name "Deploy from CD"
         git config user.email ""
+        git update-ref -d refs/heads/gh-pages
         git add .
         git commit -m "Deploy $GITHUB_SHA to gh-pages"
         git push --force --set-upstream origin gh-pages
