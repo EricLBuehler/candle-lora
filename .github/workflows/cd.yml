@@ -20,6 +20,8 @@ jobs:
         rm -rf ./docs
         echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
         cp -r target/doc ./docs
+        git config user.name "Deploy from CD"
+        git config user.email ""
         git add .
         git commit -m "Deploy $GITHUB_SHA to gh-pages"
         git push --force --set-upstream origin gh-pages
