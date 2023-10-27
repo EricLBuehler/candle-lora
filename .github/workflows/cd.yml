@@ -27,7 +27,7 @@ jobs:
         run: |
           cargo doc --no-deps
           rm -rf ./docs
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=candle_lora/index.html\">" > target/doc/index.html
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=candle_lora">" > target/doc/index.html
           cp -r target/doc ./docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
