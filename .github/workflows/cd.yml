@@ -2,7 +2,7 @@ name: Deploy Rust book
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -17,6 +17,7 @@ jobs:
     - name: Deploy GitHub Pages
       run: |
         cargo doc --all
+        cp target/doc/candle_lora docs -r
         git add .
         git commit -m "Deploy $GITHUB_SHA to gh-pages"
         git push --force --set-upstream origin gh-pages
