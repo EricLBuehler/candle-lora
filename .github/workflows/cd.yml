@@ -37,10 +37,10 @@ jobs:
           echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
           cp -r target/doc ./docs
       - name: Upload artifact
-          uses: actions/upload-pages-artifact@v2
-          with:
-            # Upload entire repository
-            path: './docs'
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # Upload entire repository
+          path: './docs'
 
   # Deployment job
   deploy:
