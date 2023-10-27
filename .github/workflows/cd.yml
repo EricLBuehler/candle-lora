@@ -16,8 +16,10 @@ jobs:
         fetch-depth: 0
     - name: Deploy GitHub Pages
       run: |
-        cargo doc --all
-        cp target/doc/candle_lora docs -r
+        cargo doc --no-deps
+        rm -rf ./docs
+        echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
+        cp -r target/doc ./docs
         git add .
         git commit -m "Deploy $GITHUB_SHA to gh-pages"
         git push --force --set-upstream origin gh-pages
