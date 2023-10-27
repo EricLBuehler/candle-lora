@@ -1,4 +1,4 @@
-name: Continuous Deployment
+name: Continuous deployment
 #https://dev.to/deciduously/prepare-your-rust-api-docs-for-github-pages-2n5i
 on:
   push:
