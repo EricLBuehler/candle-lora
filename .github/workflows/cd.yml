@@ -26,17 +26,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Build docs
-      run: |
-        cargo doc --no-deps
-        rm -rf ./docs
-        echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
-        cp -r target/doc ./docs
-    - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: Checkout
+          uses: actions/checkout@v3
+        - name: Setup Pages
+          uses: actions/configure-pages@v3
+      - name: Build docs
+        run: |
+          cargo doc --no-deps
+          rm -rf ./docs
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=build_wheel\">" > target/doc/index.html
+          cp -r target/doc ./docs
+      - name: Upload artifact
+          uses: actions/upload-pages-artifact@v2
 
   # Deployment job
   deploy:
