@@ -38,9 +38,9 @@ jobs:
           cp -r target/doc ./docs
       - name: Upload artifact
           uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload entire repository
-          path: './docs'
+          with:
+            # Upload entire repository
+            path: './docs'
 
   # Deployment job
   deploy:
