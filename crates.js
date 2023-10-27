@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["candle_lora","candle_lora_transformers"];
