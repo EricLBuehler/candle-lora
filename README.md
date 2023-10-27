@@ -33,6 +33,7 @@ See some examples of transformers from Candle which have added LoRA support [her
 converted:
 - `llama`
 - `mistral`
+- `falcon`
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
