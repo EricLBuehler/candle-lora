@@ -2,6 +2,8 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-informational)](LICENSE)
 [![Continuous integration](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml/badge.svg)](https://github.com/EricLBuehler/candle-lora/actions/workflows/ci.yml)
 
+[![Documentation](https://github.com/EricLBuehler/candle-lora/actions/workflows/cd.yml/badge.svg)](https://docs.rs/candle-core)
+
 LoRA (low rank adaptation) implemented in Rust for use with [`Candle`](https://github.com/huggingface/candle/tree/main). This technique
 interchanges the fully-trainable layers of the model with new, LoRA layers. These LoRA layers act as a wrapper over the original layers, but freeze
 the original layers. Because they contain fewer trainable parameters, LoRA allows for more efficient fine-tuning. 
