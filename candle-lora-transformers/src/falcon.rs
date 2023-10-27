@@ -532,6 +532,9 @@ impl Falcon {
         &self.config
     }
 
+    /// Load a Falcon model which will be converted to a LoRA model.
+    ///
+    /// The `merge` parameter merges the weights.
     pub fn load(
         vb: VarBuilder,
         cfg: Config,
