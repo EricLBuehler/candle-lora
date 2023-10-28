@@ -585,8 +585,6 @@
 <a href="#585" id="585">585</a>
 <a href="#586" id="586">586</a>
 <a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>candle_core::{DType, Device, IndexOp, <span class="prelude-ty">Result</span>, Tensor, D};
 <span class="kw">use </span>candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
@@ -983,9 +981,7 @@
     <span class="prelude-val">Ok</span>(m)
 }
 
-<span class="attr">#[replace_layer_fields]
-#[derive(AutoLoraConvert)]
-</span><span class="kw">struct </span>Mlp {
+<span class="kw">struct </span>Mlp {
     c_fc1: LlamaLinear,
     c_fc2: LlamaLinear,
     c_proj: LlamaLinear,
