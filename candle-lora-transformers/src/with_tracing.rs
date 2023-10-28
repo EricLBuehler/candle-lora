@@ -1,19 +1,55 @@
 use candle_core::{Module, Result, Tensor};
-use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
+use candle_lora::{
+    EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
+};
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
-use candle_nn::{Conv2d, Embedding, VarBuilder};
+use candle_nn::{Conv2d, VarBuilder};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, AutoLoraConvert)]
+#[replace_layer_fields]
 pub struct TracedLoraEmbedding {
     inner: Embedding,
     span: tracing::Span,
 }
 
 impl TracedLoraEmbedding {
-    pub fn new(d1: usize, d2: usize, vb: VarBuilder) -> Result<Self> {
-        let inner = candle_nn::embedding(d1, d2, vb)?;
+    pub fn new(
+        d1: usize,
+        d2: usize,
+        vb: VarBuilder,
+        merge: bool,
+        lora_config: LoraConfig,
+    ) -> Result<Self> {
+        let embed_config = LoraEmbeddingConfig::new(d1, d2);
+        let inner = candle_nn::embedding(d1, d2, vb.clone())?;
         let span = tracing::span!(tracing::Level::TRACE, "embedding");
-        Ok(Self { inner, span })
+
+        let mut this = Self {
+            inner: Box::new(inner),
+            span,
+        };
+
+        if merge {
+            this.get_merged_lora_model(
+                lora_config,
+                &vb.pp("traced_lora_embed"),
+                None,
+                None,
+                None,
+                Some(embed_config),
+            );
+        } else {
+            this.get_lora_model(
+                lora_config,
+                &vb.pp("traced_lora_embed"),
+                None,
+                None,
+                None,
+                Some(embed_config),
+            );
+        }
+
+        Ok(this)
     }
 
     pub fn embeddings(&self) -> &Tensor {
@@ -28,9 +64,8 @@ impl Module for TracedLoraEmbedding {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct TracedLoraLinear {
     inner: Linear,
     span: tracing::Span,
@@ -156,12 +191,12 @@ impl Module for TracedLoraLinear {
 
 // Wrap the conv2d op to provide some tracing.
 #[derive(Debug, Clone)]
-pub struct TracedLoraLConv2d {
+pub struct TracedLoraConv2d {
     inner: Conv2d,
     span: tracing::Span,
 }
 
-impl Module for TracedLoraLConv2d {
+impl Module for TracedLoraConv2d {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
         let _enter = self.span.enter();
         self.inner.forward(x)
@@ -174,10 +209,10 @@ pub fn conv2d(
     kernel_size: usize,
     cfg: candle_nn::Conv2dConfig,
     vs: candle_nn::VarBuilder,
-) -> Result<TracedLoraLConv2d> {
+) -> Result<TracedLoraConv2d> {
     let span = tracing::span!(tracing::Level::TRACE, "conv2d");
     let inner = candle_nn::conv2d(in_channels, out_channels, kernel_size, cfg, vs)?;
-    Ok(TracedLoraLConv2d { inner, span })
+    Ok(TracedLoraConv2d { inner, span })
 }
 
 // QMatMul wrapper adding some tracing.

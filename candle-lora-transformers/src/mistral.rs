@@ -181,9 +181,8 @@ fn flash_attn(_: &Tensor, _: &Tensor, _: &Tensor, _: f32, _: bool) -> Result<Ten
     unimplemented!("compile with '--features flash-attn'")
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 struct Attention {
     q_proj: TracedLoraLinear,
     k_proj: TracedLoraLinear,
@@ -387,9 +386,8 @@ impl DecoderLayer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct Mistral {
     embed_tokens: candle_nn::Embedding,
     layers: Vec<DecoderLayer>,

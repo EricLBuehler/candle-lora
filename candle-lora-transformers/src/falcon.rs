@@ -203,16 +203,14 @@ fn masked_fill(on_false: &Tensor, mask: &Tensor, on_true: f32) -> Result<Tensor>
     Ok(m)
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 struct AttentionQKV {
     query_key_value: Linear,
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 struct AttentionDense {
     dense: Linear,
 }
@@ -501,9 +499,8 @@ impl FalconDecoderLayer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct Falcon {
     word_embeddings: Embedding,
     blocks: Vec<FalconDecoderLayer>,

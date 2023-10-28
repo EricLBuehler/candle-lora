@@ -87,9 +87,8 @@ impl Config {
 
 // We wrap the `LlamaLinear` layer here to add some tracing so that it's easier to profile the resulting
 // model.
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct LlamaLinear {
     inner: Box<dyn LinearLayerLike>,
     span: tracing::Span,

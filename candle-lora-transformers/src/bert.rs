@@ -37,9 +37,8 @@ impl HiddenActLayer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 pub struct BertLinear {
     inner: Linear,
     span: tracing::Span,
