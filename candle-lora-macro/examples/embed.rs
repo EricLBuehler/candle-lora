@@ -4,6 +4,7 @@ use candle_lora::{
 };
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{init, Embedding, Linear, VarBuilder, VarMap};
+use std::sync::Arc;
 
 #[replace_layer_fields]
 #[derive(AutoLoraConvert)]
@@ -34,8 +35,8 @@ fn main() {
         .unwrap();
 
     let mut model = Model {
-        a: Box::new(Embedding::new(layer_weight.clone(), 10)),
-        b: Box::new(Linear::new(layer_weight.clone(), None)),
+        a: Arc::new(Embedding::new(layer_weight.clone(), 10)),
+        b: Arc::new(Linear::new(layer_weight.clone(), None)),
     };
 
     let varmap = VarMap::new();

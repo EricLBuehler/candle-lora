@@ -5,6 +5,7 @@ use candle_lora::{
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, LayerNorm, Linear, Module, VarBuilder};
 use std::ops::Deref;
+use std::sync::Arc;
 
 const MAX_SEQ_LEN: usize = 5000;
 
@@ -216,7 +217,7 @@ struct AttentionDense {
 }
 
 impl Deref for AttentionQKV {
-    type Target = Box<dyn LinearLayerLike>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.query_key_value
@@ -224,7 +225,7 @@ impl Deref for AttentionQKV {
 }
 
 impl Deref for AttentionDense {
-    type Target = Box<dyn LinearLayerLike>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.dense
@@ -261,7 +262,7 @@ impl FalconAttention {
             3 * hidden_size
         };
         let mut query_key_value = AttentionQKV {
-            query_key_value: Box::new(linear(
+            query_key_value: Arc::new(linear(
                 hidden_size,
                 qkv_out_dim,
                 cfg.bias,
@@ -269,7 +270,7 @@ impl FalconAttention {
             )?),
         };
         let mut dense = AttentionDense {
-            dense: Box::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp("dense"))?),
+            dense: Arc::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp("dense"))?),
         };
 
         let loraconfig_qkv = LoraLinearConfig::new(hidden_size, qkv_out_dim);
@@ -563,10 +564,10 @@ impl Falcon {
         let lm_head = linear(cfg.hidden_size, cfg.vocab_size, false, vb.pp("lm_head"))?;
 
         let mut this = Self {
-            word_embeddings: Box::new(word_embeddings),
+            word_embeddings: Arc::new(word_embeddings),
             blocks,
             ln_f,
-            lm_head: Box::new(lm_head),
+            lm_head: Arc::new(lm_head),
             config: cfg,
         };
 

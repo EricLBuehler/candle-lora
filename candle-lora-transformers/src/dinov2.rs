@@ -5,6 +5,7 @@ use candle_lora::{
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{layer_norm, LayerNorm, Linear, Module, VarBuilder};
 use std::ops::Deref;
+use std::sync::Arc;
 
 const IMG_SIZE: usize = 518;
 const PATCH_SIZE: usize = 14;
@@ -25,7 +26,7 @@ struct DinoLinear {
 }
 
 impl Deref for DinoLinear {
-    type Target = Box<dyn LinearLayerLike>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -51,10 +52,10 @@ impl Attention {
         lora_config: LoraConfig,
     ) -> Result<Self> {
         let mut qkv = DinoLinear {
-            inner: Box::new(linear(vb.pp("qkv"), dim, dim * 3, qkv_bias)?),
+            inner: Arc::new(linear(vb.pp("qkv"), dim, dim * 3, qkv_bias)?),
         };
         let mut proj = DinoLinear {
-            inner: Box::new(linear(vb.pp("proj"), dim, dim, proj_bias)?),
+            inner: Arc::new(linear(vb.pp("proj"), dim, dim, proj_bias)?),
         };
         let scale = 1. / ((dim / num_heads) as f64).sqrt();
 
@@ -163,10 +164,10 @@ impl Mlp {
     ) -> Result<Self> {
         let out_features = in_features;
         let mut fc1 = DinoLinear {
-            inner: Box::new(linear(vb.pp("fc1"), in_features, hidden_features, bias)?),
+            inner: Arc::new(linear(vb.pp("fc1"), in_features, hidden_features, bias)?),
         };
         let mut fc2 = DinoLinear {
-            inner: Box::new(linear(vb.pp("fc2"), hidden_features, out_features, bias)?),
+            inner: Arc::new(linear(vb.pp("fc2"), hidden_features, out_features, bias)?),
         };
 
         let loraconfig_fc1 = LoraLinearConfig::new(in_features, hidden_features);
@@ -287,7 +288,7 @@ struct DinoConv2d {
 }
 
 impl Deref for DinoConv2d {
-    type Target = Box<dyn Conv2dLayerLike>;
+    type Target = Arc<dyn Conv2dLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -316,7 +317,7 @@ impl PatchEmbed {
             ..Default::default()
         };
         let mut proj = DinoConv2d {
-            inner: Box::new(candle_nn::conv2d(
+            inner: Arc::new(candle_nn::conv2d(
                 in_chans,
                 embed_dim,
                 patch_size,
@@ -407,7 +408,7 @@ impl DinoVisionTransformer {
             "pos_embed",
         )?;
         let mut head = DinoLinear {
-            inner: Box::new(linear(vb.pp("head"), 2 * embed_dim, NUM_CLASSES, true)?),
+            inner: Arc::new(linear(vb.pp("head"), 2 * embed_dim, NUM_CLASSES, true)?),
         };
         let norm = layer_norm(embed_dim, 1e-5, vb.pp("norm"))?;
         let vb_b = vb.pp("blocks");

@@ -29,30 +29,30 @@ pub fn replace_layer_fields(_args: TokenStream1, input: TokenStream1) -> TokenSt
                                 {
                                     "Linear" => {
                                         if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Box<dyn LinearLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn LinearLayerLike>)).unwrap());
                                         } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Box<dyn LinearLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn LinearLayerLike>)).unwrap());
                                         }
                                     }
                                     "Conv1d" => {
                                         if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Box<dyn Conv1dLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv1dLayerLike>)).unwrap());
                                         } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Box<dyn Conv1dLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv1dLayerLike>)).unwrap());
                                         }
                                     }
                                     "Conv2d" => {
                                         if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Box<dyn Conv2dLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv2dLayerLike>)).unwrap());
                                         } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Box<dyn Conv2dLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv2dLayerLike>)).unwrap());
                                         }
                                     }
                                     "Embedding" => {
                                         if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Box<dyn EmbeddingLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn EmbeddingLayerLike>)).unwrap());
                                         } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Box<dyn EmbeddingLayerLike>)).unwrap());
+                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn EmbeddingLayerLike>)).unwrap());
                                         }
                                     }
                                     "Option" => {
@@ -77,36 +77,36 @@ pub fn replace_layer_fields(_args: TokenStream1, input: TokenStream1) -> TokenSt
                                                                 if let Visibility::Public(_) =
                                                                     field.vis
                                                                 {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Box<dyn LinearLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn LinearLayerLike>>)).unwrap());
                                                                 } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Box<dyn LinearLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn LinearLayerLike>>)).unwrap());
                                                                 }
                                                             }
                                                             "Conv1d" => {
                                                                 if let Visibility::Public(_) =
                                                                     field.vis
                                                                 {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Box<dyn Conv1dLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv1dLayerLike>>)).unwrap());
                                                                 } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Box<dyn Conv1dLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv1dLayerLike>>)).unwrap());
                                                                 }
                                                             }
                                                             "Conv2d" => {
                                                                 if let Visibility::Public(_) =
                                                                     field.vis
                                                                 {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Box<dyn Conv2dLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv2dLayerLike>>)).unwrap());
                                                                 } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Box<dyn Conv2dLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv2dLayerLike>>)).unwrap());
                                                                 }
                                                             }
                                                             "Embedding" => {
                                                                 if let Visibility::Public(_) =
                                                                     field.vis
                                                                 {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Box<dyn EmbeddingLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn EmbeddingLayerLike>>)).unwrap());
                                                                 } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Box<dyn EmbeddingLayerLike>>)).unwrap());
+                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn EmbeddingLayerLike>>)).unwrap());
                                                                 }
                                                             }
                                                             _ => {}

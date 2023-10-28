@@ -4,6 +4,7 @@ use candle_lora::{
 };
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Conv2d, VarBuilder};
+use std::sync::Arc;
 
 #[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
@@ -25,7 +26,7 @@ impl TracedLoraEmbedding {
         let span = tracing::span!(tracing::Level::TRACE, "embedding");
 
         let mut this = Self {
-            inner: Box::new(inner),
+            inner: Arc::new(inner),
             span,
         };
 
@@ -84,7 +85,7 @@ impl TracedLoraLinear {
         let inner = candle_nn::Linear::new(weights, bias);
         let span = tracing::span!(tracing::Level::TRACE, "linear");
         let mut this = Self {
-            inner: Box::new(inner),
+            inner: Arc::new(inner),
             span,
         };
         if merge {
@@ -121,7 +122,7 @@ pub fn linear(
     let inner = candle_nn::linear(d1, d2, vb.clone())?;
     let span = tracing::span!(tracing::Level::TRACE, "linear");
     let mut this = TracedLoraLinear {
-        inner: Box::new(inner),
+        inner: Arc::new(inner),
         span,
     };
     if merge {
@@ -157,7 +158,7 @@ pub fn linear_no_bias(
     let inner = candle_nn::linear_no_bias(d1, d2, vb.clone())?;
     let span = tracing::span!(tracing::Level::TRACE, "linear");
     let mut this = TracedLoraLinear {
-        inner: Box::new(inner),
+        inner: Arc::new(inner),
         span,
     };
     if merge {

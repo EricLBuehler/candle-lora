@@ -555,7 +555,7 @@ impl Llama {
             .collect();
 
         let mut this = Self {
-            wte: Box::new(wte),
+            wte: Arc::new(wte),
             blocks,
             ln_f,
             lm_head: Box::new(lm_head),

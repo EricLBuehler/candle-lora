@@ -6,6 +6,7 @@ use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, Linear, VarBuilder};
 use serde::Deserialize;
 use std::ops::Deref;
+use std::sync::Arc;
 
 pub const DTYPE: DType = DType::F32;
 
@@ -56,7 +57,7 @@ impl BertLinear {
         let dims = weight.dims2().unwrap();
         let linear_config = LoraLinearConfig::new(dims.1, dims.0);
         let mut this = Self {
-            inner: Box::new(Linear::new(weight, bias)),
+            inner: Arc::new(Linear::new(weight, bias)),
             span,
         };
 
@@ -265,7 +266,7 @@ struct BertEmbedding {
 }
 
 impl Deref for BertEmbedding {
-    type Target = Box<dyn EmbeddingLayerLike>;
+    type Target = Arc<dyn EmbeddingLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -281,7 +282,7 @@ impl BertEmbedding {
         lora_config: LoraConfig,
     ) -> Result<BertEmbedding> {
         let mut this = Self {
-            inner: Box::new(embedding(vocab_size, hidden_size, vb.clone())?),
+            inner: Arc::new(embedding(vocab_size, hidden_size, vb.clone())?),
         };
 
         let embed_config = LoraEmbeddingConfig::new(vocab_size, hidden_size);
