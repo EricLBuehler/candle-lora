@@ -16,7 +16,7 @@ anyhow = "1.0.75"
 candle-core.workspace = true
 candle-examples.workspace = true
 candle-lora = { version = "0.2.0", path = "../candle-lora" }
-candle-lora-macro.workspace = true
+candle-lora-macro = { version = "0.2.0", path = "../candle-lora-macro" }
 candle-nn.workspace = true
 candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
 candle-flash-attn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0", optional = true }

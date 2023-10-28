@@ -14,7 +14,7 @@ homepage.workspace = true
 [dependencies]
 candle-core.workspace = true
 candle-lora = { version = "0.2.0", path = "../candle-lora" }
-candle-lora-macro.workspace = true
+candle-lora-macro = { version = "0.2.0", path = "../candle-lora-macro" }
 candle-nn.workspace = true
 either.workspace = true
 thiserror.workspace = true
