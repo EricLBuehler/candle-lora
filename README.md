@@ -33,7 +33,7 @@ cargo add --git https://github.com/EricLBuehler/candle-lora.git candle-lora cand
 `candle-lora-macro` makes using `candle-lora` as simple as adding 2 macros to your model structs and calling a method!
 
 It is inspired by the simplicity of the Python `peft` library's `get_peft_model` method. 
-Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes! To see an example of the benefits, compare the example below (or [here](candle-lora-examples/examples/linear_macro.rs)) to [this](candle-lora-examples/examples/linear.rs), equivalent example. See a precise diff [here](candle-lora-examples/examples/macro_diff.txt).
+Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes!
 
 ## LoRA transformers
 See transformers from Candle which have LoRA integrated [here](candle-lora-transformers/examples/). Currently, the following
