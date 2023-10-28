@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["replace_layer_fields"],"derive":["AutoLoraConvert"]};

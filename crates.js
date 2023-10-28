@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["candle_lora","candle_lora_transformers"];
+window.ALL_CRATES = ["candle_lora","candle_lora_macro","candle_lora_transformers"];
