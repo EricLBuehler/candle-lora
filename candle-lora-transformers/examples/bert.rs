@@ -4,11 +4,13 @@ extern crate intel_mkl_src;
 #[cfg(feature = "accelerate")]
 extern crate accelerate_src;
 use candle_lora::LoraConfig;
-use candle_lora_transformers::bert::{BertModel, Config, DTYPE};
+use candle_lora_transformers::{
+    bert::{BertModel, Config, DTYPE},
+    varbuilder_utils::{from_mmaped_safetensors, from_pth_tensors},
+};
 
 use anyhow::{Error as E, Result};
-use candle_core::{Tensor, Var};
-use candle_nn::{VarBuilder, VarMap};
+use candle_core::Tensor;
 use clap::Parser;
 use hf_hub::{api::sync::Api, Repo, RepoType};
 use tokenizers::{PaddingParams, Tokenizer};
@@ -77,34 +79,11 @@ impl Args {
         let config: Config = serde_json::from_str(&config)?;
         let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(E::msg)?;
 
-        let map = VarMap::new();
-        if self.use_pth {
-            let mut ws = map.data().lock().unwrap();
-
-            let tensors = candle_core::pickle::PthTensors::new(&weights_filename)?;
-            for (name, _) in tensors.tensor_infos() {
-                let tensor = tensors
-                    .get(&name)?
-                    .expect("Tensor not found")
-                    .to_device(&device)?
-                    .to_dtype(DTYPE)?;
-                ws.insert(name.to_string(), Var::from_tensor(&tensor)?);
-            }
+        let vb = if self.use_pth {
+            from_pth_tensors(weights_filename, DTYPE, &device)?
         } else {
-            let mut ws = map.data().lock().unwrap();
-
-            let tensors =
-                unsafe { candle_core::safetensors::MmapedSafetensors::multi(&[weights_filename])? };
-            for (name, _) in tensors.tensors() {
-                let tensor = tensors
-                    .load(&name, &device)?
-                    .to_device(&device)?
-                    .to_dtype(DTYPE)?;
-                ws.insert(name, Var::from_tensor(&tensor)?);
-            }
+            from_mmaped_safetensors(&[weights_filename], DTYPE, &device)?
         };
-
-        let vb = VarBuilder::from_varmap(&map, DTYPE, &device);
 
         let loraconfig = LoraConfig::new(1, 1., None);
         let model = BertModel::load(vb, &config, true, loraconfig)?;

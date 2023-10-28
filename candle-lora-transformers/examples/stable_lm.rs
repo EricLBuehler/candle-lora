@@ -9,7 +9,7 @@ use candle_lora::LoraConfig;
 use clap::Parser;
 
 use candle_lora_transformers::{
-    mistral::{Config, Mistral},
+    stable_lm::{Config, Model},
     varbuilder_utils::from_mmaped_safetensors,
 };
 
@@ -20,7 +20,7 @@ use hf_hub::{api::sync::Api, Repo, RepoType};
 use tokenizers::Tokenizer;
 
 struct TextGeneration {
-    model: Mistral,
+    model: Model,
     device: Device,
     tokenizer: TokenOutputStream,
     logits_processor: LogitsProcessor,
@@ -31,7 +31,7 @@ struct TextGeneration {
 impl TextGeneration {
     #[allow(clippy::too_many_arguments)]
     fn new(
-        model: Mistral,
+        model: Model,
         tokenizer: Tokenizer,
         seed: u64,
         temp: Option<f64>,
@@ -69,9 +69,9 @@ impl TextGeneration {
         std::io::stdout().flush()?;
 
         let mut generated_tokens = 0usize;
-        let eos_token = match self.tokenizer.get_token("</s>") {
+        let eos_token = match self.tokenizer.get_token("<|endoftext|>") {
             Some(token) => token,
-            None => anyhow::bail!("cannot find the </s> token"),
+            None => anyhow::bail!("cannot find the <|endoftext|> token"),
         };
         let start_gen = std::time::Instant::now();
         for index in 0..sample_len {
@@ -149,7 +149,7 @@ struct Args {
     #[arg(long, short = 'n', default_value_t = 100)]
     sample_len: usize,
 
-    #[arg(long, default_value = "lmz/candle-mistral")]
+    #[arg(long, default_value = "lmz/candle-stablelm-3b-4e1t")]
     model_id: String,
 
     #[arg(long, default_value = "main")]
@@ -213,17 +213,14 @@ fn main() -> Result<()> {
             .map(std::path::PathBuf::from)
             .collect::<Vec<_>>(),
         None => {
-            vec![
-                repo.get("pytorch_model-00001-of-00002.safetensors")?,
-                repo.get("pytorch_model-00002-of-00002.safetensors")?,
-            ]
+            vec![repo.get("model.safetensors")?]
         }
     };
     println!("retrieved the files in {:?}", start.elapsed());
     let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(E::msg)?;
 
     let start = std::time::Instant::now();
-    let config = Config::config_7b_v0_1(args.use_flash_attn);
+    let config = Config::stablelm_3b_4e1t(args.use_flash_attn);
 
     let device = candle_examples::device(args.cpu)?;
     let dtype = if device.is_cuda() {
@@ -235,7 +232,7 @@ fn main() -> Result<()> {
     let vb = from_mmaped_safetensors(&filenames, dtype, &device)?;
 
     let loraconfig = LoraConfig::new(1, 1., None);
-    let model = Mistral::new(&config, vb, true, loraconfig)?;
+    let model = Model::new(&config, vb, true, loraconfig)?;
 
     println!("loaded the model in {:?}", start.elapsed());
 

@@ -7,15 +7,17 @@ extern crate accelerate_src;
 extern crate intel_mkl_src;
 
 use anyhow::{Error as E, Result};
-use candle_core::{DType, Device, Tensor, Var};
+use candle_core::{DType, Device, Tensor};
 use candle_lora::{LoraConfig, LoraEmbeddingConfig, LoraLinearConfig};
-use candle_nn::{VarBuilder, VarMap};
 use candle_transformers::generation::LogitsProcessor;
 use clap::Parser;
 use hf_hub::{api::sync::Api, Repo, RepoType};
 use tokenizers::Tokenizer;
 
-use candle_lora_transformers::falcon::{Config, Falcon};
+use candle_lora_transformers::{
+    falcon::{Config, Falcon},
+    varbuilder_utils::from_mmaped_safetensors,
+};
 
 struct TextGeneration {
     model: Falcon,
@@ -176,20 +178,7 @@ fn main() -> Result<()> {
     let start = std::time::Instant::now();
     let dtype = DType::F32;
 
-    let map = VarMap::new();
-    {
-        let mut ws = map.data().lock().unwrap();
-
-        let tensors = unsafe { candle_core::safetensors::MmapedSafetensors::multi(&filenames)? };
-        for (name, _) in tensors.tensors() {
-            let tensor = tensors
-                .load(&name, &device)?
-                .to_device(&device)?
-                .to_dtype(dtype)?;
-            ws.insert(name, Var::from_tensor(&tensor)?);
-        }
-    }
-    let vb = VarBuilder::from_varmap(&map, dtype, &device);
+    let vb = from_mmaped_safetensors(&filenames, dtype, &device)?;
 
     let config = Config::falcon7b();
     config.validate()?;
