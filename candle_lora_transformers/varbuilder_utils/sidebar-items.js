@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["from_mmaped_safetensors","from_npz_tensors","from_pth_tensors"]};
