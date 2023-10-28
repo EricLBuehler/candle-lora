@@ -35,6 +35,7 @@ converted:
 - `llama`
 - `mistral`
 - `falcon`
+- `bert`
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
