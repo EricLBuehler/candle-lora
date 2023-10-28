@@ -1,19 +1,19 @@
 [package]
 name = "candle-lora"
-version = "0.2.0"
-edition = "2021"
-license = "MIT"
 readme = "README.md"
 authors = ["Eric Buehler"]
-description = "LoRA implemented for Candle."
-homepage = "https://github.com/EricLBuehler/candle-lora"
-repository = "https://github.com/EricLBuehler/candle-lora"
-keywords = ["machine-learning"] #TODOs: Add candle keyword
-categories = ["science"]
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+license.workspace = true
+homepage.workspace = true
 
 [dependencies]
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-core.workspace = true
+candle-nn.workspace = true
 either.workspace = true
 thiserror.workspace = true
 trc.workspace = true

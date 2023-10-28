@@ -1,24 +1,25 @@
 [package]
 name = "candle-lora-transformers"
-version = "0.2.0"
-edition = "2021"
-license = "MIT"
 readme = "README.md"
 authors = ["Eric Buehler"]
-description = "LoRA Candle transformers."
-homepage = "https://github.com/EricLBuehler/candle-lora"
-repository = "https://github.com/EricLBuehler/candle-lora"
-keywords = ["machine-learning"] #TODOs: Add candle keyword
-categories = ["science"]
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+license.workspace = true
+homepage.workspace = true
 
 [dependencies]
 anyhow = "1.0.75"
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
-candle-examples = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-core.workspace = true
+candle-examples.workspace = true
 candle-lora = { version = "0.2.0", path = "../candle-lora" }
 candle-lora-macro.workspace = true
-candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-nn.workspace = true
 candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.0" }
+candle-flash-attn = { git = "https://github.com/huggingface/candle.git", version = "0.3.0", optional = true }
 clap = "4.4.7"
 hf-hub = "0.3.2"
 serde = "1.0.189"
@@ -27,3 +28,16 @@ tokenizers = "0.13.4"
 tracing = "0.1.40"
 tracing-chrome = "0.7.1"
 tracing-subscriber = "0.3.17"
+accelerate-src = { workspace = true, optional = true }
+intel-mkl-src = { workspace = true, optional = true }
+cudarc = { workspace = true, optional = true }
+half = { workspace = true, optional = true }
+
+[features]
+default = []
+accelerate = ["dep:accelerate-src", "candle-core/accelerate", "candle-nn/accelerate", "candle-transformers/accelerate"]
+cuda = ["candle-core/cuda", "candle-nn/cuda", "candle-transformers/cuda"]
+cudnn = ["candle-core/cudnn"]
+flash-attn = ["cuda", "candle-transformers/flash-attn", "dep:candle-flash-attn"]
+mkl = ["dep:intel-mkl-src", "candle-core/mkl", "candle-nn/mkl", "candle-transformers/mkl"]
+nccl = ["cuda", "cudarc/nccl", "dep:half"]
