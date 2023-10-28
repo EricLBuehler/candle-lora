@@ -1141,7 +1141,7 @@
             .collect();
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            wte: Box::new(wte),
+            wte: Arc::new(wte),
             blocks,
             ln_f,
             lm_head: Box::new(lm_head),

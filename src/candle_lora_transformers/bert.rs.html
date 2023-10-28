@@ -726,6 +726,7 @@
 <a href="#726" id="726">726</a>
 <a href="#727" id="727">727</a>
 <a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>candle_core::{DType, Device, <span class="prelude-ty">Result</span>, Tensor};
 <span class="kw">use </span>candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
@@ -734,6 +735,7 @@
 <span class="kw">use </span>candle_nn::{Embedding, Linear, VarBuilder};
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>std::ops::Deref;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">pub const </span>DTYPE: DType = DType::F32;
 
@@ -784,7 +786,7 @@
         <span class="kw">let </span>dims = weight.dims2().unwrap();
         <span class="kw">let </span>linear_config = LoraLinearConfig::new(dims.<span class="number">1</span>, dims.<span class="number">0</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            inner: Box::new(Linear::new(weight, bias)),
+            inner: Arc::new(Linear::new(weight, bias)),
             span,
         };
 
@@ -993,7 +995,7 @@
 }
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>BertEmbedding {
-    <span class="kw">type </span>Target = Box&lt;<span class="kw">dyn </span>EmbeddingLayerLike&gt;;
+    <span class="kw">type </span>Target = Arc&lt;<span class="kw">dyn </span>EmbeddingLayerLike&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
@@ -1009,7 +1011,7 @@
         lora_config: LoraConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BertEmbedding&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            inner: Box::new(embedding(vocab_size, hidden_size, vb.clone())<span class="question-mark">?</span>),
+            inner: Arc::new(embedding(vocab_size, hidden_size, vb.clone())<span class="question-mark">?</span>),
         };
 
         <span class="kw">let </span>embed_config = LoraEmbeddingConfig::new(vocab_size, hidden_size);

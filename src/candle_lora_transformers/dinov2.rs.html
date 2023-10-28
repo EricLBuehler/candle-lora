@@ -509,6 +509,7 @@
 <a href="#509" id="509">509</a>
 <a href="#510" id="510">510</a>
 <a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>candle_core::{IndexOp, <span class="prelude-ty">Result</span>, Tensor, D};
 <span class="kw">use </span>candle_lora::{
     Conv2dLayerLike, LinearLayerLike, LoraConfig, LoraConv2dConfig, LoraLinearConfig,
@@ -516,6 +517,7 @@
 <span class="kw">use </span>candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 <span class="kw">use </span>candle_nn::{layer_norm, LayerNorm, Linear, Module, VarBuilder};
 <span class="kw">use </span>std::ops::Deref;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">const </span>IMG_SIZE: usize = <span class="number">518</span>;
 <span class="kw">const </span>PATCH_SIZE: usize = <span class="number">14</span>;
@@ -536,7 +538,7 @@
 }
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>DinoLinear {
-    <span class="kw">type </span>Target = Box&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
+    <span class="kw">type </span>Target = Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
@@ -562,10 +564,10 @@
         lora_config: LoraConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>qkv = DinoLinear {
-            inner: Box::new(linear(vb.pp(<span class="string">&quot;qkv&quot;</span>), dim, dim * <span class="number">3</span>, qkv_bias)<span class="question-mark">?</span>),
+            inner: Arc::new(linear(vb.pp(<span class="string">&quot;qkv&quot;</span>), dim, dim * <span class="number">3</span>, qkv_bias)<span class="question-mark">?</span>),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>proj = DinoLinear {
-            inner: Box::new(linear(vb.pp(<span class="string">&quot;proj&quot;</span>), dim, dim, proj_bias)<span class="question-mark">?</span>),
+            inner: Arc::new(linear(vb.pp(<span class="string">&quot;proj&quot;</span>), dim, dim, proj_bias)<span class="question-mark">?</span>),
         };
         <span class="kw">let </span>scale = <span class="number">1. </span>/ ((dim / num_heads) <span class="kw">as </span>f64).sqrt();
 
@@ -674,10 +676,10 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>out_features = in_features;
         <span class="kw">let </span><span class="kw-2">mut </span>fc1 = DinoLinear {
-            inner: Box::new(linear(vb.pp(<span class="string">&quot;fc1&quot;</span>), in_features, hidden_features, bias)<span class="question-mark">?</span>),
+            inner: Arc::new(linear(vb.pp(<span class="string">&quot;fc1&quot;</span>), in_features, hidden_features, bias)<span class="question-mark">?</span>),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>fc2 = DinoLinear {
-            inner: Box::new(linear(vb.pp(<span class="string">&quot;fc2&quot;</span>), hidden_features, out_features, bias)<span class="question-mark">?</span>),
+            inner: Arc::new(linear(vb.pp(<span class="string">&quot;fc2&quot;</span>), hidden_features, out_features, bias)<span class="question-mark">?</span>),
         };
 
         <span class="kw">let </span>loraconfig_fc1 = LoraLinearConfig::new(in_features, hidden_features);
@@ -798,7 +800,7 @@
 }
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>DinoConv2d {
-    <span class="kw">type </span>Target = Box&lt;<span class="kw">dyn </span>Conv2dLayerLike&gt;;
+    <span class="kw">type </span>Target = Arc&lt;<span class="kw">dyn </span>Conv2dLayerLike&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner
@@ -827,7 +829,7 @@
             ..Default::default()
         };
         <span class="kw">let </span><span class="kw-2">mut </span>proj = DinoConv2d {
-            inner: Box::new(candle_nn::conv2d(
+            inner: Arc::new(candle_nn::conv2d(
                 in_chans,
                 embed_dim,
                 patch_size,
@@ -918,7 +920,7 @@
             <span class="string">&quot;pos_embed&quot;</span>,
         )<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>head = DinoLinear {
-            inner: Box::new(linear(vb.pp(<span class="string">&quot;head&quot;</span>), <span class="number">2 </span>* embed_dim, NUM_CLASSES, <span class="bool-val">true</span>)<span class="question-mark">?</span>),
+            inner: Arc::new(linear(vb.pp(<span class="string">&quot;head&quot;</span>), <span class="number">2 </span>* embed_dim, NUM_CLASSES, <span class="bool-val">true</span>)<span class="question-mark">?</span>),
         };
         <span class="kw">let </span>norm = layer_norm(embed_dim, <span class="number">1e-5</span>, vb.pp(<span class="string">&quot;norm&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>vb_b = vb.pp(<span class="string">&quot;blocks&quot;</span>);

@@ -247,12 +247,14 @@
 <a href="#247" id="247">247</a>
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>candle_core::{Module, <span class="prelude-ty">Result</span>, Tensor};
 <span class="kw">use </span>candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
 };
 <span class="kw">use </span>candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 <span class="kw">use </span>candle_nn::{Conv2d, VarBuilder};
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="attr">#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
@@ -274,7 +276,7 @@
         <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;embedding&quot;</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            inner: Box::new(inner),
+            inner: Arc::new(inner),
             span,
         };
 
@@ -333,7 +335,7 @@
         <span class="kw">let </span>inner = candle_nn::Linear::new(weights, bias);
         <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;linear&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            inner: Box::new(inner),
+            inner: Arc::new(inner),
             span,
         };
         <span class="kw">if </span>merge {
@@ -370,7 +372,7 @@
     <span class="kw">let </span>inner = candle_nn::linear(d1, d2, vb.clone())<span class="question-mark">?</span>;
     <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;linear&quot;</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>this = TracedLoraLinear {
-        inner: Box::new(inner),
+        inner: Arc::new(inner),
         span,
     };
     <span class="kw">if </span>merge {
@@ -406,7 +408,7 @@
     <span class="kw">let </span>inner = candle_nn::linear_no_bias(d1, d2, vb.clone())<span class="question-mark">?</span>;
     <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;linear&quot;</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>this = TracedLoraLinear {
-        inner: Box::new(inner),
+        inner: Arc::new(inner),
         span,
     };
     <span class="kw">if </span>merge {

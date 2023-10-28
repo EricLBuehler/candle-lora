@@ -610,6 +610,7 @@
 <a href="#610" id="610">610</a>
 <a href="#611" id="611">611</a>
 <a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>candle_core::{DType, Device, <span class="prelude-ty">Result</span>, Tensor, D};
 <span class="kw">use </span>candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
@@ -617,6 +618,7 @@
 <span class="kw">use </span>candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 <span class="kw">use </span>candle_nn::{Embedding, LayerNorm, Linear, Module, VarBuilder};
 <span class="kw">use </span>std::ops::Deref;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">const </span>MAX_SEQ_LEN: usize = <span class="number">5000</span>;
 
@@ -828,7 +830,7 @@
 }
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>AttentionQKV {
-    <span class="kw">type </span>Target = Box&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
+    <span class="kw">type </span>Target = Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.query_key_value
@@ -836,7 +838,7 @@
 }
 
 <span class="kw">impl </span>Deref <span class="kw">for </span>AttentionDense {
-    <span class="kw">type </span>Target = Box&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
+    <span class="kw">type </span>Target = Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw-2">&amp;</span><span class="self">self</span>.dense
@@ -873,7 +875,7 @@
             <span class="number">3 </span>* hidden_size
         };
         <span class="kw">let </span><span class="kw-2">mut </span>query_key_value = AttentionQKV {
-            query_key_value: Box::new(linear(
+            query_key_value: Arc::new(linear(
                 hidden_size,
                 qkv_out_dim,
                 cfg.bias,
@@ -881,7 +883,7 @@
             )<span class="question-mark">?</span>),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>dense = AttentionDense {
-            dense: Box::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp(<span class="string">&quot;dense&quot;</span>))<span class="question-mark">?</span>),
+            dense: Arc::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp(<span class="string">&quot;dense&quot;</span>))<span class="question-mark">?</span>),
         };
 
         <span class="kw">let </span>loraconfig_qkv = LoraLinearConfig::new(hidden_size, qkv_out_dim);
@@ -1175,10 +1177,10 @@
         <span class="kw">let </span>lm_head = linear(cfg.hidden_size, cfg.vocab_size, <span class="bool-val">false</span>, vb.pp(<span class="string">&quot;lm_head&quot;</span>))<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
-            word_embeddings: Box::new(word_embeddings),
+            word_embeddings: Arc::new(word_embeddings),
             blocks,
             ln_f,
-            lm_head: Box::new(lm_head),
+            lm_head: Arc::new(lm_head),
             config: cfg,
         };
 
