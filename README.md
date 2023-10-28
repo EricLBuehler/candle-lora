@@ -27,18 +27,18 @@ Together, these macros mean that `candle-lora` can be added to any `candle` mode
 2) Call `get_lora_model` on each model struct.
 3) Enjoy your new LoRA model!
 
-
-## Examples
-
-See some examples of transformers from Candle which have added LoRA support [here](candle-lora-transformers/examples/). Currently, the following transformers have been
-converted:
+## LoRA transformers
+See transformers from Candle which have LoRA integrated [here](candle-lora-transformers/examples/). Currently, the following
+transformers have been converted:
 - `llama`
 - `mistral`
 - `falcon`
 - `bert`
 - `stable_lm`
 - `t5`
-- `dinov2`
+- `dinov2` 
+
+## Examples
 
 ```rust
 use candle_core::{DType, Device, Module, Result, Tensor};
