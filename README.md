@@ -10,6 +10,17 @@ the original layers. Because they contain fewer trainable parameters, LoRA allow
 However, using a fine-tuned LoRA model for inference will have a negative impact on performance. This is because the original layer must still be used to calculate the outputs. However, for a LoRA model, an algorithm known as weight merging nullifies the added cost of using the
 fine-tuned LoRA model by merging the LoRA and original weights. Weights may also be unmerged.
 
+## Get started
+1) To install, run the following:
+```
+cargo add --git https://github.com/EricLBuehler/candle-lora.git candle-lora candle-lora-macro
+```
+
+2) To allow `candle-lora` to swap layers, do the following for each model struct
+    - Derive `AutoLoraConvert` from `candle-lora-macro`
+    - Add the `replace_layer_fields` attribute macro.
+3) During instantiation of each model struct, call `get_lora_model` with the appropriate parameters to convert.
+
 ## Features
 - Convert `Linear`, `Conv1d`, `Conv2d`, `Embedding` layers into LoRA layers
     - All conversions are implemented in accordance with HuggingFace's official LoRA implementation
@@ -23,11 +34,6 @@ fine-tuned LoRA model by merging the LoRA and original weights. Weights may also
 
 It is inspired by the simplicity of the Python `peft` library's `get_peft_model` method. 
 Together, these macros mean that `candle-lora` can be added to any `candle` model with minimal code changes! To see an example of the benefits, compare the example below (or [here](candle-lora-examples/examples/linear_macro.rs)) to [this](candle-lora-examples/examples/linear.rs), equivalent example. See a precise diff [here](candle-lora-examples/examples/macro_diff.txt).
-
-## How to use
-1) Derive `AutoLoraConvert` from candle-lora-macro on each model struct and add the `replace_layer_fields` attribute macro.
-2) Call `get_lora_model` on each model struct.
-3) Enjoy your new LoRA model!
 
 ## LoRA transformers
 See transformers from Candle which have LoRA integrated [here](candle-lora-transformers/examples/). Currently, the following
