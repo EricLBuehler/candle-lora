@@ -394,8 +394,6 @@ fn masked_fill(on_false: &Tensor, mask: &Tensor, on_true: f32) -> Result<Tensor>
     Ok(m)
 }
 
-#[replace_layer_fields]
-#[derive(AutoLoraConvert)]
 struct Mlp {
     c_fc1: LlamaLinear,
     c_fc2: LlamaLinear,
