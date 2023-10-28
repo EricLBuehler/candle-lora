@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["bert","falcon","llama","mistral","stable_lm","varbuilder_utils","with_tracing"]};
+window.SIDEBAR_ITEMS = {"mod":["bert","dinov2","falcon","llama","mistral","stable_lm","t5","varbuilder_utils","with_tracing"]};

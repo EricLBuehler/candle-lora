@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Config","T5EncoderModel","T5ForConditionalGeneration"]};
