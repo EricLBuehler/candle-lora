@@ -46,6 +46,7 @@ transformers have been converted:
 - `t5`
 - `dinov2` 
 - `resnet`
+- `mpt`
 
 ## Resources
 `candle-lora`'s LoRA conversion implementations are based on HuggingFace's [`peft`](https://github.com/huggingface/peft/tree/main) library. See the original paper [here](https://arxiv.org/pdf/2106.09685.pdf), as well as Microsoft's [implementation](https://github.com/microsoft/LoRA).
