@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["bert","dinov2","falcon","llama","mistral","mpt","resnet","stable_lm","t5","unsync_func","varbuilder_utils","with_tracing"]};
+window.SIDEBAR_ITEMS = {"mod":["bert","blip","blip_text","dinov2","falcon","llama","mistral","mpt","resnet","stable_lm","t5","unsync_func","varbuilder_utils","with_tracing"]};
