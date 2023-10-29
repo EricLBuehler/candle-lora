@@ -127,9 +127,9 @@ fn main() -> Result<()> {
 
     let start = std::time::Instant::now();
     let api = ApiBuilder::new()
-    .with_progress(true)
-    .with_token(Some(fs::read_to_string(".hf_token")?))
-    .build()?;
+        .with_progress(true)
+        .with_token(Some(fs::read_to_string(".hf_token")?))
+        .build()?;
     let repo = api.repo(Repo::with_revision(
         args.model_id,
         RepoType::Model,
