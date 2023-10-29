@@ -1,6 +1,8 @@
 pub mod with_tracing;
 
 pub mod bert;
+pub mod blip;
+pub mod blip_text;
 pub mod dinov2;
 pub mod falcon;
 pub mod llama;

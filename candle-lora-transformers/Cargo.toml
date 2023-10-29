@@ -33,6 +33,7 @@ intel-mkl-src = { workspace = true, optional = true }
 cudarc = { workspace = true, optional = true }
 half = { workspace = true, optional = true }
 trc.workspace = true
+image.workspace = true
 
 [features]
 default = []

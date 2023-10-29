@@ -5,10 +5,11 @@ extern crate intel_mkl_src;
 extern crate accelerate_src;
 
 use anyhow::{Error as E, Result};
+use candle_lora::LoraConfig;
 use candle_lora_transformers::varbuilder_utils::from_mmaped_safetensors;
 use clap::Parser;
 
-use candle_transformers::models::mpt::{Config, Model};
+use candle_lora_transformers::mpt::{Config, Model};
 
 use candle_core::{DType, Device, Tensor};
 use candle_transformers::generation::LogitsProcessor;
@@ -149,9 +150,6 @@ struct Args {
     revision: Option<String>,
 
     #[arg(long)]
-    quantized: bool,
-
-    #[arg(long)]
     weight_file: Option<String>,
 
     #[arg(long)]
@@ -209,13 +207,7 @@ fn main() -> Result<()> {
     };
     let filename = match args.weight_file {
         Some(weight_file) => std::path::PathBuf::from(weight_file),
-        None => {
-            if args.quantized {
-                repo.get("model-replit-code-v1_5-q4k.gguf")?
-            } else {
-                repo.get("model.safetensors")?
-            }
-        }
+        None => repo.get("model.safetensors")?,
     };
     println!("retrieved the files in {:?}", start.elapsed());
     let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(E::msg)?;
@@ -225,7 +217,8 @@ fn main() -> Result<()> {
 
     let device = candle_examples::device(args.cpu)?;
     let vb = from_mmaped_safetensors(&[filename], DType::F32, &device)?;
-    let model = Model::new(&config, vb.pp("transformer"))?;
+    let loraconfig = LoraConfig::new(1, 1., None);
+    let model = Model::new(&config, vb.pp("transformer"), true, loraconfig)?;
 
     println!("loaded the model in {:?}", start.elapsed());
 

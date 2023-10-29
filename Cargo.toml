@@ -30,6 +30,8 @@ accelerate-src = { version = "0.3.2" }
 intel-mkl-src = { version = "0.8.1", features = ["mkl-static-lp64-iomp"] }
 cudarc = { version = "0.9.14", features = ["f16"] }
 half = { version = "2.3.1", features = ["num-traits", "use-intrinsics", "rand_distr"] }
+image = { version = "0.24.7", default-features = false, features = ["jpeg", "png"] }
+imageproc = { version = "0.23.0", default-features = false }
 
 [profile.release-with-debug]
 inherits = "release"
