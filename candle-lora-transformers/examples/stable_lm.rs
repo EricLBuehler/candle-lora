@@ -224,7 +224,7 @@ fn main() -> Result<()> {
 
     let device = candle_examples::device(args.cpu)?;
     let dtype = if device.is_cuda() {
-        DType::BF16
+        DType::F32 //DType::BF16 Limitation of `rand_normal`, see https://github.com/huggingface/candle/issues/1224
     } else {
         DType::F32
     };

@@ -114,12 +114,17 @@ fn main() -> Result<()> {
     };
 
     let device = candle_examples::device(args.cpu)?;
-    let dtype = match args.dtype.as_deref() {
-        Some("f16") => DType::F16,
-        Some("bf16") => DType::BF16,
-        Some("f32") => DType::F32,
-        Some(dtype) => bail!("Unsupported dtype {dtype}"),
-        None => DType::F16,
+    let dtype = if device.is_cpu() {
+        match args.dtype.as_deref() {
+            Some("f16") => DType::F16,
+            Some("bf16") => DType::BF16,
+            Some("f32") => DType::F32,
+            Some(dtype) => bail!("Unsupported dtype {dtype}"),
+            None => DType::F16,
+        }
+    } else {
+        //Limitation of `rand_normal`, see https://github.com/huggingface/candle/issues/1224
+        DType::F32
     };
 
     let (llama, tokenizer_filename, cache) = match args.npy {
