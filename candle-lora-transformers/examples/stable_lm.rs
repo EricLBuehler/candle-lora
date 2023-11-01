@@ -225,7 +225,7 @@ fn main() -> Result<()> {
     let device = candle_examples::device(args.cpu)?;
     #[allow(clippy::if_same_then_else)]
     let dtype = if device.is_cuda() {
-        DType::F32 //DType::BF16 Limitation of `rand_normal`, see https://github.com/huggingface/candle/issues/1224
+        DType::BF16
     } else {
         DType::F32
     };
