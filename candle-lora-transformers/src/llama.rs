@@ -1,3 +1,5 @@
+//! The LLama2 model.
+
 use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,

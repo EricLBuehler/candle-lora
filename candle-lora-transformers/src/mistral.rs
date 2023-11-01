@@ -1,4 +1,5 @@
-/// Mistral LLM, https://github.com/mistralai/mistral-src
+//! Mistral LLM, https://github.com/mistralai/mistral-src
+
 use candle_core::{DType, Device, Module, Result, Tensor, D};
 use candle_lora::LoraConfig;
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};

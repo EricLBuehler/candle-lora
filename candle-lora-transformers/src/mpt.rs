@@ -1,6 +1,7 @@
+//! MPT model used by replit-code-v1_5-3b
+//! https://huggingface.co/replit/replit-code-v1_5-3b/blob/main/modeling_mpt.py
+
 use super::with_tracing::{linear_no_bias, TracedLoraEmbedding, TracedLoraLinear};
-/// MPT model used by replit-code-v1_5-3b
-/// https://huggingface.co/replit/replit-code-v1_5-3b/blob/main/modeling_mpt.py
 use candle_core::{DType, Device, IndexOp, Module, Result, Tensor, D};
 use candle_lora::LoraConfig;
 use candle_nn::{layer_norm, LayerNorm, VarBuilder};

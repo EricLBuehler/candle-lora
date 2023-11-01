@@ -1,3 +1,5 @@
+//! The StableLM model.
+
 use super::with_tracing::{linear_no_bias, TracedLoraLinear};
 use candle_core::{DType, Device, Module, Result, Tensor, D};
 use candle_lora::LoraConfig;

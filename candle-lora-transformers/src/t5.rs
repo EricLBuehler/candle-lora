@@ -1,5 +1,5 @@
-// T5 Text Model
-// https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py
+//! T5 Text Model
+//! https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py
 
 use super::with_tracing::{linear_no_bias, TracedLoraEmbedding, TracedLoraLinear};
 use candle_core::{DType, Device, Module, Result, Tensor, D};

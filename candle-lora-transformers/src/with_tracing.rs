@@ -1,3 +1,5 @@
+//! Tracing layers.
+
 use candle_core::{Module, Result, Tensor};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,

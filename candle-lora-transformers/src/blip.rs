@@ -1,3 +1,5 @@
+//! The BLIP model.
+
 use super::blip_text;
 use super::with_tracing::{conv2d, linear, TracedLoraConv2d, TracedLoraLinear};
 use candle_core::{Module, Result, Tensor, D};

@@ -1,3 +1,5 @@
+//! The DINOv2 model.
+
 use candle_core::{IndexOp, Result, Tensor, D};
 use candle_lora::{
     Conv2dLayerLike, LinearLayerLike, LoraConfig, LoraConv2dConfig, LoraLinearConfig,

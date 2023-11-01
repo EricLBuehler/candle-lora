@@ -1,3 +1,5 @@
+//! The Falcon model.
+
 use candle_core::{DType, Device, Result, Tensor, D};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,

@@ -1,3 +1,5 @@
+//! Utilities for creating a VarBuilder from a VarMap loaded from tensor storage formats.
+
 use std::path::Path;
 
 use candle_core::{DType, Device, Error, Var};

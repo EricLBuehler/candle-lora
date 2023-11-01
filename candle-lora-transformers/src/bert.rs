@@ -1,3 +1,5 @@
+//! The BERT model.
+
 use candle_core::{DType, Device, Result, Tensor};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,

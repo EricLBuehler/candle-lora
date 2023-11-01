@@ -1,4 +1,4 @@
-//! Layers defined by closures.
+//! Layers defined by closures, but not Sync.
 use candle_core::Module;
 use candle_core::{Result, Tensor};
 use std::rc::Rc;
