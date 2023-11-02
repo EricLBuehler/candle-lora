@@ -78,6 +78,47 @@
 <a href="#78" id="78">78</a>
 <a href="#79" id="79">79</a>
 <a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Utilities for creating a VarBuilder from a VarMap loaded from tensor storage formats.
 
 </span><span class="kw">use </span>std::path::Path;
@@ -88,72 +129,113 @@
     VarBuilder, VarMap,
 };
 
+<span class="kw">use </span>tqdm::Iter;
+
 <span class="doccomment">/// Load tensors into a VarBuilder backed by a VarMap using MmapedSafetensors.
+/// Set `silent` to not show a progrss bar.
 </span><span class="kw">pub fn </span>from_mmaped_safetensors&lt;<span class="lifetime">&#39;a</span>, P: AsRef&lt;Path&gt;&gt;(
     paths: <span class="kw-2">&amp;</span>[P],
     dtype: DType,
     device: <span class="kw-2">&amp;</span>Device,
+    silent: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;VarBuilderArgs&lt;<span class="lifetime">&#39;a</span>, Box&lt;<span class="kw">dyn </span>SimpleBackend&gt;&gt;, Error&gt; {
     <span class="kw">let </span>map = VarMap::new();
     {
         <span class="kw">let </span><span class="kw-2">mut </span>ws = map.data().lock().unwrap();
 
         <span class="kw">let </span>tensors = <span class="kw">unsafe </span>{ candle_core::safetensors::MmapedSafetensors::multi(paths)<span class="question-mark">? </span>};
-        <span class="kw">for </span>(name, <span class="kw">_</span>) <span class="kw">in </span>tensors.tensors() {
-            <span class="kw">let </span>tensor = tensors
-                .load(<span class="kw-2">&amp;</span>name, device)<span class="question-mark">?
-                </span>.to_device(device)<span class="question-mark">?
-                </span>.to_dtype(dtype)<span class="question-mark">?</span>;
-            ws.insert(name, Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
-        }
+
+        <span class="kw">if </span>silent {
+            <span class="kw">for </span>(name, <span class="kw">_</span>) <span class="kw">in </span>tensors.tensors() {
+                <span class="kw">let </span>tensor = tensors
+                    .load(<span class="kw-2">&amp;</span>name, device)<span class="question-mark">?
+                    </span>.to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.clone(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">for </span>(name, <span class="kw">_</span>) <span class="kw">in </span>tensors.tensors().iter().tqdm() {
+                <span class="kw">let </span>tensor = tensors
+                    .load(name, device)<span class="question-mark">?
+                    </span>.to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.clone(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        };
     }
 
     <span class="prelude-val">Ok</span>(VarBuilder::from_varmap(<span class="kw-2">&amp;</span>map, dtype, device))
 }
 
 <span class="doccomment">/// Load tensors into a VarBuilder backed by a VarMap using NpzTensors.
+/// Set `silent` to not show a progress bar.
 </span><span class="kw">pub fn </span>from_npz_tensors&lt;<span class="lifetime">&#39;a</span>, P: AsRef&lt;Path&gt;&gt;(
     path: P,
     dtype: DType,
     device: <span class="kw-2">&amp;</span>Device,
+    silent: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;VarBuilderArgs&lt;<span class="lifetime">&#39;a</span>, Box&lt;<span class="kw">dyn </span>SimpleBackend&gt;&gt;, Error&gt; {
     <span class="kw">let </span>map = VarMap::new();
     {
         <span class="kw">let </span><span class="kw-2">mut </span>ws = map.data().lock().unwrap();
 
         <span class="kw">let </span>tensors = candle_core::npy::NpzTensors::new(path)<span class="question-mark">?</span>;
-        <span class="kw">for </span>name <span class="kw">in </span>tensors.names() {
-            <span class="kw">let </span>tensor = tensors
-                .get(name)<span class="question-mark">?
-                </span>.expect(<span class="string">&quot;Expect Some(_) tensor.&quot;</span>)
-                .to_device(device)<span class="question-mark">?
-                </span>.to_dtype(dtype)<span class="question-mark">?</span>;
-            ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
-        }
+        <span class="kw">if </span>silent {
+            <span class="kw">for </span>name <span class="kw">in </span>tensors.names() {
+                <span class="kw">let </span>tensor = tensors
+                    .get(name)<span class="question-mark">?
+                    </span>.expect(<span class="string">&quot;Expect Some(_) tensor.&quot;</span>)
+                    .to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">for </span>name <span class="kw">in </span>tensors.names().iter().tqdm() {
+                <span class="kw">let </span>tensor = tensors
+                    .get(name)<span class="question-mark">?
+                    </span>.expect(<span class="string">&quot;Expect Some(_) tensor.&quot;</span>)
+                    .to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        };
     }
 
     <span class="prelude-val">Ok</span>(VarBuilder::from_varmap(<span class="kw-2">&amp;</span>map, dtype, device))
 }
 
 <span class="doccomment">/// Load tensors into a VarBuilder backed by a VarMap using PthTensors.
+/// Set `silent` to not show a progrss bar.
 </span><span class="kw">pub fn </span>from_pth_tensors&lt;<span class="lifetime">&#39;a</span>, P: AsRef&lt;Path&gt;&gt;(
     path: P,
     dtype: DType,
     device: <span class="kw-2">&amp;</span>Device,
+    silent: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;VarBuilderArgs&lt;<span class="lifetime">&#39;a</span>, Box&lt;<span class="kw">dyn </span>SimpleBackend&gt;&gt;, Error&gt; {
     <span class="kw">let </span>map = VarMap::new();
     {
         <span class="kw">let </span><span class="kw-2">mut </span>ws = map.data().lock().unwrap();
 
         <span class="kw">let </span>tensors = candle_core::pickle::PthTensors::new(path)<span class="question-mark">?</span>;
-        <span class="kw">for </span>name <span class="kw">in </span>tensors.tensor_infos().keys() {
-            <span class="kw">let </span>tensor = tensors
-                .get(name)<span class="question-mark">?
-                </span>.expect(<span class="string">&quot;Tensor not found&quot;</span>)
-                .to_device(device)<span class="question-mark">?
-                </span>.to_dtype(dtype)<span class="question-mark">?</span>;
-            ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
-        }
+        <span class="kw">if </span>silent {
+            <span class="kw">for </span>name <span class="kw">in </span>tensors.tensor_infos().keys() {
+                <span class="kw">let </span>tensor = tensors
+                    .get(name)<span class="question-mark">?
+                    </span>.expect(<span class="string">&quot;Tensor not found&quot;</span>)
+                    .to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">for </span>name <span class="kw">in </span>tensors.tensor_infos().keys().tqdm() {
+                <span class="kw">let </span>tensor = tensors
+                    .get(name)<span class="question-mark">?
+                    </span>.expect(<span class="string">&quot;Tensor not found&quot;</span>)
+                    .to_device(device)<span class="question-mark">?
+                    </span>.to_dtype(dtype)<span class="question-mark">?</span>;
+                ws.insert(name.to_string(), Var::from_tensor(<span class="kw-2">&amp;</span>tensor)<span class="question-mark">?</span>);
+            }
+        };
     }
 
     <span class="prelude-val">Ok</span>(VarBuilder::from_varmap(<span class="kw-2">&amp;</span>map, dtype, device))
