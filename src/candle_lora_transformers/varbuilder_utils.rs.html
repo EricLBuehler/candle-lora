@@ -132,7 +132,7 @@
 <span class="kw">use </span>tqdm::Iter;
 
 <span class="doccomment">/// Load tensors into a VarBuilder backed by a VarMap using MmapedSafetensors.
-/// Set `silent` to not show a progrss bar.
+/// Set `silent` to not show a progress bar.
 </span><span class="kw">pub fn </span>from_mmaped_safetensors&lt;<span class="lifetime">&#39;a</span>, P: AsRef&lt;Path&gt;&gt;(
     paths: <span class="kw-2">&amp;</span>[P],
     dtype: DType,
@@ -205,7 +205,7 @@
 }
 
 <span class="doccomment">/// Load tensors into a VarBuilder backed by a VarMap using PthTensors.
-/// Set `silent` to not show a progrss bar.
+/// Set `silent` to not show a progress bar.
 </span><span class="kw">pub fn </span>from_pth_tensors&lt;<span class="lifetime">&#39;a</span>, P: AsRef&lt;Path&gt;&gt;(
     path: P,
     dtype: DType,
