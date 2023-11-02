@@ -11,7 +11,7 @@ use candle_nn::{
 use tqdm::Iter;
 
 /// Load tensors into a VarBuilder backed by a VarMap using MmapedSafetensors.
-/// Set `silent` to not show a progrss bar.
+/// Set `silent` to not show a progress bar.
 pub fn from_mmaped_safetensors<'a, P: AsRef<Path>>(
     paths: &[P],
     dtype: DType,
@@ -84,7 +84,7 @@ pub fn from_npz_tensors<'a, P: AsRef<Path>>(
 }
 
 /// Load tensors into a VarBuilder backed by a VarMap using PthTensors.
-/// Set `silent` to not show a progrss bar.
+/// Set `silent` to not show a progress bar.
 pub fn from_pth_tensors<'a, P: AsRef<Path>>(
     path: P,
     dtype: DType,
