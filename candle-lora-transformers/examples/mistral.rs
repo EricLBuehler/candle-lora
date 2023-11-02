@@ -233,7 +233,7 @@ fn main() -> Result<()> {
         DType::F32
     };
 
-    let vb = from_mmaped_safetensors(&filenames, dtype, &device)?;
+    let vb = from_mmaped_safetensors(&filenames, dtype, &device, false)?;
 
     let loraconfig = LoraConfig::new(1, 1., None);
     let model = Mistral::new(&config, vb, true, loraconfig)?;

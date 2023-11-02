@@ -216,7 +216,7 @@ fn main() -> Result<()> {
     let config = Config::replit_code_v1_5_3b();
 
     let device = candle_examples::device(args.cpu)?;
-    let vb = from_mmaped_safetensors(&[filename], DType::F32, &device)?;
+    let vb = from_mmaped_safetensors(&[filename], DType::F32, &device, false)?;
     let loraconfig = LoraConfig::new(1, 1., None);
     let model = Model::new(&config, vb.pp("transformer"), true, loraconfig)?;
 

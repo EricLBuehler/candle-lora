@@ -132,7 +132,7 @@ fn main() -> Result<()> {
             let cache = model::Cache::new(!args.no_kv_cache, dtype, &config, &device)?;
             let tokenizer = std::path::PathBuf::from("llama-tokenizer.json");
 
-            let vb = from_npz_tensors(filename, dtype, &device)?;
+            let vb = from_npz_tensors(filename, dtype, &device, false)?;
 
             let loraconfig = LoraConfig::new(1, 1., None);
             let linearconfig = LoraLinearConfig::new(config.hidden_size, config.vocab_size);
@@ -199,7 +199,7 @@ fn main() -> Result<()> {
             println!("building the model");
             let cache = model::Cache::new(!args.no_kv_cache, dtype, &config, &device)?;
 
-            let vb = from_mmaped_safetensors(&filenames, dtype, &device)?;
+            let vb = from_mmaped_safetensors(&filenames, dtype, &device, false)?;
 
             let loraconfig = LoraConfig::new(1, 1., None);
             let linearconfig = LoraLinearConfig::new(config.hidden_size, config.vocab_size);

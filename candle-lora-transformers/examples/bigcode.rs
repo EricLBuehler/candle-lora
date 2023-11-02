@@ -148,7 +148,7 @@ fn main() -> Result<()> {
 
     let start = std::time::Instant::now();
     let device = candle_examples::device(args.cpu)?;
-    let vb = from_mmaped_safetensors(&filenames, DType::F32, &device)?;
+    let vb = from_mmaped_safetensors(&filenames, DType::F32, &device, false)?;
     let config = Config::starcoder_1b();
     let loraconfig = LoraConfig::new(1, 1., None);
     let model = GPTBigCode::load(vb, config, true, loraconfig)?;

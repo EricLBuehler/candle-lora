@@ -64,7 +64,7 @@ pub fn main() -> anyhow::Result<()> {
         }
         Some(model) => model.into(),
     };
-    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device)?;
+    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device, false)?;
     let class_count = candle_examples::imagenet::CLASS_COUNT as usize;
 
     let loraconfig = LoraConfig::new(1, 1., None);

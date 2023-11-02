@@ -80,9 +80,9 @@ impl Args {
         let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(E::msg)?;
 
         let vb = if self.use_pth {
-            from_pth_tensors(weights_filename, DTYPE, &device)?
+            from_pth_tensors(weights_filename, DTYPE, &device, false)?
         } else {
-            from_mmaped_safetensors(&[weights_filename], DTYPE, &device)?
+            from_mmaped_safetensors(&[weights_filename], DTYPE, &device, false)?
         };
 
         let loraconfig = LoraConfig::new(1, 1., None);

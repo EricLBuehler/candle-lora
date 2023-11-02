@@ -43,7 +43,7 @@ pub fn main() -> anyhow::Result<()> {
         }
         Some(model) => model.into(),
     };
-    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device)?;
+    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device, false)?;
     let loraconfig = LoraConfig::new(1, 1., None);
     let model = dinov2::vit_small(vb, true, loraconfig)?;
     println!("model built");

@@ -178,7 +178,7 @@ fn main() -> Result<()> {
     let start = std::time::Instant::now();
     let dtype = DType::F32;
 
-    let vb = from_mmaped_safetensors(&filenames, dtype, &device)?;
+    let vb = from_mmaped_safetensors(&filenames, dtype, &device, false)?;
 
     let config = Config::falcon7b();
     config.validate()?;

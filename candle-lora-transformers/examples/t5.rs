@@ -122,7 +122,7 @@ impl T5ModelBuilder {
     }
 
     pub fn build_encoder(&self) -> Result<t5::T5EncoderModel> {
-        let vb = from_mmaped_safetensors(&self.weights_filename, DTYPE, &self.device)?;
+        let vb = from_mmaped_safetensors(&self.weights_filename, DTYPE, &self.device, false)?;
         let loraconfig = LoraConfig::new(1, 1., None);
         Ok(t5::T5EncoderModel::load(
             vb,
@@ -133,7 +133,7 @@ impl T5ModelBuilder {
     }
 
     pub fn build_conditional_generation(&self) -> Result<t5::T5ForConditionalGeneration> {
-        let vb = from_mmaped_safetensors(&self.weights_filename, DTYPE, &self.device)?;
+        let vb = from_mmaped_safetensors(&self.weights_filename, DTYPE, &self.device, false)?;
         let loraconfig = LoraConfig::new(1, 1., None);
         Ok(t5::T5ForConditionalGeneration::load(
             vb,

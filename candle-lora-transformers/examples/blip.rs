@@ -95,7 +95,7 @@ pub fn main() -> anyhow::Result<()> {
     let image = load_image(args.image)?.to_device(&device)?;
     println!("loaded image {image:?}");
 
-    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device)?;
+    let vb = from_mmaped_safetensors(&[model_file], DType::F32, &device, false)?;
     let loraconfig = LoraConfig::new(1, 1., None);
     let mut model = blip::BlipForConditionalGeneration::new(&config, vb, true, loraconfig)?;
     let image_embeds = image.unsqueeze(0)?.apply(model.vision_model())?;
