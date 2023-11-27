@@ -837,7 +837,7 @@
                                         <span class="kw">continue</span>;
                                     }
                                     <span class="kw">let </span>typname = <span class="kw-2">&amp;</span>ty.path.segments.first().unwrap().ident;
-                                    <span class="kw">if </span>is_ident(typname, <span class="string">&quot;Box&quot;</span>) {
+                                    <span class="kw">if </span>is_ident(typname, <span class="string">&quot;Arc&quot;</span>) {
                                         <span class="kw">if let </span>syn::PathArguments::AngleBracketed(bracketed) =
                                             <span class="kw-2">&amp;</span>ty.path.segments.first().as_ref().unwrap().arguments
                                         {
@@ -901,7 +901,7 @@
                             }
                             <span class="kw">continue</span>;
                         }
-                        <span class="kw">if </span>!is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">&quot;Box&quot;</span>) {
+                        <span class="kw">if </span>!is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">&quot;Arc&quot;</span>) {
                             <span class="kw">continue</span>;
                         }
                         <span class="kw">if let </span>syn::PathArguments::AngleBracketed(bracketed) =
@@ -994,7 +994,7 @@
     <span class="kw">if </span>!linear_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(linear_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_fields.iter() {
-                linear_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.linear.get(#n).unwrap().clone())),))
+                linear_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone())),))
             }
         }];);
     }
@@ -1005,7 +1005,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_fields.iter() {
                 linear_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for linear.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.linear.get(#n).unwrap().clone())
+                    <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone())
                 }),))
             }
         }];);
@@ -1015,7 +1015,7 @@
     <span class="kw">if </span>!conv1d_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(conv1d_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_fields.iter() {
-                conv1d_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.conv1d.get(#n).unwrap().clone())),))
+                conv1d_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone())),))
             }
         }];);
     }
@@ -1026,7 +1026,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_fields.iter() {
                 conv1d_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for conv1d.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.conv1d.get(#n).unwrap().clone())
+                    <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone())
                 }),))
             }
         }];);
@@ -1036,7 +1036,7 @@
     <span class="kw">if </span>!conv2d_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(conv2d_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_fields.iter() {
-                conv2d_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.conv2d.get(#n).unwrap().clone())),))
+                conv2d_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone())),))
             }
         }];);
     }
@@ -1047,7 +1047,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_fields.iter() {
                 conv2d_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for conv2d.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.conv2d.get(#n).unwrap().clone())
+                    <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone())
                 }),))
             }
         }];);
@@ -1057,7 +1057,7 @@
     <span class="kw">if </span>!embed_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(embed_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_fields.iter() {
-                embed_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.embed.get(#n).unwrap().clone())),))
+                embed_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone())),))
             }
         }];);
     }
@@ -1068,7 +1068,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_fields.iter() {
                 embed_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for embed.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::boxed::Box::new(new_layers.embed.get(#n).unwrap().clone())
+                    <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone())
                 }),))
             }
         }];);
@@ -1114,7 +1114,7 @@
     <span class="kw">if </span>!linear_option1_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(linear_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_option1_fields.iter() {
-                linear_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.linear.get(#n).unwrap().clone()))),))
+                linear_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone()))),))
             }
         }];);
     }
@@ -1125,7 +1125,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_option1_fields.iter() {
                 linear_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option linear.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.linear.get(#n).unwrap().clone()))
+                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone()))
                 }),))
             }
         }];);
@@ -1135,7 +1135,7 @@
     <span class="kw">if </span>!conv1d_option1_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(conv1d_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_option1_fields.iter() {
-                conv1d_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.conv1d.get(#n).unwrap().clone()))),))
+                conv1d_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone()))),))
             }
         }];);
     }
@@ -1146,7 +1146,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_option1_fields.iter() {
                 conv1d_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option conv1d.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.conv1d.get(#n).unwrap().clone()))
+                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone()))
                 }),))
             }
         }];);
@@ -1156,7 +1156,7 @@
     <span class="kw">if </span>!conv2d_option1_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(conv2d_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_option1_fields.iter() {
-                conv2d_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.conv2d.get(#n).unwrap().clone()))),))
+                conv2d_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone()))),))
             }
         }];);
     }
@@ -1167,7 +1167,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_option1_fields.iter() {
                 conv2d_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option conv2d.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.conv2d.get(#n).unwrap().clone()))
+                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone()))
                 }),))
             }
         }];);
@@ -1177,7 +1177,7 @@
     <span class="kw">if </span>!embed_option1_fields.is_empty() {
         <span class="macro">quote_into::quote_into!</span>(embed_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_option1_fields.iter() {
-                embed_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.embed.get(#n).unwrap().clone()))),))
+                embed_option1_stream_assign.extend(<span class="macro">quote::quote!</span>((<span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone()))),))
             }
         }];);
     }
@@ -1188,7 +1188,7 @@
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_option1_fields.iter() {
                 embed_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
                     (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option embed.&quot;</span>);
-                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::boxed::Box::new(new_layers.embed.get(#n).unwrap().clone()))
+                    <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone()))
                 }),))
             }
         }];);
