@@ -167,7 +167,7 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
                         }
                         if is_ident(&segments[0].ident, "Option") {
                             if let syn::PathArguments::AngleBracketed(bracketed) =
-                                &segments.get(0).as_ref().unwrap().arguments
+                                &segments.first().as_ref().unwrap().arguments
                             {
                                 if bracketed.args.len() != 1 {
                                     continue;
@@ -245,7 +245,7 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
                             continue;
                         }
                         if let syn::PathArguments::AngleBracketed(bracketed) =
-                            &segments.get(0).as_ref().unwrap().arguments
+                            &segments.first().as_ref().unwrap().arguments
                         {
                             if bracketed.args.len() != 1 {
                                 continue;
