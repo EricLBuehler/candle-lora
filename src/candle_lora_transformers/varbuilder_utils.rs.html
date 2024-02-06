@@ -216,7 +216,7 @@
     {
         <span class="kw">let </span><span class="kw-2">mut </span>ws = map.data().lock().unwrap();
 
-        <span class="kw">let </span>tensors = candle_core::pickle::PthTensors::new(path)<span class="question-mark">?</span>;
+        <span class="kw">let </span>tensors = candle_core::pickle::PthTensors::new(path, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
         <span class="kw">if </span>silent {
             <span class="kw">for </span>name <span class="kw">in </span>tensors.tensor_infos().keys() {
                 <span class="kw">let </span>tensor = tensors
