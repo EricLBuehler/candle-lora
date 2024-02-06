@@ -95,7 +95,7 @@ pub fn from_pth_tensors<'a, P: AsRef<Path>>(
     {
         let mut ws = map.data().lock().unwrap();
 
-        let tensors = candle_core::pickle::PthTensors::new(path)?;
+        let tensors = candle_core::pickle::PthTensors::new(path, None)?;
         if silent {
             for name in tensors.tensor_infos().keys() {
                 let tensor = tensors
