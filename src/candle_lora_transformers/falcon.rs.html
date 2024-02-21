@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/falcon.rs`."><title>falcon.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/falcon.rs`."><title>falcon.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -627,9 +628,9 @@
 <span class="kw">const </span>MAX_SEQ_LEN: usize = <span class="number">5000</span>;
 
 <span class="kw">fn </span>linear(size1: usize, size2: usize, bias: bool, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;Linear&gt; {
-    <span class="kw">let </span>weight = vb.get((size2, size1), <span class="string">&quot;weight&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>weight = vb.get((size2, size1), <span class="string">"weight"</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>bias = <span class="kw">if </span>bias {
-        <span class="prelude-val">Some</span>(vb.get(size2, <span class="string">&quot;bias&quot;</span>)<span class="question-mark">?</span>)
+        <span class="prelude-val">Some</span>(vb.get(size2, <span class="string">"bias"</span>)<span class="question-mark">?</span>)
     } <span class="kw">else </span>{
         <span class="prelude-val">None
     </span>};
@@ -637,10 +638,10 @@
 }
 
 <span class="kw">fn </span>layer_norm(size: usize, eps: f64, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;LayerNorm&gt; {
-    <span class="kw">let </span>(weight, bias) = <span class="kw">match </span>(vb.get(size, <span class="string">&quot;weight&quot;</span>), vb.get(size, <span class="string">&quot;bias&quot;</span>)) {
+    <span class="kw">let </span>(weight, bias) = <span class="kw">match </span>(vb.get(size, <span class="string">"weight"</span>), vb.get(size, <span class="string">"bias"</span>)) {
         (<span class="prelude-val">Ok</span>(weight), <span class="prelude-val">Ok</span>(bias)) =&gt; (weight, bias),
         (<span class="prelude-val">Err</span>(err), <span class="kw">_</span>) | (<span class="kw">_</span>, <span class="prelude-val">Err</span>(err)) =&gt; {
-            <span class="kw">if let </span>(<span class="prelude-val">Ok</span>(weight), <span class="prelude-val">Ok</span>(bias)) = (vb.get(size, <span class="string">&quot;gamma&quot;</span>), vb.get(size, <span class="string">&quot;beta&quot;</span>)) {
+            <span class="kw">if let </span>(<span class="prelude-val">Ok</span>(weight), <span class="prelude-val">Ok</span>(bias)) = (vb.get(size, <span class="string">"gamma"</span>), vb.get(size, <span class="string">"beta"</span>)) {
                 (weight, bias)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(err);
@@ -651,7 +652,7 @@
 }
 
 <span class="kw">fn </span>embedding(vocab_size: usize, hidden_size: usize, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;Embedding&gt; {
-    <span class="kw">let </span>embeddings = vb.get((vocab_size, hidden_size), <span class="string">&quot;weight&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>embeddings = vb.get((vocab_size, hidden_size), <span class="string">"weight"</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(Embedding::new(embeddings, hidden_size))
 }
 
@@ -704,13 +705,13 @@
 <span class="kw">impl </span>Config {
     <span class="kw">pub fn </span>validate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.alibi {
-            <span class="macro">candle_core::bail!</span>(<span class="string">&quot;alibi is not supported&quot;</span>);
+            <span class="macro">candle_core::bail!</span>(<span class="string">"alibi is not supported"</span>);
         }
         <span class="kw">if </span><span class="self">self</span>.new_decoder_architecture {
-            <span class="macro">candle_core::bail!</span>(<span class="string">&quot;new_decoder_architecture is not supported&quot;</span>);
+            <span class="macro">candle_core::bail!</span>(<span class="string">"new_decoder_architecture is not supported"</span>);
         }
         <span class="kw">if </span><span class="self">self</span>.n_head_kv.is_some() {
-            <span class="macro">candle_core::bail!</span>(<span class="string">&quot;n_head_kv is not supported&quot;</span>);
+            <span class="macro">candle_core::bail!</span>(<span class="string">"n_head_kv is not supported"</span>);
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -883,18 +884,18 @@
                 hidden_size,
                 qkv_out_dim,
                 cfg.bias,
-                vb.pp(<span class="string">&quot;query_key_value&quot;</span>),
+                vb.pp(<span class="string">"query_key_value"</span>),
             )<span class="question-mark">?</span>),
         };
         <span class="kw">let </span><span class="kw-2">mut </span>dense = AttentionDense {
-            dense: Arc::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp(<span class="string">&quot;dense&quot;</span>))<span class="question-mark">?</span>),
+            dense: Arc::new(linear(hidden_size, hidden_size, cfg.bias, vb.pp(<span class="string">"dense"</span>))<span class="question-mark">?</span>),
         };
 
         <span class="kw">let </span>loraconfig_qkv = LoraLinearConfig::new(hidden_size, qkv_out_dim);
         <span class="kw">if </span>merge {
             query_key_value.get_merged_lora_model(
                 lora_config.clone(),
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_query_key_value&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_query_key_value"</span>),
                 <span class="prelude-val">Some</span>(loraconfig_qkv),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -903,7 +904,7 @@
         } <span class="kw">else </span>{
             query_key_value.get_lora_model(
                 lora_config.clone(),
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_query_key_value&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_query_key_value"</span>),
                 <span class="prelude-val">Some</span>(loraconfig_qkv),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -915,7 +916,7 @@
         <span class="kw">if </span>merge {
             dense.get_merged_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_dense&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_dense"</span>),
                 <span class="prelude-val">Some</span>(loraconfig_dense),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -924,7 +925,7 @@
         } <span class="kw">else </span>{
             dense.get_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_dense&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_dense"</span>),
                 <span class="prelude-val">Some</span>(loraconfig_dense),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -1039,8 +1040,8 @@
         <span class="comment">//TODO
         </span><span class="kw">let </span>h = cfg.hidden_size;
         <span class="kw">let </span>b = cfg.bias;
-        <span class="kw">let </span>dense_h_to_4h = linear(h, <span class="number">4 </span>* h, b, vb.pp(<span class="string">&quot;dense_h_to_4h&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>dense_4h_to_h = linear(<span class="number">4 </span>* h, h, b, vb.pp(<span class="string">&quot;dense_4h_to_h&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>dense_h_to_4h = linear(h, <span class="number">4 </span>* h, b, vb.pp(<span class="string">"dense_h_to_4h"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>dense_4h_to_h = linear(<span class="number">4 </span>* h, h, b, vb.pp(<span class="string">"dense_4h_to_h"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             dense_h_to_4h,
             dense_4h_to_h,
@@ -1065,21 +1066,21 @@
 
 <span class="kw">impl </span>FalconDecoderLayer {
     <span class="kw">fn </span>load(vb: VarBuilder, cfg: <span class="kw-2">&amp;</span>Config, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>mlp = FalconMlp::load(vb.pp(<span class="string">&quot;mlp&quot;</span>), cfg)<span class="question-mark">?</span>;
+        <span class="kw">let </span>mlp = FalconMlp::load(vb.pp(<span class="string">"mlp"</span>), cfg)<span class="question-mark">?</span>;
         <span class="kw">let </span>inp_layernorm = layer_norm(
             cfg.hidden_size,
             cfg.layer_norm_epsilon,
-            vb.pp(<span class="string">&quot;input_layernorm&quot;</span>),
+            vb.pp(<span class="string">"input_layernorm"</span>),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>self_attention =
-            FalconAttention::load(vb.pp(<span class="string">&quot;self_attention&quot;</span>), cfg, merge, lora_config)<span class="question-mark">?</span>;
+            FalconAttention::load(vb.pp(<span class="string">"self_attention"</span>), cfg, merge, lora_config)<span class="question-mark">?</span>;
         <span class="kw">let </span>post_attention_layernorm = <span class="kw">if </span>cfg.parallel_attn {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
             <span class="kw">let </span>ln = layer_norm(
                 cfg.hidden_size,
                 cfg.layer_norm_epsilon,
-                vb.pp(<span class="string">&quot;post_attention_layernorm&quot;</span>),
+                vb.pp(<span class="string">"post_attention_layernorm"</span>),
             )<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(ln)
         };
@@ -1161,12 +1162,12 @@
         <span class="kw">let </span>word_embeddings = embedding(
             cfg.vocab_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;transformer.word_embeddings&quot;</span>),
+            vb.pp(<span class="string">"transformer.word_embeddings"</span>),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>blocks = (<span class="number">0</span>..cfg.num_hidden_layers)
             .map(|i| {
                 FalconDecoderLayer::load(
-                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;transformer.h.{i}&quot;</span>)),
+                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"transformer.h.{i}"</span>)),
                     <span class="kw-2">&amp;</span>cfg,
                     merge,
                     lora_config.clone(),
@@ -1176,9 +1177,9 @@
         <span class="kw">let </span>ln_f = layer_norm(
             cfg.hidden_size,
             cfg.layer_norm_epsilon,
-            vb.pp(<span class="string">&quot;transformer.ln_f&quot;</span>),
+            vb.pp(<span class="string">"transformer.ln_f"</span>),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>lm_head = linear(cfg.hidden_size, cfg.vocab_size, <span class="bool-val">false</span>, vb.pp(<span class="string">&quot;lm_head&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>lm_head = linear(cfg.hidden_size, cfg.vocab_size, <span class="bool-val">false</span>, vb.pp(<span class="string">"lm_head"</span>))<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
             word_embeddings: Arc::new(word_embeddings),
@@ -1191,7 +1192,7 @@
         <span class="kw">if </span>merge {
             this.get_merged_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_falcon&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_falcon"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -1200,7 +1201,7 @@
         } <span class="kw">else </span>{
             this.get_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_falcon&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_falcon"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-macro/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_macro" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-macro/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_macro" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -687,35 +688,35 @@
                                     .to_string()
                                     .as_str()
                                 {
-                                    <span class="string">&quot;Linear&quot; </span>=&gt; {
+                                    <span class="string">"Linear" </span>=&gt; {
                                         <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) = field.vis {
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(<span class="kw">pub </span>#ident: Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;)).unwrap());
                                         } <span class="kw">else </span>{
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;)).unwrap());
                                         }
                                     }
-                                    <span class="string">&quot;Conv1d&quot; </span>=&gt; {
+                                    <span class="string">"Conv1d" </span>=&gt; {
                                         <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) = field.vis {
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(<span class="kw">pub </span>#ident: Arc&lt;<span class="kw">dyn </span>Conv1dLayerLike&gt;)).unwrap());
                                         } <span class="kw">else </span>{
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: Arc&lt;<span class="kw">dyn </span>Conv1dLayerLike&gt;)).unwrap());
                                         }
                                     }
-                                    <span class="string">&quot;Conv2d&quot; </span>=&gt; {
+                                    <span class="string">"Conv2d" </span>=&gt; {
                                         <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) = field.vis {
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(<span class="kw">pub </span>#ident: Arc&lt;<span class="kw">dyn </span>Conv2dLayerLike&gt;)).unwrap());
                                         } <span class="kw">else </span>{
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: Arc&lt;<span class="kw">dyn </span>Conv2dLayerLike&gt;)).unwrap());
                                         }
                                     }
-                                    <span class="string">&quot;Embedding&quot; </span>=&gt; {
+                                    <span class="string">"Embedding" </span>=&gt; {
                                         <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) = field.vis {
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(<span class="kw">pub </span>#ident: Arc&lt;<span class="kw">dyn </span>EmbeddingLayerLike&gt;)).unwrap());
                                         } <span class="kw">else </span>{
                                             f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: Arc&lt;<span class="kw">dyn </span>EmbeddingLayerLike&gt;)).unwrap());
                                         }
                                     }
-                                    <span class="string">&quot;Option&quot; </span>=&gt; {
+                                    <span class="string">"Option" </span>=&gt; {
                                         <span class="kw">if let </span>PathArguments::AngleBracketed(bracketed) =
                                             <span class="kw-2">&amp;</span>path.path.segments.first().unwrap().arguments
                                         {
@@ -733,7 +734,7 @@
                                                             .to_string()
                                                             .as_str()
                                                         {
-                                                            <span class="string">&quot;Linear&quot; </span>=&gt; {
+                                                            <span class="string">"Linear" </span>=&gt; {
                                                                 <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) =
                                                                     field.vis
                                                                 {
@@ -742,7 +743,7 @@
                                                                     f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>LinearLayerLike&gt;&gt;)).unwrap());
                                                                 }
                                                             }
-                                                            <span class="string">&quot;Conv1d&quot; </span>=&gt; {
+                                                            <span class="string">"Conv1d" </span>=&gt; {
                                                                 <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) =
                                                                     field.vis
                                                                 {
@@ -751,7 +752,7 @@
                                                                     f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>Conv1dLayerLike&gt;&gt;)).unwrap());
                                                                 }
                                                             }
-                                                            <span class="string">&quot;Conv2d&quot; </span>=&gt; {
+                                                            <span class="string">"Conv2d" </span>=&gt; {
                                                                 <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) =
                                                                     field.vis
                                                                 {
@@ -760,7 +761,7 @@
                                                                     f = <span class="prelude-val">Some</span>(syn::Field::parse_named.parse2(<span class="macro">quote::quote!</span>(#ident: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>Conv2dLayerLike&gt;&gt;)).unwrap());
                                                                 }
                                                             }
-                                                            <span class="string">&quot;Embedding&quot; </span>=&gt; {
+                                                            <span class="string">"Embedding" </span>=&gt; {
                                                                 <span class="kw">if let </span>Visibility::Public(<span class="kw">_</span>) =
                                                                     field.vis
                                                                 {
@@ -786,12 +787,12 @@
                     }
                 }
                 <span class="kw">_ </span>=&gt; {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Named fields are required.&quot;</span>)
+                    <span class="macro">panic!</span>(<span class="string">"Named fields are required."</span>)
                 }
             }
         }
         <span class="kw">_ </span>=&gt; {
-            <span class="macro">panic!</span>(<span class="string">&quot;Cannot swap fields of non struct!&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">"Cannot swap fields of non struct!"</span>);
         }
     }
 
@@ -825,7 +826,7 @@
                         <span class="kw">if </span>segments.len() != <span class="number">1 </span>{
                             <span class="kw">continue</span>;
                         }
-                        <span class="kw">if </span>is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">&quot;Option&quot;</span>) {
+                        <span class="kw">if </span>is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">"Option"</span>) {
                             <span class="kw">if let </span>syn::PathArguments::AngleBracketed(bracketed) =
                                 <span class="kw-2">&amp;</span>segments.first().as_ref().unwrap().arguments
                             {
@@ -837,7 +838,7 @@
                                         <span class="kw">continue</span>;
                                     }
                                     <span class="kw">let </span>typname = <span class="kw-2">&amp;</span>ty.path.segments.first().unwrap().ident;
-                                    <span class="kw">if </span>is_ident(typname, <span class="string">&quot;Arc&quot;</span>) {
+                                    <span class="kw">if </span>is_ident(typname, <span class="string">"Arc"</span>) {
                                         <span class="kw">if let </span>syn::PathArguments::AngleBracketed(bracketed) =
                                             <span class="kw-2">&amp;</span>ty.path.segments.first().as_ref().unwrap().arguments
                                         {
@@ -869,21 +870,21 @@
                                                                     .unwrap()
                                                                     .to_string(),
                                                             );
-                                                            <span class="kw">if </span>is_ident(trt, <span class="string">&quot;LinearLayerLike&quot;</span>) {
+                                                            <span class="kw">if </span>is_ident(trt, <span class="string">"LinearLayerLike"</span>) {
                                                                 linear_option1_fields.push(value);
                                                             } <span class="kw">else if </span>is_ident(
                                                                 trt,
-                                                                <span class="string">&quot;Conv1dLayerLike&quot;</span>,
+                                                                <span class="string">"Conv1dLayerLike"</span>,
                                                             ) {
                                                                 conv1d_option1_fields.push(value);
                                                             } <span class="kw">else if </span>is_ident(
                                                                 trt,
-                                                                <span class="string">&quot;Conv2dLayerLike&quot;</span>,
+                                                                <span class="string">"Conv2dLayerLike"</span>,
                                                             ) {
                                                                 conv2d_option1_fields.push(value);
                                                             } <span class="kw">else if </span>is_ident(
                                                                 trt,
-                                                                <span class="string">&quot;EmbeddingLayerLike&quot;</span>,
+                                                                <span class="string">"EmbeddingLayerLike"</span>,
                                                             ) {
                                                                 embed_option1_fields.push(value);
                                                             }
@@ -901,7 +902,7 @@
                             }
                             <span class="kw">continue</span>;
                         }
-                        <span class="kw">if </span>!is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">&quot;Arc&quot;</span>) {
+                        <span class="kw">if </span>!is_ident(<span class="kw-2">&amp;</span>segments[<span class="number">0</span>].ident, <span class="string">"Arc"</span>) {
                             <span class="kw">continue</span>;
                         }
                         <span class="kw">if let </span>syn::PathArguments::AngleBracketed(bracketed) =
@@ -926,13 +927,13 @@
                                                 field.ident.clone().unwrap(),
                                                 field.ident.as_ref().unwrap().to_string(),
                                             );
-                                            <span class="kw">if </span>is_ident(trt, <span class="string">&quot;LinearLayerLike&quot;</span>) {
+                                            <span class="kw">if </span>is_ident(trt, <span class="string">"LinearLayerLike"</span>) {
                                                 linear_fields.push(value);
-                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">&quot;Conv1dLayerLike&quot;</span>) {
+                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">"Conv1dLayerLike"</span>) {
                                                 conv1d_fields.push(value);
-                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">&quot;Conv2dLayerLike&quot;</span>) {
+                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">"Conv2dLayerLike"</span>) {
                                                 conv2d_fields.push(value);
-                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">&quot;EmbeddingLayerLike&quot;</span>) {
+                                            } <span class="kw">else if </span>is_ident(trt, <span class="string">"EmbeddingLayerLike"</span>) {
                                                 embed_fields.push(value);
                                             }
                                         }
@@ -1004,7 +1005,7 @@
         <span class="macro">quote_into::quote_into!</span>(linear_merge_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_fields.iter() {
                 linear_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for linear.&quot;</span>);
+                    (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for linear."</span>);
                     <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone())
                 }),))
             }
@@ -1025,7 +1026,7 @@
         <span class="macro">quote_into::quote_into!</span>(conv1d_merge_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_fields.iter() {
                 conv1d_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for conv1d.&quot;</span>);
+                    (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for conv1d."</span>);
                     <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone())
                 }),))
             }
@@ -1046,7 +1047,7 @@
         <span class="macro">quote_into::quote_into!</span>(conv2d_merge_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_fields.iter() {
                 conv2d_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for conv2d.&quot;</span>);
+                    (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for conv2d."</span>);
                     <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone())
                 }),))
             }
@@ -1067,7 +1068,7 @@
         <span class="macro">quote_into::quote_into!</span>(embed_merge_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_fields.iter() {
                 embed_merge_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for embed.&quot;</span>);
+                    (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for embed."</span>);
                     <span class="self">self</span>.#name = ::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone())
                 }),))
             }
@@ -1124,7 +1125,7 @@
         <span class="macro">quote_into::quote_into!</span>(linear_merge_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>linear_option1_fields.iter() {
                 linear_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option linear.&quot;</span>);
+                    (new_layers.linear.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for option linear."</span>);
                     <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.linear.get(#n).unwrap().clone()))
                 }),))
             }
@@ -1145,7 +1146,7 @@
         <span class="macro">quote_into::quote_into!</span>(conv1d_merge_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv1d_option1_fields.iter() {
                 conv1d_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option conv1d.&quot;</span>);
+                    (new_layers.conv1d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for option conv1d."</span>);
                     <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv1d.get(#n).unwrap().clone()))
                 }),))
             }
@@ -1166,7 +1167,7 @@
         <span class="macro">quote_into::quote_into!</span>(conv2d_merge_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>conv2d_option1_fields.iter() {
                 conv2d_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option conv2d.&quot;</span>);
+                    (new_layers.conv2d.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for option conv2d."</span>);
                     <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.conv2d.get(#n).unwrap().clone()))
                 }),))
             }
@@ -1187,7 +1188,7 @@
         <span class="macro">quote_into::quote_into!</span>(embed_merge_option1_stream_assign += [#{
             <span class="kw">for </span>(name, n) <span class="kw">in </span>embed_option1_fields.iter() {
                 embed_merge_option1_stream_assign.extend(<span class="macro">quote::quote!</span>(({
-                    (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">&quot;Merge failed for option embed.&quot;</span>);
+                    (new_layers.embed.get_mut(#n).unwrap().clone()).merge_weights().expect(<span class="string">"Merge failed for option embed."</span>);
                     <span class="self">self</span>.#name = ::std::option::Option::Some(::std::sync::Arc::new(new_layers.embed.get(#n).unwrap().clone()))
                 }),))
             }
@@ -1198,7 +1199,7 @@
     <span class="macro">quote_into::quote_into! </span>{ stream +=
         <span class="kw">impl </span>#st_name {
             <span class="doccomment">/// Be sure to provide a configuration for each type!
-            </span><span class="kw">pub fn </span>get_lora_model&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, lora_config: candle_lora::LoraConfig, vb: <span class="kw-2">&amp;</span>candle_nn::VarBuilder, linear_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraLinearConfig&gt;, conv1d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv1dConfig&gt;, conv2d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv2dConfig&gt;, embed_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraEmbeddingConfig&gt;) {
+            </span><span class="kw">pub fn </span>get_lora_model&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, lora_config: candle_lora::LoraConfig, vb: <span class="kw-2">&amp;</span>candle_nn::VarBuilder, linear_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraLinearConfig&gt;, conv1d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv1dConfig&gt;, conv2d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv2dConfig&gt;, embed_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraEmbeddingConfig&gt;) {
                 <span class="kw">let </span><span class="kw-2">mut </span>linear: ::std::collections::HashMap&lt;String, <span class="kw-2">&amp;</span><span class="kw">dyn </span>candle_lora::LinearLayerLike&gt; = ::std::collections::HashMap::new();
                 <span class="kw">let </span><span class="kw-2">mut </span>conv1d: ::std::collections::HashMap&lt;String, <span class="kw-2">&amp;</span><span class="kw">dyn </span>candle_lora::Conv1dLayerLike&gt; = ::std::collections::HashMap::new();
                 <span class="kw">let </span><span class="kw-2">mut </span>conv2d: ::std::collections::HashMap&lt;String, <span class="kw-2">&amp;</span><span class="kw">dyn </span>candle_lora::Conv2dLayerLike&gt; = ::std::collections::HashMap::new();
@@ -1215,16 +1216,16 @@
                 #embed_option1_stream
 
                 <span class="kw">if </span>!linear.is_empty() &amp;&amp; linear_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for linear layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for linear layers."</span>);
                 }
                 <span class="kw">if </span>!conv1d.is_empty() &amp;&amp; conv1d_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for conv1d layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for conv1d layers."</span>);
                 }
                 <span class="kw">if </span>!conv2d.is_empty() &amp;&amp; conv2d_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for conv2d layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for conv2d layers."</span>);
                 }
                 <span class="kw">if </span>!embed.is_empty() &amp;&amp; embed_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for embedding layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for embedding layers."</span>);
                 }
 
                 <span class="kw">let </span><span class="kw-2">mut </span>builder = candle_lora::SelectedLayersBuilder::new();
@@ -1256,7 +1257,7 @@
             }
 
             <span class="doccomment">/// Be sure to provide a configuration for each type!
-            </span><span class="kw">pub fn </span>get_merged_lora_model&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, lora_config: candle_lora::LoraConfig, vb: <span class="kw-2">&amp;</span>candle_nn::VarBuilder, linear_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraLinearConfig&gt;, conv1d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv1dConfig&gt;, conv2d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv2dConfig&gt;, embed_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraEmbeddingConfig&gt;) {
+            </span><span class="kw">pub fn </span>get_merged_lora_model&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, lora_config: candle_lora::LoraConfig, vb: <span class="kw-2">&amp;</span>candle_nn::VarBuilder, linear_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraLinearConfig&gt;, conv1d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv1dConfig&gt;, conv2d_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraConv2dConfig&gt;, embed_config: <span class="prelude-ty">Option</span>&lt;candle_lora::LoraEmbeddingConfig&gt;) {
                 <span class="kw">use </span>candle_lora::Merge;
                 <span class="kw">let </span><span class="kw-2">mut </span>linear: ::std::collections::HashMap&lt;String, <span class="kw-2">&amp;</span><span class="kw">dyn </span>candle_lora::LinearLayerLike&gt; = ::std::collections::HashMap::new();
                 <span class="kw">let </span><span class="kw-2">mut </span>conv1d: ::std::collections::HashMap&lt;String, <span class="kw-2">&amp;</span><span class="kw">dyn </span>candle_lora::Conv1dLayerLike&gt; = ::std::collections::HashMap::new();
@@ -1274,16 +1275,16 @@
                 #embed_option1_stream
 
                 <span class="kw">if </span>!linear.is_empty() &amp;&amp; linear_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for linear layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for linear layers."</span>);
                 }
                 <span class="kw">if </span>!conv1d.is_empty() &amp;&amp; conv1d_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for conv1d layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for conv1d layers."</span>);
                 }
                 <span class="kw">if </span>!conv2d.is_empty() &amp;&amp; conv2d_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for conv2d layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for conv2d layers."</span>);
                 }
                 <span class="kw">if </span>!embed.is_empty() &amp;&amp; embed_config.is_none() {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Config not speified for embedding layers.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Config not speified for embedding layers."</span>);
                 }
 
                 <span class="kw">let </span><span class="kw-2">mut </span>builder = candle_lora::SelectedLayersBuilder::new();

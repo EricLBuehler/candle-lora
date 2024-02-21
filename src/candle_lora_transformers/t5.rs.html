@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/t5.rs`."><title>t5.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/t5.rs`."><title>t5.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -992,19 +993,19 @@
     num_decoder_layers: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     num_heads: usize,
     relative_attention_num_buckets: usize,
-    <span class="attr">#[serde(default = <span class="string">&quot;default_relative_attention_max_distance&quot;</span>)]
+    <span class="attr">#[serde(default = <span class="string">"default_relative_attention_max_distance"</span>)]
     </span>relative_attention_max_distance: usize,
     dropout_rate: f64,
     layer_norm_epsilon: f64,
     initializer_factor: f64,
     <span class="attr">#[serde(default)]
     </span>feed_forward_proj: Activation,
-    <span class="attr">#[serde(default = <span class="string">&quot;default_tie_word_embeddings&quot;</span>)]
+    <span class="attr">#[serde(default = <span class="string">"default_tie_word_embeddings"</span>)]
     </span>tie_word_embeddings: bool,
-    <span class="attr">#[serde(default = <span class="string">&quot;default_is_decoder&quot;</span>)]
+    <span class="attr">#[serde(default = <span class="string">"default_is_decoder"</span>)]
     </span>is_decoder: bool,
     is_encoder_decoder: bool,
-    <span class="attr">#[serde(default = <span class="string">&quot;default_use_cache&quot;</span>)]
+    <span class="attr">#[serde(default = <span class="string">"default_use_cache"</span>)]
     </span><span class="kw">pub </span>use_cache: bool,
     <span class="kw">pub </span>pad_token_id: usize,
     <span class="kw">pub </span>eos_token_id: usize,
@@ -1072,11 +1073,11 @@
 
 <span class="kw">impl </span>T5LayerNorm {
     <span class="kw">fn </span>load(h: usize, eps: f64, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>weight = vb.get(h, <span class="string">&quot;weight&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>weight = vb.get(h, <span class="string">"weight"</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             weight,
             variance_epsilon: eps,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;layer-norm&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"layer-norm"</span>),
         })
     }
 }
@@ -1108,16 +1109,16 @@
         <span class="kw">let </span>wi = linear_no_bias(
             cfg.d_model,
             cfg.d_ff,
-            vb.pp(<span class="string">&quot;wi&quot;</span>),
+            vb.pp(<span class="string">"wi"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>wo = linear_no_bias(cfg.d_ff, cfg.d_model, vb.pp(<span class="string">&quot;wo&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>wo = linear_no_bias(cfg.d_ff, cfg.d_model, vb.pp(<span class="string">"wo"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             wi,
             wo,
             act: Activation::Relu,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;dense-act-dense&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"dense-act-dense"</span>),
         })
     }
 }
@@ -1146,24 +1147,24 @@
         <span class="kw">let </span>wi_0 = linear_no_bias(
             cfg.d_model,
             cfg.d_ff,
-            vb.pp(<span class="string">&quot;wi_0&quot;</span>),
+            vb.pp(<span class="string">"wi_0"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>wi_1 = linear_no_bias(
             cfg.d_model,
             cfg.d_ff,
-            vb.pp(<span class="string">&quot;wi_1&quot;</span>),
+            vb.pp(<span class="string">"wi_1"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>wo = linear_no_bias(cfg.d_ff, cfg.d_model, vb.pp(<span class="string">&quot;wo&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>wo = linear_no_bias(cfg.d_ff, cfg.d_model, vb.pp(<span class="string">"wo"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             wi_0,
             wi_1,
             wo,
             act: Activation::NewGelu,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;dense-gated-act-dense&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"dense-gated-act-dense"</span>),
         })
     }
 }
@@ -1190,12 +1191,12 @@
 <span class="kw">impl </span>T5LayerFF {
     <span class="kw">fn </span>load(vb: VarBuilder, cfg: <span class="kw-2">&amp;</span>Config, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>layer_norm =
-            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">&quot;layer_norm&quot;</span>))<span class="question-mark">?</span>;
+            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">"layer_norm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>(dense_act, gated_dense_act) = <span class="kw">if </span>cfg.feed_forward_proj == Activation::NewGelu {
             (
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">Some</span>(T5DenseGatedActDense::load(
-                    vb.pp(<span class="string">&quot;DenseReluDense&quot;</span>),
+                    vb.pp(<span class="string">"DenseReluDense"</span>),
                     cfg,
                     merge,
                     lora_config.clone(),
@@ -1204,7 +1205,7 @@
         } <span class="kw">else </span>{
             (
                 <span class="prelude-val">Some</span>(T5DenseActDense::load(
-                    vb.pp(<span class="string">&quot;DenseReluDense&quot;</span>),
+                    vb.pp(<span class="string">"DenseReluDense"</span>),
                     cfg,
                     merge,
                     lora_config.clone(),
@@ -1216,7 +1217,7 @@
             dense_act,
             gated_dense_act,
             layer_norm,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;layer-ff&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"layer-ff"</span>),
         })
     }
 }
@@ -1267,28 +1268,28 @@
         <span class="kw">let </span>q = linear_no_bias(
             cfg.d_model,
             inner_dim,
-            vb.pp(<span class="string">&quot;q&quot;</span>),
+            vb.pp(<span class="string">"q"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>k = linear_no_bias(
             cfg.d_model,
             inner_dim,
-            vb.pp(<span class="string">&quot;k&quot;</span>),
+            vb.pp(<span class="string">"k"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>v = linear_no_bias(
             cfg.d_model,
             inner_dim,
-            vb.pp(<span class="string">&quot;v&quot;</span>),
+            vb.pp(<span class="string">"v"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>o = linear_no_bias(
             inner_dim,
             cfg.d_model,
-            vb.pp(<span class="string">&quot;o&quot;</span>),
+            vb.pp(<span class="string">"o"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
@@ -1296,7 +1297,7 @@
             <span class="kw">let </span>emb = TracedLoraEmbedding::new(
                 cfg.relative_attention_num_buckets,
                 cfg.num_heads,
-                vb.pp(<span class="string">&quot;relative_attention_bias&quot;</span>),
+                vb.pp(<span class="string">"relative_attention_bias"</span>),
                 merge,
                 lora_config,
             )<span class="question-mark">?</span>;
@@ -1317,10 +1318,10 @@
             inner_dim,
             use_cache: cfg.use_cache &amp;&amp; decoder,
             kv_cache: <span class="prelude-val">None</span>,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attention&quot;</span>),
-            span_cache: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attention-cache&quot;</span>),
-            span_mm: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attention-mm&quot;</span>),
-            span_sm: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attention-sm&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attention"</span>),
+            span_cache: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attention-cache"</span>),
+            span_mm: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attention-mm"</span>),
+            span_sm: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attention-sm"</span>),
         })
     }
 
@@ -1474,13 +1475,13 @@
         lora_config: LoraConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>self_attention =
-            T5Attention::load(h, d, vb.pp(<span class="string">&quot;SelfAttention&quot;</span>), cfg, merge, lora_config)<span class="question-mark">?</span>;
+            T5Attention::load(h, d, vb.pp(<span class="string">"SelfAttention"</span>), cfg, merge, lora_config)<span class="question-mark">?</span>;
         <span class="kw">let </span>layer_norm =
-            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">&quot;layer_norm&quot;</span>))<span class="question-mark">?</span>;
+            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">"layer_norm"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             self_attention,
             layer_norm,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;self-attn&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"self-attn"</span>),
         })
     }
 
@@ -1522,17 +1523,17 @@
         <span class="kw">let </span>cross_attention = T5Attention::load(
             <span class="bool-val">false</span>,
             decoder,
-            vb.pp(<span class="string">&quot;EncDecAttention&quot;</span>),
+            vb.pp(<span class="string">"EncDecAttention"</span>),
             cfg,
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>layer_norm =
-            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">&quot;layer_norm&quot;</span>))<span class="question-mark">?</span>;
+            T5LayerNorm::load(cfg.d_model, cfg.layer_norm_epsilon, vb.pp(<span class="string">"layer_norm"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             cross_attention,
             layer_norm,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;cross-attn&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"cross-attn"</span>),
         })
     }
 
@@ -1576,11 +1577,11 @@
         merge: bool,
         lora_config: LoraConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>vb = vb.pp(<span class="string">&quot;layer&quot;</span>);
+        <span class="kw">let </span>vb = vb.pp(<span class="string">"layer"</span>);
         <span class="kw">let </span>self_attn = T5LayerSelfAttention::load(
             has_relative_attention_bias,
             decoder,
-            vb.pp(<span class="string">&quot;0&quot;</span>),
+            vb.pp(<span class="string">"0"</span>),
             cfg,
             merge,
             lora_config.clone(),
@@ -1588,7 +1589,7 @@
         <span class="kw">let </span>cross_attn = <span class="kw">if </span>cfg.is_decoder {
             <span class="prelude-val">Some</span>(T5LayerCrossAttention::load(
                 decoder,
-                vb.pp(<span class="string">&quot;1&quot;</span>),
+                vb.pp(<span class="string">"1"</span>),
                 cfg,
                 merge,
                 lora_config.clone(),
@@ -1602,7 +1603,7 @@
             self_attn,
             cross_attn,
             ff,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;block&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"block"</span>),
         })
     }
 
@@ -1666,7 +1667,7 @@
                 T5Block::load(
                     i == <span class="number">0</span>,
                     decoder,
-                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;block.{i}&quot;</span>)),
+                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"block.{i}"</span>)),
                     cfg,
                     merge,
                     lora_config.clone(),
@@ -1676,13 +1677,13 @@
         <span class="kw">let </span>final_layer_norm = T5LayerNorm::load(
             cfg.d_model,
             cfg.layer_norm_epsilon,
-            vb.pp(<span class="string">&quot;final_layer_norm&quot;</span>),
+            vb.pp(<span class="string">"final_layer_norm"</span>),
         )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             block,
             shared: shared.clone(),
             final_layer_norm,
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;stack&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"stack"</span>),
         })
     }
 
@@ -1727,16 +1728,16 @@
         <span class="kw">let </span>shared = TracedLoraEmbedding::new(
             cfg.vocab_size,
             cfg.d_model,
-            vb.pp(<span class="string">&quot;shared&quot;</span>),
+            vb.pp(<span class="string">"shared"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>shared = Trc::new(shared);
-        <span class="kw">let </span>encoder = T5Stack::load(<span class="bool-val">false</span>, vb.pp(<span class="string">&quot;encoder&quot;</span>), <span class="kw-2">&amp;</span>shared, cfg, merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>encoder = T5Stack::load(<span class="bool-val">false</span>, vb.pp(<span class="string">"encoder"</span>), <span class="kw-2">&amp;</span>shared, cfg, merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             encoder,
             device: vb.device().clone(),
-            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;encoder&quot;</span>),
+            span: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"encoder"</span>),
         })
     }
 
@@ -1779,7 +1780,7 @@
         <span class="kw">let </span>shared = TracedLoraEmbedding::new(
             cfg.vocab_size,
             cfg.d_model,
-            vb.pp(<span class="string">&quot;shared&quot;</span>),
+            vb.pp(<span class="string">"shared"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
@@ -1791,7 +1792,7 @@
         encoder_cfg.is_encoder_decoder = <span class="bool-val">false</span>;
         <span class="kw">let </span>encoder = T5Stack::load(
             <span class="bool-val">false</span>,
-            vb.pp(<span class="string">&quot;encoder&quot;</span>),
+            vb.pp(<span class="string">"encoder"</span>),
             <span class="kw-2">&amp;</span>shared,
             <span class="kw-2">&amp;</span>encoder_cfg,
             merge,
@@ -1804,7 +1805,7 @@
         decoder_cfg.num_layers = cfg.num_decoder_layers.unwrap_or(cfg.num_layers);
         <span class="kw">let </span>decoder = T5Stack::load(
             <span class="bool-val">true</span>,
-            vb.pp(<span class="string">&quot;decoder&quot;</span>),
+            vb.pp(<span class="string">"decoder"</span>),
             <span class="kw-2">&amp;</span>shared,
             <span class="kw-2">&amp;</span>decoder_cfg,
             merge,
@@ -1818,7 +1819,7 @@
             <span class="prelude-val">Some</span>(linear_no_bias(
                 cfg.d_model,
                 cfg.vocab_size,
-                vb.pp(<span class="string">&quot;lm_head&quot;</span>),
+                vb.pp(<span class="string">"lm_head"</span>),
                 merge,
                 lora_config,
             )<span class="question-mark">?</span>)
@@ -1832,8 +1833,8 @@
             lm_head,
             shared,
             device: vb.device().clone(),
-            span_decode: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;decode&quot;</span>),
-            span_decode_head: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;decode-head&quot;</span>),
+            span_decode: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"decode"</span>),
+            span_decode_head: <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"decode-head"</span>),
         })
     }
 

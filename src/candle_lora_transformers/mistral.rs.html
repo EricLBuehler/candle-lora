@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/mistral.rs`."><title>mistral.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/mistral.rs`."><title>mistral.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -538,7 +539,7 @@
 
 <span class="kw">impl </span>RmsNorm {
     <span class="kw">fn </span>new(size: usize, eps: f64, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;rms-norm&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"rms-norm"</span>);
         <span class="kw">let </span>inner = candle_nn::rms_norm(size, eps, vb)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ inner, span })
     }
@@ -618,21 +619,21 @@
         <span class="kw">let </span>gate_proj = linear_no_bias(
             hidden_sz,
             intermediate_sz,
-            vb.pp(<span class="string">&quot;gate_proj&quot;</span>),
+            vb.pp(<span class="string">"gate_proj"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>up_proj = linear_no_bias(
             hidden_sz,
             intermediate_sz,
-            vb.pp(<span class="string">&quot;up_proj&quot;</span>),
+            vb.pp(<span class="string">"up_proj"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>down_proj = linear_no_bias(
             intermediate_sz,
             hidden_sz,
-            vb.pp(<span class="string">&quot;down_proj&quot;</span>),
+            vb.pp(<span class="string">"down_proj"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
@@ -653,7 +654,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;flash-attn&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"flash-attn"</span>)]
 </span><span class="kw">fn </span>flash_attn(
     q: <span class="kw-2">&amp;</span>Tensor,
     k: <span class="kw-2">&amp;</span>Tensor,
@@ -664,9 +665,9 @@
     candle_flash_attn::flash_attn(q, k, v, softmax_scale, causal)
 }
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;flash-attn&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"flash-attn"</span>))]
 </span><span class="kw">fn </span>flash_attn(<span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: f32, <span class="kw">_</span>: bool) -&gt; <span class="prelude-ty">Result</span>&lt;Tensor&gt; {
-    <span class="macro">unimplemented!</span>(<span class="string">&quot;compile with &#39;--features flash-attn&#39;&quot;</span>)
+    <span class="macro">unimplemented!</span>(<span class="string">"compile with '--features flash-attn'"</span>)
 }
 
 <span class="attr">#[derive(Debug, AutoLoraConvert)]
@@ -702,28 +703,28 @@
         <span class="kw">let </span>q_proj = linear_no_bias(
             hidden_sz,
             num_heads * head_dim,
-            vb.pp(<span class="string">&quot;q_proj&quot;</span>),
+            vb.pp(<span class="string">"q_proj"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>k_proj = linear_no_bias(
             hidden_sz,
             num_kv_heads * head_dim,
-            vb.pp(<span class="string">&quot;k_proj&quot;</span>),
+            vb.pp(<span class="string">"k_proj"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>v_proj = linear_no_bias(
             hidden_sz,
             num_kv_heads * head_dim,
-            vb.pp(<span class="string">&quot;v_proj&quot;</span>),
+            vb.pp(<span class="string">"v_proj"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>o_proj = linear_no_bias(
             num_heads * head_dim,
             hidden_sz,
-            vb.pp(<span class="string">&quot;o_proj&quot;</span>),
+            vb.pp(<span class="string">"o_proj"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
@@ -838,17 +839,17 @@
         <span class="kw">let </span>self_attn = Attention::new(
             rotary_emb,
             cfg,
-            vb.pp(<span class="string">&quot;self_attn&quot;</span>),
+            vb.pp(<span class="string">"self_attn"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>mlp = MLP::new(cfg, vb.pp(<span class="string">&quot;mlp&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>mlp = MLP::new(cfg, vb.pp(<span class="string">"mlp"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="kw">let </span>input_layernorm =
-            RmsNorm::new(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">&quot;input_layernorm&quot;</span>))<span class="question-mark">?</span>;
+            RmsNorm::new(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">"input_layernorm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>post_attention_layernorm = RmsNorm::new(
             cfg.hidden_size,
             cfg.rms_norm_eps,
-            vb.pp(<span class="string">&quot;post_attention_layernorm&quot;</span>),
+            vb.pp(<span class="string">"post_attention_layernorm"</span>),
         )<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             self_attn,
@@ -891,12 +892,12 @@
     ///
     /// The `merge` parameter merges the weights.
     </span><span class="kw">pub fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>vb_m = vb.pp(<span class="string">&quot;model&quot;</span>);
+        <span class="kw">let </span>vb_m = vb.pp(<span class="string">"model"</span>);
         <span class="kw">let </span>embed_tokens =
-            candle_nn::embedding(cfg.vocab_size, cfg.hidden_size, vb_m.pp(<span class="string">&quot;embed_tokens&quot;</span>))<span class="question-mark">?</span>;
+            candle_nn::embedding(cfg.vocab_size, cfg.hidden_size, vb_m.pp(<span class="string">"embed_tokens"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>rotary_emb = Arc::new(RotaryEmbedding::new(vb.dtype(), cfg, vb_m.device())<span class="question-mark">?</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>layers = Vec::with_capacity(cfg.num_hidden_layers);
-        <span class="kw">let </span>vb_l = vb_m.pp(<span class="string">&quot;layers&quot;</span>);
+        <span class="kw">let </span>vb_l = vb_m.pp(<span class="string">"layers"</span>);
         <span class="kw">for </span>layer_idx <span class="kw">in </span><span class="number">0</span>..cfg.num_hidden_layers {
             <span class="kw">let </span>layer = DecoderLayer::new(
                 rotary_emb.clone(),
@@ -907,11 +908,11 @@
             )<span class="question-mark">?</span>;
             layers.push(layer)
         }
-        <span class="kw">let </span>norm = RmsNorm::new(cfg.hidden_size, cfg.rms_norm_eps, vb_m.pp(<span class="string">&quot;norm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>norm = RmsNorm::new(cfg.hidden_size, cfg.rms_norm_eps, vb_m.pp(<span class="string">"norm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>lm_head = linear_no_bias(
             cfg.hidden_size,
             cfg.vocab_size,
-            vb.pp(<span class="string">&quot;lm_head&quot;</span>),
+            vb.pp(<span class="string">"lm_head"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;

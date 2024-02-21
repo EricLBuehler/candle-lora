@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/blip_text.rs`."><title>blip_text.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/blip_text.rs`."><title>blip_text.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -603,18 +604,18 @@
         <span class="kw">let </span>word_embedddings = TracedLoraEmbedding::new(
             cfg.vocab_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;word_embeddings&quot;</span>),
+            vb.pp(<span class="string">"word_embeddings"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
         <span class="kw">let </span>position_embeddings = TracedLoraEmbedding::new(
             cfg.max_position_embeddings,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;position_embeddings&quot;</span>),
+            vb.pp(<span class="string">"position_embeddings"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">&quot;LayerNorm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">"LayerNorm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>position_ids =
             Tensor::arange(<span class="number">0</span>, cfg.max_position_embeddings <span class="kw">as </span>u32, vb.device())<span class="question-mark">?</span>.unsqueeze(<span class="number">0</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -659,7 +660,7 @@
         <span class="kw">let </span>query = linear(
             cfg.hidden_size,
             all_head_size,
-            vb.pp(<span class="string">&quot;query&quot;</span>),
+            vb.pp(<span class="string">"query"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
@@ -671,11 +672,11 @@
         <span class="kw">let </span>key = linear(
             in_size,
             all_head_size,
-            vb.pp(<span class="string">&quot;key&quot;</span>),
+            vb.pp(<span class="string">"key"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>value = linear(in_size, all_head_size, vb.pp(<span class="string">&quot;value&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>value = linear(in_size, all_head_size, vb.pp(<span class="string">"value"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="kw">let </span>attention_scale = <span class="number">1f64 </span>/ (attention_head_size <span class="kw">as </span>f64).sqrt();
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             query,
@@ -761,11 +762,11 @@
         <span class="kw">let </span>dense = linear(
             cfg.hidden_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;dense&quot;</span>),
+            vb.pp(<span class="string">"dense"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">&quot;LayerNorm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">"LayerNorm"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ dense, layer_norm })
     }
 
@@ -791,11 +792,11 @@
         <span class="kw">let </span>self_ = TextSelfAttention::new(
             cfg,
             is_cross_attention,
-            vb.pp(<span class="string">&quot;self&quot;</span>),
+            vb.pp(<span class="string">"self"</span>),
             merge,
             lora_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>output = TextSelfOutput::new(cfg, vb.pp(<span class="string">&quot;output&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>output = TextSelfOutput::new(cfg, vb.pp(<span class="string">"output"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ self_, output })
     }
 
@@ -827,7 +828,7 @@
         <span class="kw">let </span>dense = linear(
             cfg.hidden_size,
             cfg.intermediate_size,
-            vb.pp(<span class="string">&quot;dense&quot;</span>),
+            vb.pp(<span class="string">"dense"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
@@ -855,11 +856,11 @@
         <span class="kw">let </span>dense = linear(
             cfg.intermediate_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;dense&quot;</span>),
+            vb.pp(<span class="string">"dense"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">&quot;LayerNorm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">"LayerNorm"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ dense, layer_norm })
     }
 
@@ -879,12 +880,12 @@
 <span class="kw">impl </span>TextLayer {
     <span class="kw">fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>attention =
-            TextAttention::new(cfg, <span class="bool-val">false</span>, vb.pp(<span class="string">&quot;attention&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+            TextAttention::new(cfg, <span class="bool-val">false</span>, vb.pp(<span class="string">"attention"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
         <span class="kw">let </span>cross_attention = <span class="kw">if </span>cfg.is_decoder {
             <span class="prelude-val">Some</span>(TextAttention::new(
                 cfg,
                 <span class="bool-val">true</span>,
-                vb.pp(<span class="string">&quot;crossattention&quot;</span>),
+                vb.pp(<span class="string">"crossattention"</span>),
                 merge,
                 lora_config.clone(),
             )<span class="question-mark">?</span>)
@@ -892,8 +893,8 @@
             <span class="prelude-val">None
         </span>};
         <span class="kw">let </span>intermediate =
-            TextIntermediate::new(cfg, vb.pp(<span class="string">&quot;intermediate&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>output = TextOutput::new(cfg, vb.pp(<span class="string">&quot;output&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+            TextIntermediate::new(cfg, vb.pp(<span class="string">"intermediate"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>output = TextOutput::new(cfg, vb.pp(<span class="string">"output"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             attention,
             cross_attention,
@@ -918,7 +919,7 @@
         <span class="kw">let </span>attention_output = <span class="self">self</span>.attention.forward(xs, <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(attention_mask))<span class="question-mark">?</span>;
         <span class="kw">let </span>attention_output = <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.cross_attention {
             <span class="prelude-val">Some</span>(ca) =&gt; ca.forward(<span class="kw-2">&amp;</span>attention_output, <span class="prelude-val">Some</span>(encoder_hidden_states), <span class="prelude-val">None</span>)<span class="question-mark">?</span>,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">candle_core::bail!</span>(<span class="string">&quot;expected some cross-attn&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">candle_core::bail!</span>(<span class="string">"expected some cross-attn"</span>),
         };
         <span class="kw">let </span>intermediate_output = <span class="self">self</span>.intermediate.forward(<span class="kw-2">&amp;</span>attention_output)<span class="question-mark">?</span>;
         <span class="self">self</span>.output.forward(<span class="kw-2">&amp;</span>intermediate_output, <span class="kw-2">&amp;</span>attention_output)
@@ -932,7 +933,7 @@
 
 <span class="kw">impl </span>TextEncoder {
     <span class="kw">fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>vb = vb.pp(<span class="string">&quot;layer&quot;</span>);
+        <span class="kw">let </span>vb = vb.pp(<span class="string">"layer"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>layers = Vec::with_capacity(cfg.num_hidden_layers);
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..cfg.num_hidden_layers {
             <span class="kw">let </span>layer = TextLayer::new(cfg, vb.pp(i), merge, lora_config.clone())<span class="question-mark">?</span>;
@@ -969,7 +970,7 @@
         <span class="kw">let </span>dense = linear(
             cfg.hidden_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;dense&quot;</span>),
+            vb.pp(<span class="string">"dense"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
@@ -998,11 +999,11 @@
         <span class="kw">let </span>dense = linear(
             cfg.hidden_size,
             cfg.hidden_size,
-            vb.pp(<span class="string">&quot;dense&quot;</span>),
+            vb.pp(<span class="string">"dense"</span>),
             merge,
             lora_config,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">&quot;LayerNorm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>layer_norm = layer_norm(cfg.hidden_size, cfg.layer_norm_eps, vb.pp(<span class="string">"LayerNorm"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             dense,
             transform_act_fn: cfg.hidden_act,
@@ -1028,13 +1029,13 @@
 <span class="kw">impl </span>TextLMPredictionHead {
     <span class="kw">fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>transform =
-            TextPredictionHeadTransform::new(cfg, vb.pp(<span class="string">&quot;transform&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>weight = vb.get((cfg.vocab_size, cfg.hidden_size), <span class="string">&quot;decoder.weight&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">let </span>bias = vb.get(cfg.vocab_size, <span class="string">&quot;bias&quot;</span>)<span class="question-mark">?</span>;
+            TextPredictionHeadTransform::new(cfg, vb.pp(<span class="string">"transform"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>weight = vb.get((cfg.vocab_size, cfg.hidden_size), <span class="string">"decoder.weight"</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bias = vb.get(cfg.vocab_size, <span class="string">"bias"</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>decoder = TracedLoraLinear::from_weights(
             weight,
             <span class="prelude-val">Some</span>(bias),
-            vb.pp(<span class="string">&quot;decoder&quot;</span>),
+            vb.pp(<span class="string">"decoder"</span>),
             merge,
             lora_config,
         );
@@ -1055,7 +1056,7 @@
 
 <span class="kw">impl </span>TextOnlyMLMHead {
     <span class="kw">fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>predictions = TextLMPredictionHead::new(cfg, vb.pp(<span class="string">&quot;predictions&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>predictions = TextLMPredictionHead::new(cfg, vb.pp(<span class="string">"predictions"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ predictions })
     }
 }
@@ -1076,8 +1077,8 @@
 
 <span class="kw">impl </span>TextModel {
     <span class="kw">pub fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>embeddings = TextEmbeddings::new(cfg, vb.pp(<span class="string">&quot;embeddings&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>encoder = TextEncoder::new(cfg, vb.pp(<span class="string">&quot;encoder&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>embeddings = TextEmbeddings::new(cfg, vb.pp(<span class="string">"embeddings"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>encoder = TextEncoder::new(cfg, vb.pp(<span class="string">"encoder"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             embeddings,
             encoder,
@@ -1097,7 +1098,7 @@
             <span class="self">self</span>.encoder
                 .forward(<span class="kw-2">&amp;</span>embedding_output, encoder_hidden_states, attention_mask)<span class="question-mark">?</span>;
         <span class="self">self</span>.past_kv_len += seq_len;
-        <span class="comment">// We&#39;re interested in the sequence-output rather than the pooled-output.
+        <span class="comment">// We're interested in the sequence-output rather than the pooled-output.
         </span><span class="prelude-val">Ok</span>(sequence_output)
     }
 
@@ -1115,8 +1116,8 @@
 
 <span class="kw">impl </span>TextLMHeadModel {
     <span class="kw">pub fn </span>new(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder, merge: bool, lora_config: LoraConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>bert = TextModel::new(cfg, vb.pp(<span class="string">&quot;bert&quot;</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
-        <span class="kw">let </span>cls = TextOnlyMLMHead::new(cfg, vb.pp(<span class="string">&quot;cls&quot;</span>), merge, lora_config)<span class="question-mark">?</span>;
+        <span class="kw">let </span>bert = TextModel::new(cfg, vb.pp(<span class="string">"bert"</span>), merge, lora_config.clone())<span class="question-mark">?</span>;
+        <span class="kw">let </span>cls = TextOnlyMLMHead::new(cfg, vb.pp(<span class="string">"cls"</span>), merge, lora_config)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ bert, cls })
     }
 
@@ -1132,7 +1133,7 @@
         <span class="kw">let </span>mask = Tensor::from_vec(mask, (seq_len, seq_len), input_ids.device())<span class="question-mark">?</span>;
         <span class="kw">let </span>sequence_output = <span class="self">self</span>.bert.forward(input_ids, encoder_hidden_states, <span class="kw-2">&amp;</span>mask)<span class="question-mark">?</span>;
         <span class="kw">let </span>prediction_scores = <span class="self">self</span>.cls.forward(<span class="kw-2">&amp;</span>sequence_output)<span class="question-mark">?</span>;
-        <span class="comment">// return_logits is false so we don&#39;t discard the last sequence element.
+        <span class="comment">// return_logits is false so we don't discard the last sequence element.
         </span><span class="prelude-val">Ok</span>(prediction_scores)
     }
 

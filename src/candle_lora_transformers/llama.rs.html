@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/llama.rs`."><title>llama.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0 (82e1608df 2023-12-21)" data-channel="1.75.0" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-9dd44ab47b99a0fb.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora-transformers/src/llama.rs`."><title>llama.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora_transformers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -609,7 +610,7 @@
     <span class="kw">pub </span>num_attention_heads: usize,
     <span class="kw">pub </span>num_key_value_heads: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     <span class="kw">pub </span>rms_norm_eps: f64,
-    <span class="attr">#[serde(default = <span class="string">&quot;default_rope&quot;</span>)]
+    <span class="attr">#[serde(default = <span class="string">"default_rope"</span>)]
     </span><span class="kw">pub </span>rope_theta: f32,
 }
 
@@ -675,7 +676,7 @@
     }
 }
 
-<span class="comment">// We wrap the `LlamaLinear` layer here to add some tracing so that it&#39;s easier to profile the resulting
+<span class="comment">// We wrap the `LlamaLinear` layer here to add some tracing so that it's easier to profile the resulting
 // model.
 </span><span class="attr">#[derive(Debug, AutoLoraConvert)]
 #[replace_layer_fields]
@@ -758,7 +759,7 @@
 }
 
 <span class="kw">fn </span>linear(size1: usize, size2: usize, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;LlamaLinear&gt; {
-    <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;linear&quot;</span>);
+    <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"linear"</span>);
     <span class="kw">let </span>inner = candle_nn::linear_no_bias(size1, size2, vb)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(LlamaLinear {
         inner: Box::new(inner),
@@ -767,7 +768,7 @@
 }
 
 <span class="kw">fn </span>embedding(cfg: <span class="kw-2">&amp;</span>Config, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;Embedding&gt; {
-    <span class="kw">let </span>embeddings = vb.get((cfg.vocab_size, cfg.hidden_size), <span class="string">&quot;weight&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>embeddings = vb.get((cfg.vocab_size, cfg.hidden_size), <span class="string">"weight"</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(Embedding::new(embeddings, cfg.hidden_size))
 }
 
@@ -780,7 +781,7 @@
 
 <span class="kw">impl </span>RmsNorm {
     <span class="kw">fn </span>load(size: usize, eps: f64, vb: VarBuilder) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;rms-norm&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"rms-norm"</span>);
         <span class="kw">let </span>inner = candle_nn::rms_norm(size, eps, vb)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ inner, span })
     }
@@ -807,7 +808,7 @@
     span_rot: tracing::Span,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;flash-attn&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"flash-attn"</span>)]
 </span><span class="kw">fn </span>flash_attn(
     q: <span class="kw-2">&amp;</span>Tensor,
     k: <span class="kw-2">&amp;</span>Tensor,
@@ -818,9 +819,9 @@
     candle_flash_attn::flash_attn(q, k, v, softmax_scale, causal)
 }
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;flash-attn&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"flash-attn"</span>))]
 </span><span class="kw">fn </span>flash_attn(<span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: <span class="kw-2">&amp;</span>Tensor, <span class="kw">_</span>: f32, <span class="kw">_</span>: bool) -&gt; <span class="prelude-ty">Result</span>&lt;Tensor&gt; {
-    <span class="macro">unimplemented!</span>(<span class="string">&quot;compile with &#39;--features flash-attn&#39;&quot;</span>)
+    <span class="macro">unimplemented!</span>(<span class="string">"compile with '--features flash-attn'"</span>)
 }
 
 <span class="kw">impl </span>CausalSelfAttention {
@@ -898,7 +899,7 @@
             <span class="kw">let </span>mask = <span class="self">self</span>.cache.mask(seq_len)<span class="question-mark">?</span>.broadcast_as(att.shape())<span class="question-mark">?</span>;
             <span class="kw">let </span>att = masked_fill(<span class="kw-2">&amp;</span>att, <span class="kw-2">&amp;</span>mask, f32::NEG_INFINITY)<span class="question-mark">?</span>;
             <span class="kw">let </span>att = candle_nn::ops::softmax(<span class="kw-2">&amp;</span>att, D::Minus1)<span class="question-mark">?</span>;
-            <span class="comment">// Convert to contiguous as matmul doesn&#39;t support strided vs for now.
+            <span class="comment">// Convert to contiguous as matmul doesn't support strided vs for now.
             </span>att.matmul(<span class="kw-2">&amp;</span>v.contiguous()<span class="question-mark">?</span>)<span class="question-mark">?</span>.to_dtype(in_dtype)<span class="question-mark">?
         </span>};
         <span class="kw">let </span>y = y.transpose(<span class="number">1</span>, <span class="number">2</span>)<span class="question-mark">?</span>.reshape(<span class="kw-2">&amp;</span>[b_sz, seq_len, hidden_size])<span class="question-mark">?</span>;
@@ -928,15 +929,15 @@
         lora_config: LoraConfig,
         linear_config: LoraLinearConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attn&quot;</span>);
-        <span class="kw">let </span>span_rot = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;attn-rot&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attn"</span>);
+        <span class="kw">let </span>span_rot = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"attn-rot"</span>);
         <span class="kw">let </span>size_in = cfg.hidden_size;
         <span class="kw">let </span>size_q = (cfg.hidden_size / cfg.num_attention_heads) * cfg.num_attention_heads;
         <span class="kw">let </span>size_kv = (cfg.hidden_size / cfg.num_attention_heads) * cfg.num_key_value_heads;
-        <span class="kw">let </span>q_proj = linear(size_in, size_q, vb.pp(<span class="string">&quot;q_proj&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>k_proj = linear(size_in, size_kv, vb.pp(<span class="string">&quot;k_proj&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>v_proj = linear(size_in, size_kv, vb.pp(<span class="string">&quot;v_proj&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>o_proj = linear(size_q, size_in, vb.pp(<span class="string">&quot;o_proj&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>q_proj = linear(size_in, size_q, vb.pp(<span class="string">"q_proj"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>k_proj = linear(size_in, size_kv, vb.pp(<span class="string">"k_proj"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>v_proj = linear(size_in, size_kv, vb.pp(<span class="string">"v_proj"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>o_proj = linear(size_q, size_in, vb.pp(<span class="string">"o_proj"</span>))<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
             q_proj,
@@ -955,7 +956,7 @@
         <span class="kw">if </span>merge {
             this.get_merged_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama_csa&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama_csa"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -964,7 +965,7 @@
         } <span class="kw">else </span>{
             this.get_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama_csa&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama_csa"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -998,12 +999,12 @@
     }
 
     <span class="kw">fn </span>load(vb: VarBuilder, cfg: <span class="kw-2">&amp;</span>Config) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;mlp&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"mlp"</span>);
         <span class="kw">let </span>h_size = cfg.hidden_size;
         <span class="kw">let </span>i_size = cfg.intermediate_size;
-        <span class="kw">let </span>c_fc1 = linear(h_size, i_size, vb.pp(<span class="string">&quot;gate_proj&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>c_fc2 = linear(h_size, i_size, vb.pp(<span class="string">&quot;up_proj&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>c_proj = linear(i_size, h_size, vb.pp(<span class="string">&quot;down_proj&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>c_fc1 = linear(h_size, i_size, vb.pp(<span class="string">"gate_proj"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>c_fc2 = linear(h_size, i_size, vb.pp(<span class="string">"up_proj"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>c_proj = linear(i_size, h_size, vb.pp(<span class="string">"down_proj"</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             c_fc1,
             c_fc2,
@@ -1043,21 +1044,21 @@
         linear_config: LoraLinearConfig,
         embed_onfig: LoraEmbeddingConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">&quot;block&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::span!</span>(tracing::Level::TRACE, <span class="string">"block"</span>);
         <span class="kw">let </span>attn = CausalSelfAttention::load(
-            vb.pp(<span class="string">&quot;self_attn&quot;</span>),
+            vb.pp(<span class="string">"self_attn"</span>),
             cache,
             cfg,
             merge,
             lora_config.clone(),
             linear_config.clone(),
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>mlp = Mlp::load(vb.pp(<span class="string">&quot;mlp&quot;</span>), cfg)<span class="question-mark">?</span>;
-        <span class="kw">let </span>rms_1 = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">&quot;input_layernorm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>mlp = Mlp::load(vb.pp(<span class="string">"mlp"</span>), cfg)<span class="question-mark">?</span>;
+        <span class="kw">let </span>rms_1 = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">"input_layernorm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>rms_2 = RmsNorm::load(
             cfg.hidden_size,
             cfg.rms_norm_eps,
-            vb.pp(<span class="string">&quot;post_attention_layernorm&quot;</span>),
+            vb.pp(<span class="string">"post_attention_layernorm"</span>),
         )<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">Self </span>{
@@ -1071,7 +1072,7 @@
         <span class="kw">if </span>merge {
             this.get_merged_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama_block&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama_block"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -1080,7 +1081,7 @@
         } <span class="kw">else </span>{
             this.get_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama_block&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama_block"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -1126,13 +1127,13 @@
         linear_config: LoraLinearConfig,
         embed_config: LoraEmbeddingConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span>wte = embedding(cfg, vb.pp(<span class="string">&quot;model.embed_tokens&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>lm_head = linear(cfg.hidden_size, cfg.vocab_size, vb.pp(<span class="string">&quot;lm_head&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>ln_f = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">&quot;model.norm&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>wte = embedding(cfg, vb.pp(<span class="string">"model.embed_tokens"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>lm_head = linear(cfg.hidden_size, cfg.vocab_size, vb.pp(<span class="string">"lm_head"</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>ln_f = RmsNorm::load(cfg.hidden_size, cfg.rms_norm_eps, vb.pp(<span class="string">"model.norm"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>blocks: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..cfg.num_hidden_layers)
             .map(|i| {
                 Block::load(
-                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;model.layers.{i}&quot;</span>)),
+                    vb.pp(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"model.layers.{i}"</span>)),
                     cache,
                     cfg,
                     merge,
@@ -1154,7 +1155,7 @@
         <span class="kw">if </span>merge {
             this.get_merged_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -1163,7 +1164,7 @@
         } <span class="kw">else </span>{
             this.get_lora_model(
                 lora_config,
-                <span class="kw-2">&amp;</span>vb.pp(<span class="string">&quot;lora_llama&quot;</span>),
+                <span class="kw-2">&amp;</span>vb.pp(<span class="string">"lora_llama"</span>),
                 <span class="prelude-val">Some</span>(linear_config),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
