@@ -12,24 +12,12 @@ pub(crate) struct FrozenLinear {
 impl FrozenLinear {
     pub(crate) fn new(weight: Tensor, bias: Option<Tensor>) -> Result<Self> {
         Ok(Self {
-            linear: Linear::new(
-                weight.detach()?,
-                match bias {
-                    Some(bias) => Some(bias.detach()?),
-                    None => None,
-                },
-            ),
+            linear: Linear::new(weight.detach(), bias.map(|bias| bias.detach())),
         })
     }
 
     pub(crate) fn new_from_linear(old: &dyn LinearLayerLike) -> Result<Self> {
-        Self::new(
-            old.weight().detach()?,
-            match old.bias() {
-                Some(bias) => Some(bias.detach()?),
-                None => None,
-            },
-        )
+        Self::new(old.weight().detach(), old.bias().map(|bias| bias.detach()))
     }
 }
 

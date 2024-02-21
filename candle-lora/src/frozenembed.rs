@@ -12,7 +12,7 @@ pub(crate) struct FrozenEmbedding {
 impl FrozenEmbedding {
     pub(crate) fn new(embeddings: &Tensor, hidden_size: usize) -> Result<Self> {
         Ok(Self {
-            embed: Embedding::new(embeddings.detach()?, hidden_size),
+            embed: Embedding::new(embeddings.detach(), hidden_size),
         })
     }
 
