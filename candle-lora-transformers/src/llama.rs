@@ -4,7 +4,7 @@ use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
 };
-use candle_lora_macro::{self, replace_layer_fields, AutoLoraConvert};
+use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, Module, VarBuilder};
 use serde::Deserialize;
 use std::collections::HashMap;
