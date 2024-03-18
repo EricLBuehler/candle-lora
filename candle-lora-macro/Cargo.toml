@@ -16,8 +16,8 @@ proc-macro2 = "1.0.66"
 quote_into = "0.2.0"
 syn = { version = "2.0.32", features = ["full", "extra-traits"] }
 candle-lora = { path = "../candle-lora", package = "candle-lora", version = "0.2.0" }
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.4.0" }
-candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.4.0" }
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.4.1" }
+candle-nn = { git = "https://github.com/huggingface/candle.git", version = "0.4.1" }
 quote = "1.0.33"
 
 [lib]
