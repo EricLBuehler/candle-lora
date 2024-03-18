@@ -10,6 +10,8 @@ the original layers. Because they contain fewer trainable parameters, LoRA allow
 However, using a fine-tuned LoRA model for inference will have a negative impact on performance. This is because the original layer must still be used to calculate the outputs. However, for a LoRA model, an algorithm known as weight merging nullifies the added cost of using the
 fine-tuned LoRA model by merging the LoRA and original weights. Weights may also be unmerged.
 
+Please see our recent paper [X-LoRA](https://github.com/EricLBuehler/xlora). We introduce a MoE inspired method to densely gate LoRA adapters powered by a model self-reflection forward pass. For inference, we have created [mistral.rs](https://github.com/EricLBuehler/mistral.rs), which is written in Rust and enables inference of X-LoRA and other models including quantized.
+
 ## Get started
 1) To install, run the following:
 ```
