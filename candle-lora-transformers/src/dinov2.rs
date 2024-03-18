@@ -28,7 +28,7 @@ struct DinoLinear {
 }
 
 impl Deref for DinoLinear {
-    type Target = Arc<dyn LinearLayerLike>;
+    type Target = Arc<dyn LinearLayerLike + Send + Sync>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -290,7 +290,7 @@ struct DinoConv2d {
 }
 
 impl Deref for DinoConv2d {
-    type Target = Arc<dyn Conv2dLayerLike>;
+    type Target = Arc<dyn Conv2dLayerLike + Send + Sync>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner

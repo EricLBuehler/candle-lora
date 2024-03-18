@@ -268,7 +268,7 @@ struct BertEmbedding {
 }
 
 impl Deref for BertEmbedding {
-    type Target = Arc<dyn EmbeddingLayerLike>;
+    type Target = Arc<dyn EmbeddingLayerLike + Send + Sync>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner

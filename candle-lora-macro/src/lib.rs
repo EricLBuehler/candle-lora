@@ -9,127 +9,121 @@ use syn::{
 pub fn replace_layer_fields(_args: TokenStream1, input: TokenStream1) -> TokenStream1 {
     let mut ast = parse_macro_input!(input as DeriveInput);
     match &mut ast.data {
-        Data::Struct(ref mut struct_data) => {
-            match &mut struct_data.fields {
-                Fields::Named(fields) => {
-                    for field in fields.named.iter_mut() {
-                        let mut f = None;
-                        let ident = field.ident.clone().unwrap();
-                        let ty = field.ty.clone();
-                        if let Type::Path(path) = ty {
-                            if path.path.segments.len() == 1 {
-                                match path
-                                    .path
-                                    .segments
-                                    .first()
-                                    .unwrap()
-                                    .ident
-                                    .to_string()
-                                    .as_str()
-                                {
-                                    "Linear" => {
-                                        if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn LinearLayerLike>)).unwrap());
-                                        } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn LinearLayerLike>)).unwrap());
-                                        }
+        Data::Struct(ref mut struct_data) => match &mut struct_data.fields {
+            Fields::Named(fields) => {
+                for field in fields.named.iter_mut() {
+                    let mut f = None;
+                    let ident = field.ident.clone().unwrap();
+                    let ty = field.ty.clone();
+                    if let Type::Path(path) = ty {
+                        if path.path.segments.len() == 1 {
+                            match path
+                                .path
+                                .segments
+                                .first()
+                                .unwrap()
+                                .ident
+                                .to_string()
+                                .as_str()
+                            {
+                                "Linear" => {
+                                    if let Visibility::Public(_) = field.vis {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn LinearLayerLike + Send + Sync>)).unwrap());
+                                    } else {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn LinearLayerLike + Send + Sync>)).unwrap());
                                     }
-                                    "Conv1d" => {
-                                        if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv1dLayerLike>)).unwrap());
-                                        } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv1dLayerLike>)).unwrap());
-                                        }
+                                }
+                                "Conv1d" => {
+                                    if let Visibility::Public(_) = field.vis {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv1dLayerLike + Send + Sync + Send + Sync>)).unwrap());
+                                    } else {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv1dLayerLike + Send + Sync>)).unwrap());
                                     }
-                                    "Conv2d" => {
-                                        if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv2dLayerLike>)).unwrap());
-                                        } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv2dLayerLike>)).unwrap());
-                                        }
+                                }
+                                "Conv2d" => {
+                                    if let Visibility::Public(_) = field.vis {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn Conv2dLayerLike + Send + Sync>)).unwrap());
+                                    } else {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn Conv2dLayerLike + Send + Sync>)).unwrap());
                                     }
-                                    "Embedding" => {
-                                        if let Visibility::Public(_) = field.vis {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn EmbeddingLayerLike>)).unwrap());
-                                        } else {
-                                            f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn EmbeddingLayerLike>)).unwrap());
-                                        }
+                                }
+                                "Embedding" => {
+                                    if let Visibility::Public(_) = field.vis {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Arc<dyn EmbeddingLayerLike + Send + Sync>)).unwrap());
+                                    } else {
+                                        f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Arc<dyn EmbeddingLayerLike + Send + Sync>)).unwrap());
                                     }
-                                    "Option" => {
-                                        if let PathArguments::AngleBracketed(bracketed) =
-                                            &path.path.segments.first().unwrap().arguments
-                                        {
-                                            if bracketed.args.len() == 1 {
-                                                if let GenericArgument::Type(Type::Path(tp)) =
-                                                    bracketed.args.first().unwrap()
-                                                {
-                                                    if tp.path.segments.len() == 1 {
-                                                        match tp
-                                                            .path
-                                                            .segments
-                                                            .first()
-                                                            .unwrap()
-                                                            .ident
-                                                            .to_string()
-                                                            .as_str()
-                                                        {
-                                                            "Linear" => {
-                                                                if let Visibility::Public(_) =
-                                                                    field.vis
-                                                                {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn LinearLayerLike>>)).unwrap());
-                                                                } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn LinearLayerLike>>)).unwrap());
-                                                                }
+                                }
+                                "Option" => {
+                                    if let PathArguments::AngleBracketed(bracketed) =
+                                        &path.path.segments.first().unwrap().arguments
+                                    {
+                                        if bracketed.args.len() == 1 {
+                                            if let GenericArgument::Type(Type::Path(tp)) =
+                                                bracketed.args.first().unwrap()
+                                            {
+                                                if tp.path.segments.len() == 1 {
+                                                    match tp
+                                                        .path
+                                                        .segments
+                                                        .first()
+                                                        .unwrap()
+                                                        .ident
+                                                        .to_string()
+                                                        .as_str()
+                                                    {
+                                                        "Linear" => {
+                                                            if let Visibility::Public(_) = field.vis
+                                                            {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn LinearLayerLike + Send + Sync>>)).unwrap());
+                                                            } else {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn LinearLayerLike + Send + Sync>>)).unwrap());
                                                             }
-                                                            "Conv1d" => {
-                                                                if let Visibility::Public(_) =
-                                                                    field.vis
-                                                                {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv1dLayerLike>>)).unwrap());
-                                                                } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv1dLayerLike>>)).unwrap());
-                                                                }
-                                                            }
-                                                            "Conv2d" => {
-                                                                if let Visibility::Public(_) =
-                                                                    field.vis
-                                                                {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv2dLayerLike>>)).unwrap());
-                                                                } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv2dLayerLike>>)).unwrap());
-                                                                }
-                                                            }
-                                                            "Embedding" => {
-                                                                if let Visibility::Public(_) =
-                                                                    field.vis
-                                                                {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn EmbeddingLayerLike>>)).unwrap());
-                                                                } else {
-                                                                    f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn EmbeddingLayerLike>>)).unwrap());
-                                                                }
-                                                            }
-                                                            _ => {}
                                                         }
+                                                        "Conv1d" => {
+                                                            if let Visibility::Public(_) = field.vis
+                                                            {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv1dLayerLike + Send + Sync>>)).unwrap());
+                                                            } else {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv1dLayerLike + Send + Sync>>)).unwrap());
+                                                            }
+                                                        }
+                                                        "Conv2d" => {
+                                                            if let Visibility::Public(_) = field.vis
+                                                            {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn Conv2dLayerLike + Send + Sync>>)).unwrap());
+                                                            } else {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn Conv2dLayerLike + Send + Sync>>)).unwrap());
+                                                            }
+                                                        }
+                                                        "Embedding" => {
+                                                            if let Visibility::Public(_) = field.vis
+                                                            {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(pub #ident: Option<Arc<dyn EmbeddingLayerLike + Send + Sync>>)).unwrap());
+                                                            } else {
+                                                                f = Some(syn::Field::parse_named.parse2(quote::quote!(#ident: Option<Arc<dyn EmbeddingLayerLike + Send + Sync>>)).unwrap());
+                                                            }
+                                                        }
+                                                        _ => {}
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    _ => {}
                                 }
+                                _ => {}
                             }
                         }
-                        if let Some(f) = f {
-                            *field = f;
-                        }
+                    }
+                    if let Some(f) = f {
+                        *field = f;
                     }
                 }
-                _ => {
-                    panic!("Named fields are required.")
-                }
             }
-        }
+            _ => {
+                panic!("Named fields are required.")
+            }
+        },
         _ => {
             panic!("Cannot swap fields of non struct!");
         }
