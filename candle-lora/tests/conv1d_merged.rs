@@ -33,7 +33,7 @@ fn conv1d() -> candle_core::Result<()> {
                 match name {
                     ModelLayers::Conv => {
                         conv.merge_weights().unwrap();
-                        self.conv = Box::new(conv)
+                        self.conv = Arc::new(conv)
                     }
                 }
             }
@@ -61,7 +61,7 @@ fn conv1d() -> candle_core::Result<()> {
     )?;
 
     let mut model = Model {
-        conv: Box::new(Conv1d::new(
+        conv: Arc::new(Conv1d::new(
             conv_weight.clone(),
             Some(conv_bias.clone()),
             Conv1dConfig::default(),
