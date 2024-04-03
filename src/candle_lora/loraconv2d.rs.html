@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora/src/loraconv2d.rs`."><title>loraconv2d.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `candle-lora/src/loraconv2d.rs`."><title>loraconv2d.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="candle_lora" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.1 (7cf61ebde 2024-03-27)" data-channel="1.77.1" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../candle_lora/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -201,25 +202,44 @@
 <a href="#200" id="200">200</a>
 <a href="#201" id="201">201</a>
 <a href="#202" id="202">202</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::ops::Mul;
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, ops::Mul, sync::Arc};
 
 <span class="kw">use </span>candle_core::{Module, <span class="prelude-ty">Result</span>, Tensor};
 <span class="kw">use </span>candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarBuilder};
 <span class="kw">use </span>either::Either;
-<span class="kw">use </span>trc::Trc;
 
 <span class="kw">use crate</span>::{
     frozenconv::FrozenConv2d, Conv2dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+    Saveable,
 };
 
 <span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>LoraConv2d {
-    old: Trc&lt;FrozenConv2d&gt;,
+    old: Arc&lt;FrozenConv2d&gt;,
     a_conv: Conv2d,
     b_conv: Conv2d,
     scale: <span class="prelude-ty">Option</span>&lt;f64&gt;,
-    dropout: <span class="prelude-ty">Option</span>&lt;Trc&lt;Dropout&gt;&gt;,
+    dropout: <span class="prelude-ty">Option</span>&lt;Arc&lt;Dropout&gt;&gt;,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 <span class="attr">#[derive(Clone, Debug)]
@@ -278,7 +298,7 @@
         );
 
         <span class="prelude-val">Ok</span>(LoraConv2d {
-            old: Trc::new(FrozenConv2d::new_from_conv2d(old)<span class="question-mark">?</span>),
+            old: Arc::new(FrozenConv2d::new_from_conv2d(old)<span class="question-mark">?</span>),
             a_conv,
             b_conv,
             scale: <span class="kw">if </span>config.rank &gt; <span class="number">0 </span>{
@@ -286,8 +306,10 @@
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>},
-            dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
+            dropout: config.dropout.map(|x| Arc::new(Dropout::new(x))),
             merged: <span class="bool-val">false</span>,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -339,7 +361,7 @@
         <span class="kw">if </span><span class="self">self</span>.merged {
             <span class="prelude-val">Err</span>(Either::Left(MergeError::AlreadyMerged))
         } <span class="kw">else </span>{
-            <span class="self">self</span>.old = Trc::new(
+            <span class="self">self</span>.old = Arc::new(
                 FrozenConv2d::new(
                     <span class="kw-2">&amp;</span>(<span class="self">self</span>.old.weight() + <span class="self">self</span>.get_delta_weight()<span class="question-mark">?</span>).map_err(Either::Right)<span class="question-mark">?</span>,
                     <span class="self">self</span>.old.bias(),
@@ -356,7 +378,7 @@
         <span class="kw">if </span>!<span class="self">self</span>.merged {
             <span class="prelude-val">Err</span>(Either::Left(MergeError::NotMerged))
         } <span class="kw">else </span>{
-            <span class="self">self</span>.old = Trc::new(
+            <span class="self">self</span>.old = Arc::new(
                 FrozenConv2d::new(
                     <span class="kw-2">&amp;</span>(<span class="self">self</span>.old.weight() - <span class="self">self</span>.get_delta_weight()<span class="question-mark">?</span>).map_err(Either::Right)<span class="question-mark">?</span>,
                     <span class="self">self</span>.old.bias(),
@@ -389,6 +411,19 @@
         </span>} <span class="kw">else </span>{
             <span class="self">self</span>.old.forward(input)
         }
+    }
+}
+
+<span class="kw">impl </span>Saveable <span class="kw">for </span>LoraConv2d {
+    <span class="kw">fn </span>get_tensors(<span class="kw-2">&amp;</span><span class="self">self</span>, accum: <span class="kw-2">&amp;mut </span>HashMap&lt;String, Tensor&gt;) {
+        accum.insert(
+            <span class="self">self</span>.prefix.clone() + <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"a{}.weight"</span>, <span class="self">self</span>.id),
+            <span class="self">self</span>.a_conv.weight().clone(),
+        );
+        accum.insert(
+            <span class="self">self</span>.prefix.clone() + <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"b{}.weight"</span>, <span class="self">self</span>.id),
+            <span class="self">self</span>.b_conv.weight().clone(),
+        );
     }
 }
 
