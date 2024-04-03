@@ -144,11 +144,11 @@ impl Module for LoraLinear {
 impl Saveable for LoraLinear {
     fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
         accum.insert(
-            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.prefix.clone() + &format!(".a{}.weight", self.id),
             self.ff_a.weight().clone(),
         );
         accum.insert(
-            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.prefix.clone() + &format!(".b{}.weight", self.id),
             self.ff_b.weight().clone(),
         );
     }

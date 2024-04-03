@@ -162,11 +162,11 @@ impl Module for LoraConv1d {
 impl Saveable for LoraConv1d {
     fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
         accum.insert(
-            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.prefix.clone() + &format!(".a{}.weight", self.id),
             self.a.clone(),
         );
         accum.insert(
-            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.prefix.clone() + &format!(".b{}.weight", self.id),
             self.b.clone(),
         );
     }
