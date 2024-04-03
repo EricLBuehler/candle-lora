@@ -1,23 +1,24 @@
-use std::ops::Mul;
+use std::{collections::HashMap, ops::Mul, sync::Arc};
 
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Embedding, Init, VarBuilder};
 use either::Either;
-use trc::Trc;
 
 use crate::{
     frozenembed::FrozenEmbedding, EmbeddingLayerLike, LoraConfig, Merge, MergeError,
-    MergeErrorOrError,
+    MergeErrorOrError, Saveable,
 };
 
 #[derive(Debug, Clone)]
 pub struct LoraEmbedding {
-    old: Trc<FrozenEmbedding>,
+    old: Arc<FrozenEmbedding>,
     embed_a: Embedding,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -63,7 +64,7 @@ impl LoraEmbedding {
         let embed_a = Embedding::new(a_t.clone(), a_t.dim(1)?);
 
         Ok(LoraEmbedding {
-            old: Trc::new(FrozenEmbedding::new_from_embed(old)?),
+            old: Arc::new(FrozenEmbedding::new_from_embed(old)?),
             embed_a,
             a,
             b,
@@ -73,6 +74,8 @@ impl LoraEmbedding {
                 None
             },
             merged: false,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -90,7 +93,7 @@ impl Merge for LoraEmbedding {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenEmbedding::new(
                     &(self.embeddings() + self.get_delta_weight()?.transpose(0, 1))
                         .map_err(Either::Right)?,
@@ -107,7 +110,7 @@ impl Merge for LoraEmbedding {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenEmbedding::new(
                     &(self.embeddings() - self.get_delta_weight()?.transpose(0, 1))
                         .map_err(Either::Right)?,
@@ -132,6 +135,19 @@ impl Module for LoraEmbedding {
             result = (result + (after_a.broadcast_matmul(&b)?).mul(scale))?
         }
         Ok(result)
+    }
+}
+
+impl Saveable for LoraEmbedding {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
+        accum.insert(
+            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.a.clone(),
+        );
+        accum.insert(
+            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.b.clone(),
+        );
     }
 }
 

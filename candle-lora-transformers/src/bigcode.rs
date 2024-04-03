@@ -16,7 +16,7 @@ struct CustomLinear {
 }
 
 impl Deref for CustomLinear {
-    type Target = Arc<dyn LinearLayerLike + Send + Sync>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
@@ -30,7 +30,7 @@ struct CustomEmbedding {
 }
 
 impl Deref for CustomEmbedding {
-    type Target = Arc<dyn EmbeddingLayerLike + Send + Sync>;
+    type Target = Arc<dyn EmbeddingLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner

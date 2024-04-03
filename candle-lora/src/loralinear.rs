@@ -1,22 +1,24 @@
-use std::ops::Mul;
+use std::{collections::HashMap, ops::Mul, sync::Arc};
 
 use candle_core::{Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, Linear, VarBuilder};
 use either::Either;
-use trc::Trc;
 
 use crate::{
     frozenlinear::FrozenLinear, LinearLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+    Saveable,
 };
 
 #[derive(Debug, Clone)]
 pub struct LoraLinear {
-    old: Trc<FrozenLinear>,
+    old: Arc<FrozenLinear>,
     ff_a: Linear,
     ff_b: Linear,
     scale: Option<f64>,
-    dropout: Option<Trc<Dropout>>,
+    dropout: Option<Arc<Dropout>>,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -55,7 +57,7 @@ impl LoraLinear {
         )?;
 
         Ok(LoraLinear {
-            old: Trc::new(FrozenLinear::new_from_linear(old)?),
+            old: Arc::new(FrozenLinear::new_from_linear(old)?),
             ff_a: Linear::new(a, None),
             ff_b: Linear::new(b, None),
             scale: if config.rank > 0 {
@@ -63,8 +65,10 @@ impl LoraLinear {
             } else {
                 None
             },
-            dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
+            dropout: config.dropout.map(|x| Arc::new(Dropout::new(x))),
             merged: false,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -86,7 +90,7 @@ impl Merge for LoraLinear {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenLinear::new(
                     (self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
                     self.old.bias().cloned(),
@@ -102,7 +106,7 @@ impl Merge for LoraLinear {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenLinear::new(
                     (self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
                     self.old.bias().cloned(),
@@ -134,6 +138,19 @@ impl Module for LoraLinear {
             }
             Ok(result)
         }
+    }
+}
+
+impl Saveable for LoraLinear {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
+        accum.insert(
+            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.ff_a.weight().clone(),
+        );
+        accum.insert(
+            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.ff_b.weight().clone(),
+        );
     }
 }
 

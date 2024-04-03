@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use candle_core::{Module, Result, Shape, Tensor};
 use candle_nn::Linear;
 
-use crate::LinearLayerLike;
+use crate::{LinearLayerLike, Saveable};
 
 /// Linear, but with a `new` implementation that ensures the weight and/or biases are detached (frozen).
 #[derive(Debug)]
@@ -24,6 +26,12 @@ impl FrozenLinear {
 impl Module for FrozenLinear {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
         self.linear.forward(x)
+    }
+}
+
+impl Saveable for FrozenLinear {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for frozen layers, only for candle_lora layers.");
     }
 }
 

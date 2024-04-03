@@ -3,7 +3,7 @@
 //! See "Deep Residual Learning for Image Recognition" He et al. 2015
 //! <https://arxiv.org/abs/1512.03385>
 
-use candle_core::{Module, Result, D};
+use candle_core::{Module, Result, Tensor, D};
 use candle_lora::{Conv2dLayerLike, LoraConfig, LoraConv2dConfig};
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{batch_norm, VarBuilder};

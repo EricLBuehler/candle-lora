@@ -211,11 +211,21 @@ pub struct NewLayers<T: Eq + PartialEq + Hash> {
     pub embed: HashMap<T, LoraEmbedding>,
 }
 
+pub trait Saveable {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>);
+}
+
 /// Any layer that is linear-like.
-pub trait LinearLayerLike: Module + Debug {
+pub trait LinearLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn shape(&self) -> &Shape;
+}
+
+impl Saveable for Linear {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for candle_nn layers, only for candle_lora layers.");
+    }
 }
 
 impl LinearLayerLike for Linear {
@@ -231,10 +241,16 @@ impl LinearLayerLike for Linear {
 }
 
 /// Any layer that is conv1d-like.
-pub trait Conv1dLayerLike: Module + Debug {
+pub trait Conv1dLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv1dConfig;
+}
+
+impl Saveable for Conv1d {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for candle_nn layers, only for candle_lora layers.");
+    }
 }
 
 impl Conv1dLayerLike for Conv1d {
@@ -250,10 +266,16 @@ impl Conv1dLayerLike for Conv1d {
 }
 
 /// Any layer that is conv2d-like.
-pub trait Conv2dLayerLike: Module + Debug {
+pub trait Conv2dLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv2dConfig;
+}
+
+impl Saveable for Conv2d {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for candle_nn layers, only for candle_lora layers.");
+    }
 }
 
 impl Conv2dLayerLike for Conv2d {
@@ -269,9 +291,15 @@ impl Conv2dLayerLike for Conv2d {
 }
 
 /// Any layer that is embedding-like.
-pub trait EmbeddingLayerLike: Module + Debug {
+pub trait EmbeddingLayerLike: Module + Debug + Saveable + Send + Sync {
     fn embeddings(&self) -> &Tensor;
     fn hidden_size(&self) -> usize;
+}
+
+impl Saveable for Embedding {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for candle_nn layers, only for candle_lora layers.");
+    }
 }
 
 impl EmbeddingLayerLike for Embedding {

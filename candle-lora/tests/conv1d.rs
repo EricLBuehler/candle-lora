@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use candle_lora::{LoraConfig, SelectedLayersBuilder};
 use candle_nn::VarBuilder;
 
@@ -16,7 +18,7 @@ fn conv1d() -> candle_core::Result<()> {
 
     #[derive(Debug)]
     struct Model {
-        conv: Box<dyn Conv1dLayerLike>,
+        conv: Arc<dyn Conv1dLayerLike>,
     }
 
     impl Module for Model {
@@ -29,7 +31,7 @@ fn conv1d() -> candle_core::Result<()> {
         fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
             for (name, conv) in new.conv1d {
                 match name {
-                    ModelLayers::Conv => self.conv = Box::new(conv),
+                    ModelLayers::Conv => self.conv = Arc::new(conv),
                 }
             }
         }
@@ -56,7 +58,7 @@ fn conv1d() -> candle_core::Result<()> {
     )?;
 
     let mut model = Model {
-        conv: Box::new(Conv1d::new(
+        conv: Arc::new(Conv1d::new(
             conv_weight.clone(),
             Some(conv_bias.clone()),
             Conv1dConfig::default(),

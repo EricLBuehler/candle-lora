@@ -3,6 +3,7 @@
 use candle_core::{DType, Device, IndexOp, Result, Tensor, D};
 use candle_lora::{
     EmbeddingLayerLike, LinearLayerLike, LoraConfig, LoraEmbeddingConfig, LoraLinearConfig,
+    Saveable,
 };
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
 use candle_nn::{Embedding, Module, VarBuilder};
@@ -100,6 +101,12 @@ impl Module for LlamaLinear {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
         let _enter = self.span.enter();
         self.inner.forward(x)
+    }
+}
+
+impl Saveable for LlamaLinear {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!()
     }
 }
 

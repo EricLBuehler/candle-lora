@@ -219,7 +219,7 @@ struct AttentionDense {
 }
 
 impl Deref for AttentionQKV {
-    type Target = Arc<dyn LinearLayerLike + Send + Sync>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.query_key_value
@@ -227,7 +227,7 @@ impl Deref for AttentionQKV {
 }
 
 impl Deref for AttentionDense {
-    type Target = Arc<dyn LinearLayerLike + Send + Sync>;
+    type Target = Arc<dyn LinearLayerLike>;
 
     fn deref(&self) -> &Self::Target {
         &self.dense

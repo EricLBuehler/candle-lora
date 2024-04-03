@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use candle_lora::{LoraConfig, LoraEmbeddingConfig, SelectedLayersBuilder};
 use candle_nn::VarBuilder;
 
@@ -16,7 +18,7 @@ fn embed() -> candle_core::Result<()> {
 
     #[derive(Debug)]
     struct Model {
-        embed: Box<dyn EmbeddingLayerLike>,
+        embed: Arc<dyn EmbeddingLayerLike>,
     }
 
     impl Module for Model {
@@ -29,7 +31,7 @@ fn embed() -> candle_core::Result<()> {
         fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
             for (name, embed) in new.embed {
                 match name {
-                    ModelLayers::Embed => self.embed = Box::new(embed),
+                    ModelLayers::Embed => self.embed = Arc::new(embed),
                 }
             }
         }
@@ -52,7 +54,7 @@ fn embed() -> candle_core::Result<()> {
     )?;
 
     let mut model = Model {
-        embed: Box::new(Embedding::new(embed_weight, hidden_size)),
+        embed: Arc::new(Embedding::new(embed_weight, hidden_size)),
     };
 
     let dummy_image = Tensor::zeros((2, 4), DType::U32, &device)?;

@@ -16,7 +16,6 @@ candle-core.workspace = true
 candle-nn.workspace = true
 either.workspace = true
 thiserror.workspace = true
-trc.workspace = true
 
 [features]
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
