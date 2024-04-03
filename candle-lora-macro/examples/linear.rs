@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use candle_core::{DType, Device, Module, Result, Tensor};
 use candle_lora::{LinearLayerLike, LoraConfig, LoraLinearConfig};
 use candle_lora_macro::{replace_layer_fields, AutoLoraConvert};
@@ -6,7 +8,7 @@ use candle_nn::{init, Linear, VarBuilder, VarMap};
 #[replace_layer_fields]
 #[derive(AutoLoraConvert, Debug)]
 struct Model {
-    a: Box<dyn LinearLayerLike>,
+    a: Arc<dyn LinearLayerLike>,
     b: i32,
 }
 
@@ -32,7 +34,7 @@ fn main() {
         .unwrap();
 
     let mut model = Model {
-        a: Box::new(Linear::new(layer_weight.clone(), None)),
+        a: Arc::new(Linear::new(layer_weight.clone(), None)),
         b: 1,
     };
 
@@ -48,6 +50,8 @@ fn main() {
         None,
         None,
     );
+
+    println!("{:?}", model.a);
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device).unwrap();
 

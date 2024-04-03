@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use candle_lora::{LoraConfig, NewLayers, SelectedLayersBuilder};
 use candle_nn::VarBuilder;
 
@@ -16,7 +18,7 @@ fn single_linear() -> candle_core::Result<()> {
 
     #[derive(Debug)]
     struct Model {
-        layer: Box<dyn LinearLayerLike>,
+        layer: Arc<dyn LinearLayerLike>,
     }
 
     impl Module for Model {
@@ -29,7 +31,7 @@ fn single_linear() -> candle_core::Result<()> {
         fn insert_new(&mut self, new: NewLayers<ModelLayers>) {
             for (name, linear) in new.linear {
                 match name {
-                    ModelLayers::Layer => self.layer = Box::new(linear),
+                    ModelLayers::Layer => self.layer = Arc::new(linear),
                 }
             }
         }
@@ -49,7 +51,7 @@ fn single_linear() -> candle_core::Result<()> {
     )?;
 
     let mut model = Model {
-        layer: Box::new(Linear::new(layer_weight.clone(), None)),
+        layer: Arc::new(Linear::new(layer_weight.clone(), None)),
     };
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device)?;

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use candle_lora::{LoraConfig, Merge, SelectedLayersBuilder};
 use candle_nn::VarBuilder;
 
@@ -16,7 +18,7 @@ fn conv1d() -> candle_core::Result<()> {
 
     #[derive(Debug)]
     struct Model {
-        conv: Box<dyn Conv1dLayerLike>,
+        conv: Arc<dyn Conv1dLayerLike>,
     }
 
     impl Module for Model {
