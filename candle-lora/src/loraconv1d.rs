@@ -1,9 +1,8 @@
-use std::{collections::HashMap, ops::Mul};
+use std::{collections::HashMap, ops::Mul, sync::Arc};
 
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Conv1d, Conv1dConfig, Dropout, VarBuilder};
 use either::Either;
-use trc::Trc;
 
 use crate::{
     frozenconv::FrozenConv1d, Conv1dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
@@ -12,11 +11,11 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct LoraConv1d {
-    old: Trc<FrozenConv1d>,
+    old: Arc<FrozenConv1d>,
     a: Tensor,
     b: Tensor,
     scale: Option<f64>,
-    dropout: Option<Trc<Dropout>>,
+    dropout: Option<Arc<Dropout>>,
     merged: bool,
     prefix: String,
     id: usize,
@@ -66,7 +65,7 @@ impl LoraConv1d {
         )?;
 
         Ok(LoraConv1d {
-            old: Trc::new(FrozenConv1d::new_from_conv1d(old)?),
+            old: Arc::new(FrozenConv1d::new_from_conv1d(old)?),
             a,
             b,
             scale: if config.rank > 0 {
@@ -74,7 +73,7 @@ impl LoraConv1d {
             } else {
                 None
             },
-            dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
+            dropout: config.dropout.map(|x| Arc::new(Dropout::new(x))),
             merged: false,
             prefix: vb.prefix(),
             id,
@@ -101,7 +100,7 @@ impl Merge for LoraConv1d {
         if self.merged {
             Err(Either::Left(MergeError::AlreadyMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenConv1d::new(
                     &(self.old.weight() + self.get_delta_weight()?).map_err(Either::Right)?,
                     self.old.bias(),
@@ -118,7 +117,7 @@ impl Merge for LoraConv1d {
         if !self.merged {
             Err(Either::Left(MergeError::NotMerged))
         } else {
-            self.old = Trc::new(
+            self.old = Arc::new(
                 FrozenConv1d::new(
                     &(self.old.weight() - self.get_delta_weight()?).map_err(Either::Right)?,
                     self.old.bias(),

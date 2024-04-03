@@ -216,7 +216,7 @@ pub trait Saveable {
 }
 
 /// Any layer that is linear-like.
-pub trait LinearLayerLike: Module + Debug + Saveable {
+pub trait LinearLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn shape(&self) -> &Shape;
@@ -241,7 +241,7 @@ impl LinearLayerLike for Linear {
 }
 
 /// Any layer that is conv1d-like.
-pub trait Conv1dLayerLike: Module + Debug + Saveable {
+pub trait Conv1dLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv1dConfig;
@@ -266,7 +266,7 @@ impl Conv1dLayerLike for Conv1d {
 }
 
 /// Any layer that is conv2d-like.
-pub trait Conv2dLayerLike: Module + Debug + Saveable {
+pub trait Conv2dLayerLike: Module + Debug + Saveable + Send + Sync {
     fn weight(&self) -> &Tensor;
     fn bias(&self) -> Option<&Tensor>;
     fn config(&self) -> &Conv2dConfig;
@@ -291,7 +291,7 @@ impl Conv2dLayerLike for Conv2d {
 }
 
 /// Any layer that is embedding-like.
-pub trait EmbeddingLayerLike: Module + Debug + Saveable {
+pub trait EmbeddingLayerLike: Module + Debug + Saveable + Send + Sync {
     fn embeddings(&self) -> &Tensor;
     fn hidden_size(&self) -> usize;
 }
