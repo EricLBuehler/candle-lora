@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std::{collections::HashMap, ops::Mul};
 
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Embedding, Init, VarBuilder};
@@ -7,7 +7,7 @@ use trc::Trc;
 
 use crate::{
     frozenembed::FrozenEmbedding, EmbeddingLayerLike, LoraConfig, Merge, MergeError,
-    MergeErrorOrError,
+    MergeErrorOrError, Saveable,
 };
 
 #[derive(Debug, Clone)]
@@ -18,6 +18,8 @@ pub struct LoraEmbedding {
     b: Tensor,
     scale: Option<f64>,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -73,6 +75,8 @@ impl LoraEmbedding {
                 None
             },
             merged: false,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -132,6 +136,19 @@ impl Module for LoraEmbedding {
             result = (result + (after_a.broadcast_matmul(&b)?).mul(scale))?
         }
         Ok(result)
+    }
+}
+
+impl Saveable for LoraEmbedding {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
+        accum.insert(
+            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.a.clone(),
+        );
+        accum.insert(
+            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.b.clone(),
+        );
     }
 }
 

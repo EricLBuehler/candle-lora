@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std::{collections::HashMap, ops::Mul};
 
 use candle_core::{Module, Result, Shape, Tensor};
 use candle_nn::{init, Dropout, Linear, VarBuilder};
@@ -7,6 +7,7 @@ use trc::Trc;
 
 use crate::{
     frozenlinear::FrozenLinear, LinearLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+    Saveable,
 };
 
 #[derive(Debug, Clone)]
@@ -17,6 +18,8 @@ pub struct LoraLinear {
     scale: Option<f64>,
     dropout: Option<Trc<Dropout>>,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -65,6 +68,8 @@ impl LoraLinear {
             },
             dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
             merged: false,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -134,6 +139,19 @@ impl Module for LoraLinear {
             }
             Ok(result)
         }
+    }
+}
+
+impl Saveable for LoraLinear {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
+        accum.insert(
+            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.ff_a.weight().clone(),
+        );
+        accum.insert(
+            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.ff_b.weight().clone(),
+        );
     }
 }
 

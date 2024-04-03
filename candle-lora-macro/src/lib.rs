@@ -303,11 +303,29 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
         }];);
     }
 
+    let mut linear_get = TokenStream::new();
+    if !linear_fields.is_empty() {
+        quote_into::quote_into!(linear_get += [#{
+            for (namei,_) in linear_fields.iter() {
+                quote_into::quote_into!(linear_get += (self.#namei.get_tensors(&mut output)),)
+            }
+        }];);
+    }
+
     let mut conv1d_stream = TokenStream::new();
     if !conv1d_fields.is_empty() {
         quote_into::quote_into!(conv1d_stream += [#{
             for (namei,name) in conv1d_fields.iter() {
                 quote_into::quote_into!(conv1d_stream += (conv1d.insert(#name.to_string(), &*self.#namei)),)
+            }
+        }];);
+    }
+
+    let mut conv1d_get = TokenStream::new();
+    if !conv1d_fields.is_empty() {
+        quote_into::quote_into!(conv1d_get += [#{
+            for (namei,_) in conv1d_fields.iter() {
+                quote_into::quote_into!(conv1d_get += (self.#namei.get_tensors(&mut output)),)
             }
         }];);
     }
@@ -321,11 +339,29 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
         }];);
     }
 
+    let mut conv2d_get = TokenStream::new();
+    if !conv2d_fields.is_empty() {
+        quote_into::quote_into!(conv2d_get += [#{
+            for (namei,_) in conv2d_fields.iter() {
+                quote_into::quote_into!(conv2d_get += (self.#namei.get_tensors(&mut output)),)
+            }
+        }];);
+    }
+
     let mut embed_stream = TokenStream::new();
     if !embed_fields.is_empty() {
         quote_into::quote_into!(embed_stream += [#{
             for (namei,name) in embed_fields.iter() {
                 quote_into::quote_into!(embed_stream += (embed.insert(#name.to_string(), &*self.#namei)),)
+            }
+        }];);
+    }
+
+    let mut embed_get = TokenStream::new();
+    if !embed_fields.is_empty() {
+        quote_into::quote_into!(embed_get += [#{
+            for (namei,_) in embed_fields.iter() {
+                quote_into::quote_into!(embed_get += (self.#namei.get_tensors(&mut output)),)
             }
         }];);
     }
@@ -652,6 +688,15 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
                 #conv1d_merge_option1_stream_assign
                 #conv2d_merge_option1_stream_assign
                 #embed_merge_option1_stream_assign
+            }
+
+            pub fn get_tensors(&self) -> ::std::collections::HashMap<String, Tensor> {
+                let mut output = ::std::collections::HashMap::new();
+                #linear_get
+                #conv1d_get
+                #conv2d_get
+                #embed_get
+                output
             }
         }
     }

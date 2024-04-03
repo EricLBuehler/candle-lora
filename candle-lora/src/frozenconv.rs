@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{Conv1d, Conv1dConfig, Conv2d, Conv2dConfig};
 
-use crate::{Conv1dLayerLike, Conv2dLayerLike};
+use crate::{Conv1dLayerLike, Conv2dLayerLike, Saveable};
 
 /// Conv1d, but with a `new` implementation that ensures the weights are detached (frozen).
 #[derive(Debug)]
@@ -39,6 +41,12 @@ impl FrozenConv1d {
 impl Module for FrozenConv1d {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
         self.conv.forward(x)
+    }
+}
+
+impl Saveable for FrozenConv1d {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for frozen layers, only for candle_lora layers.");
     }
 }
 
@@ -90,6 +98,12 @@ impl FrozenConv2d {
 impl Module for FrozenConv2d {
     fn forward(&self, x: &Tensor) -> Result<Tensor> {
         self.conv.forward(x)
+    }
+}
+
+impl Saveable for FrozenConv2d {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for frozen layers, only for candle_lora layers.");
     }
 }
 

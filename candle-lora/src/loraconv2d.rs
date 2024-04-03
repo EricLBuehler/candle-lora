@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std::{collections::HashMap, ops::Mul};
 
 use candle_core::{Module, Result, Tensor};
 use candle_nn::{init, Conv2d, Conv2dConfig, Dropout, VarBuilder};
@@ -7,6 +7,7 @@ use trc::Trc;
 
 use crate::{
     frozenconv::FrozenConv2d, Conv2dLayerLike, LoraConfig, Merge, MergeError, MergeErrorOrError,
+    Saveable,
 };
 
 #[derive(Debug, Clone)]
@@ -17,6 +18,8 @@ pub struct LoraConv2d {
     scale: Option<f64>,
     dropout: Option<Trc<Dropout>>,
     merged: bool,
+    prefix: String,
+    id: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -85,6 +88,8 @@ impl LoraConv2d {
             },
             dropout: config.dropout.map(|x| Trc::new(Dropout::new(x))),
             merged: false,
+            prefix: vb.prefix(),
+            id,
         })
     }
 }
@@ -186,6 +191,19 @@ impl Module for LoraConv2d {
         } else {
             self.old.forward(input)
         }
+    }
+}
+
+impl Saveable for LoraConv2d {
+    fn get_tensors(&self, accum: &mut HashMap<String, Tensor>) {
+        accum.insert(
+            self.prefix.clone() + &format!("a{}.weight", self.id),
+            self.a_conv.weight().clone(),
+        );
+        accum.insert(
+            self.prefix.clone() + &format!("b{}.weight", self.id),
+            self.b_conv.weight().clone(),
+        );
     }
 }
 

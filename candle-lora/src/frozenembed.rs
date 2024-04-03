@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use candle_core::{Result, Tensor};
 use candle_nn::Embedding;
 
-use crate::EmbeddingLayerLike;
+use crate::{EmbeddingLayerLike, Saveable};
 
 /// Embedding, but with a `new` implementation that ensures the embeddings are detached (frozen).
 #[derive(Debug)]
@@ -24,6 +26,12 @@ impl FrozenEmbedding {
 impl crate::Module for FrozenEmbedding {
     fn forward(&self, indexes: &Tensor) -> Result<Tensor> {
         self.embed.forward(indexes)
+    }
+}
+
+impl Saveable for FrozenEmbedding {
+    fn get_tensors(&self, _accum: &mut HashMap<String, Tensor>) {
+        unimplemented!("Saving not supported for frozen layers, only for candle_lora layers.");
     }
 }
 

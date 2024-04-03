@@ -51,7 +51,7 @@ fn main() {
         None,
     );
 
-    println!("{:?}", model.a);
+    dbg!(model.get_tensors());
 
     let dummy_image = Tensor::zeros((10, 10), DType::F32, &device).unwrap();
 
