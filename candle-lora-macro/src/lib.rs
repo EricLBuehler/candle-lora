@@ -591,16 +591,16 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
                 #embed_option1_stream
 
                 if !linear.is_empty() && linear_config.is_none() {
-                    panic!("Config not speified for linear layers.");
+                    panic!("Config not specified for linear layers.");
                 }
                 if !conv1d.is_empty() && conv1d_config.is_none() {
-                    panic!("Config not speified for conv1d layers.");
+                    panic!("Config not specified for conv1d layers.");
                 }
                 if !conv2d.is_empty() && conv2d_config.is_none() {
-                    panic!("Config not speified for conv2d layers.");
+                    panic!("Config not specified for conv2d layers.");
                 }
                 if !embed.is_empty() && embed_config.is_none() {
-                    panic!("Config not speified for embedding layers.");
+                    panic!("Config not specified for embedding layers.");
                 }
 
                 let mut builder = candle_lora::SelectedLayersBuilder::new();
@@ -650,16 +650,16 @@ pub fn auto_lora_convert(tokens: TokenStream1) -> TokenStream1 {
                 #embed_option1_stream
 
                 if !linear.is_empty() && linear_config.is_none() {
-                    panic!("Config not speified for linear layers.");
+                    panic!("Config not specified for linear layers.");
                 }
                 if !conv1d.is_empty() && conv1d_config.is_none() {
-                    panic!("Config not speified for conv1d layers.");
+                    panic!("Config not specified for conv1d layers.");
                 }
                 if !conv2d.is_empty() && conv2d_config.is_none() {
-                    panic!("Config not speified for conv2d layers.");
+                    panic!("Config not specified for conv2d layers.");
                 }
                 if !embed.is_empty() && embed_config.is_none() {
-                    panic!("Config not speified for embedding layers.");
+                    panic!("Config not specified for embedding layers.");
                 }
 
                 let mut builder = candle_lora::SelectedLayersBuilder::new();

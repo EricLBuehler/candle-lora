@@ -18,13 +18,13 @@ candle-examples.workspace = true
 candle-lora = { version = "0.2.0", path = "../candle-lora" }
 candle-lora-macro = { version = "0.2.0", path = "../candle-lora-macro" }
 candle-nn.workspace = true
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.5.0" }
-candle-flash-attn = { git = "https://github.com/huggingface/candle.git", version = "0.5.0", optional = true }
-clap = "4.4.7"
+candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.6.0" }
+candle-flash-attn = { git = "https://github.com/huggingface/candle.git", version = "0.6.0", optional = true }
+clap = { version = "4.4.7", features = ["derive"] }
 hf-hub = "0.3.2"
 serde = "1.0.189"
 serde_json.workspace = true
-tokenizers = "0.15.1"
+tokenizers = "0.19.1"
 tracing = "0.1.40"
 tracing-chrome = "0.7.1"
 tracing-subscriber = "0.3.17"

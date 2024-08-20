@@ -653,7 +653,7 @@ impl T5Block {
             None
         };
         let ff_i = if cross_attn.is_some() { 2 } else { 1 };
-        let ff = T5LayerFF::load(vb.pp(&ff_i.to_string()), cfg, merge, lora_config)?;
+        let ff = T5LayerFF::load(vb.pp(ff_i.to_string()), cfg, merge, lora_config)?;
         Ok(Self {
             self_attn,
             cross_attn,
