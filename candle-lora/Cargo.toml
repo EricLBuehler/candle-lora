@@ -19,3 +19,4 @@ thiserror.workspace = true
 
 [features]
 cuda = ["candle-core/cuda", "candle-nn/cuda"]
+metal = ["candle-core/metal", "candle-nn/metal"]
