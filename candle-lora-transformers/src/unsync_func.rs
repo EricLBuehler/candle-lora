@@ -10,7 +10,7 @@ pub struct UnsyncFunc<'a> {
     f: Rc<dyn 'a + Fn(&Tensor) -> Result<Tensor>>,
 }
 
-impl<'a> std::fmt::Debug for UnsyncFunc<'a> {
+impl std::fmt::Debug for UnsyncFunc<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "func")
     }
@@ -23,7 +23,7 @@ where
     UnsyncFunc { f: Rc::new(f) }
 }
 
-impl<'a> Module for UnsyncFunc<'a> {
+impl Module for UnsyncFunc<'_> {
     fn forward(&self, xs: &Tensor) -> Result<Tensor> {
         (*self.f)(xs)
     }
