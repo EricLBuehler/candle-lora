@@ -551,7 +551,7 @@ impl Falcon {
         let blocks = (0..cfg.num_hidden_layers)
             .map(|i| {
                 FalconDecoderLayer::load(
-                    vb.pp(&format!("transformer.h.{i}")),
+                    vb.pp(format!("transformer.h.{i}")),
                     &cfg,
                     merge,
                     lora_config.clone(),

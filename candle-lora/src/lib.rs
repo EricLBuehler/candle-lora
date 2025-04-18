@@ -136,7 +136,7 @@ pub struct SelectedLayersBuilder<'a, T: Eq + PartialEq + Hash> {
     selected: SelectedLayers<'a, T>,
 }
 
-impl<'a, T: Eq + PartialEq + Hash> Default for SelectedLayersBuilder<'a, T> {
+impl<T: Eq + PartialEq + Hash> Default for SelectedLayersBuilder<'_, T> {
     fn default() -> Self {
         Self::new()
     }

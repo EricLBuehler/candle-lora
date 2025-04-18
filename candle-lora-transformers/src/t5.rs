@@ -722,7 +722,7 @@ impl T5Stack {
                 T5Block::load(
                     i == 0,
                     decoder,
-                    vb.pp(&format!("block.{i}")),
+                    vb.pp(format!("block.{i}")),
                     cfg,
                     merge,
                     lora_config.clone(),

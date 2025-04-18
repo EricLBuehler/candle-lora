@@ -647,7 +647,7 @@ impl BertEncoder {
         let layers = (0..config.num_hidden_layers)
             .map(|index| {
                 BertLayer::load(
-                    vb.pp(&format!("layer.{index}")),
+                    vb.pp(format!("layer.{index}")),
                     config,
                     merge,
                     lora_config.clone(),
@@ -693,13 +693,13 @@ impl BertModel {
                 if let Some(model_type) = &config.model_type {
                     if let (Ok(embeddings), Ok(encoder)) = (
                         BertEmbeddings::load(
-                            vb.pp(&format!("{model_type}.embeddings")),
+                            vb.pp(format!("{model_type}.embeddings")),
                             config,
                             merge,
                             lora_config.clone(),
                         ),
                         BertEncoder::load(
-                            vb.pp(&format!("{model_type}.encoder")),
+                            vb.pp(format!("{model_type}.encoder")),
                             config,
                             merge,
                             lora_config,

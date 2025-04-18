@@ -551,7 +551,7 @@ impl Llama {
         let blocks: Vec<_> = (0..cfg.num_hidden_layers)
             .map(|i| {
                 Block::load(
-                    vb.pp(&format!("model.layers.{i}")),
+                    vb.pp(format!("model.layers.{i}")),
                     cache,
                     cfg,
                     merge,
